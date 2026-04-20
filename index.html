@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -15,20 +15,15 @@
   --border:rgba(255,255,255,0.055);--border2:rgba(255,255,255,0.11);
   --text:#edf1fa;--muted:#4e5a78;--muted2:#8090b0;
   --accent:#00d4ff;--violet:#8b5cf6;--green:#10d98a;
-  --red:#f24060;--amber:#fbbf24;--orange:#fb923c;--tg:#2aabee;
-  --potus:#ff4500;
+  --red:#f24060;--amber:#fbbf24;--tg:#2aabee;--potus:#ff4500;
   --mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif;--r:12px;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse 900px 500px at -5% 10%,rgba(0,212,255,.03) 0%,transparent 65%),
-             radial-gradient(ellipse 700px 400px at 105% 85%,rgba(139,92,246,.04) 0%,transparent 65%);}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
-  background-size:48px 48px;}
-header{position:sticky;top:0;z-index:200;background:rgba(4,6,15,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;padding:0 16px;height:56px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 900px 500px at -5% 10%,rgba(0,212,255,.03) 0%,transparent 65%),radial-gradient(ellipse 700px 400px at 105% 85%,rgba(139,92,246,.04) 0%,transparent 65%);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:48px 48px;}
+header{position:sticky;top:0;z-index:200;background:rgba(4,6,15,.94);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;padding:0 16px;height:56px;}
 .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;letter-spacing:-.4px;color:var(--text);text-decoration:none;flex-shrink:0;}
 .logo-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:14px;}
 .logo span{color:var(--accent);}
@@ -41,7 +36,7 @@ header{position:sticky;top:0;z-index:200;background:rgba(4,6,15,.92);backdrop-fi
 .hprice-val{font-weight:600;}
 .up{color:var(--green);}.dn{color:var(--red);}
 .h-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.h-src-count{font-size:10px;color:var(--muted2);font-family:var(--mono);background:var(--panel);border:1px solid var(--border);padding:3px 8px;border-radius:6px;white-space:nowrap;}
+.h-src{font-size:10px;color:var(--muted2);font-family:var(--mono);background:var(--panel);border:1px solid var(--border);padding:3px 8px;border-radius:6px;white-space:nowrap;}
 .btn-sm{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--sans);font-size:11px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s;}
 .btn-sm:hover{color:var(--text);border-color:var(--accent);background:rgba(0,212,255,.05);}
 .btn-sm .badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
@@ -54,7 +49,7 @@ aside{width:208px;flex-shrink:0;border-right:1px solid var(--border);padding:12p
 .nav-link:hover{background:var(--panel);color:var(--text);}
 .nav-link.active{background:rgba(0,212,255,.07);color:var(--accent);border-color:rgba(0,212,255,.12);}
 .nav-icon{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
-.nc-badge{margin-left:auto;font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 5px;border-radius:6px;}
+.nbadge{margin-left:auto;font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 5px;border-radius:6px;}
 .nb{background:rgba(0,212,255,.1);color:var(--accent);}
 .nr{background:rgba(242,64,96,.1);color:var(--red);}
 .ng{background:rgba(16,217,138,.1);color:var(--green);}
@@ -71,25 +66,18 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 .ticker-inner{display:flex;gap:20px;white-space:nowrap;animation:tick 50s linear infinite;}
 .ticker-inner:hover{animation-play-state:paused;}
 @keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.titem{font-size:10px;font-family:var(--mono);display:flex;align-items:center;gap:5px;}
+.titem{font-size:10px;font-family:var(--mono);}
 .potus-banner{display:none;background:rgba(255,69,0,.06);border:1px solid rgba(255,69,0,.25);border-radius:9px;padding:10px 14px;align-items:flex-start;gap:10px;}
 .potus-banner.show{display:flex;}
-.potus-label{font-size:9px;font-weight:700;color:var(--potus);font-family:var(--mono);letter-spacing:.8px;margin-bottom:3px;}
-.potus-text{font-size:12px;line-height:1.5;color:var(--text);}
+.potus-lbl{font-size:9px;font-weight:700;color:var(--potus);font-family:var(--mono);letter-spacing:.8px;margin-bottom:3px;}
+.potus-txt{font-size:12px;line-height:1.5;color:var(--text);}
 .potus-meta{font-size:10px;color:var(--muted2);margin-top:3px;font-family:var(--mono);}
-.potus-impact{font-size:11px;font-weight:700;color:var(--potus);margin-left:auto;flex-shrink:0;font-family:var(--mono);}
-.err-bar{display:none;background:rgba(242,64,96,.07);border:1px solid rgba(242,64,96,.18);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--red);align-items:center;gap:7px;}
-.err-bar.show{display:flex;}
 .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
 .stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;}
 .stat-lbl{font-size:8px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
 .stat-val{font-size:20px;font-weight:700;font-family:var(--mono);line-height:1;}
 .stat-sub{font-size:10px;color:var(--muted2);margin-top:2px;}
-.sg .stat-val{color:var(--green);}
-.sr .stat-val{color:var(--red);}
-.sa .stat-val{color:var(--amber);}
-.sb .stat-val{color:var(--accent);}
-.sp .stat-val{color:var(--potus);}
+.sg .stat-val{color:var(--green);}.sr .stat-val{color:var(--red);}.sa .stat-val{color:var(--amber);}.sb .stat-val{color:var(--accent);}.sp .stat-val{color:var(--potus);}
 .ctrl-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
 .srch{flex:1;min-width:140px;display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--border2);border-radius:9px;padding:7px 12px;}
 .srch input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:12px;}
@@ -100,7 +88,7 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 .feed-hdr{display:flex;align-items:center;gap:8px;}
 .feed-title{font-size:12px;font-weight:700;}
 .feed-count{font-size:9px;font-family:var(--mono);color:var(--muted2);background:var(--panel);border:1px solid var(--border);padding:2px 7px;border-radius:4px;}
-.feed-src-count{font-size:9px;color:var(--muted);font-family:var(--mono);}
+.feed-src-c{font-size:9px;color:var(--muted);font-family:var(--mono);}
 .ref-info{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--muted);display:flex;align-items:center;gap:5px;}
 .spin{animation:sp .8s linear infinite;display:inline-block;}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -108,14 +96,9 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 .ncard{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
 .ncard:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3);}
 .ncard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
-.t-break::before{background:var(--accent);}
-.t-bull::before{background:var(--green);}
-.t-bear::before{background:var(--red);}
-.t-whale::before{background:var(--violet);}
-.t-reg::before{background:var(--amber);}
-.t-potus::before{background:var(--potus);}
-.t-hoax::before{background:rgba(242,64,96,.35);}
-.t-neutral::before{background:var(--muted);}
+.t-break::before{background:var(--accent);}.t-bull::before{background:var(--green);}.t-bear::before{background:var(--red);}
+.t-whale::before{background:var(--violet);}.t-reg::before{background:var(--amber);}.t-potus::before{background:var(--potus);}
+.t-hoax::before{background:rgba(242,64,96,.35);}.t-neutral::before{background:var(--muted);}
 .card-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
 .sig{font-size:8px;font-weight:700;letter-spacing:.7px;font-family:var(--mono);padding:3px 6px;border-radius:3px;flex-shrink:0;margin-top:1px;}
 .s-break{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
@@ -132,14 +115,11 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 .hoax-overlay{position:absolute;top:9px;right:9px;font-size:8px;font-weight:700;font-family:var(--mono);padding:2px 6px;border-radius:4px;background:rgba(242,64,96,.1);color:var(--red);border:1px solid rgba(242,64,96,.2);}
 .card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px;}
 .m-src{font-size:10px;color:var(--accent);font-weight:600;}
-.tg-src{color:var(--tg);}
-.reddit-src{color:#ff4500;}
-.potus-src{color:var(--potus);}
-.m-trust{font-size:9px;color:var(--muted2);}
-.m-time{font-size:9px;font-family:var(--mono);color:var(--muted);}
+.tg-src{color:var(--tg);}.reddit-src{color:#ff4500;}.potus-src{color:var(--potus);}
+.m-trust{font-size:9px;color:var(--muted2);}.m-time{font-size:9px;font-family:var(--mono);color:var(--muted);}
 .m-coins{display:flex;gap:3px;}
 .cpill{font-size:8px;font-weight:700;font-family:var(--mono);padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.05);color:var(--muted2);border:1px solid var(--border);}
-.src-type-badge{font-size:8px;font-family:var(--mono);padding:2px 5px;border-radius:3px;flex-shrink:0;}
+.stb{font-size:8px;font-family:var(--mono);padding:2px 5px;border-radius:3px;flex-shrink:0;}
 .st-rss{background:rgba(255,165,0,.07);color:#ffa500;border:1px solid rgba(255,165,0,.18);}
 .st-tg{background:rgba(42,171,238,.07);color:var(--tg);border:1px solid rgba(42,171,238,.18);}
 .st-reddit{background:rgba(255,69,0,.07);color:#ff4500;border:1px solid rgba(255,69,0,.18);}
@@ -175,16 +155,14 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 .c-pr{margin-left:auto;text-align:right;}
 .c-usd{font-size:11px;font-weight:600;font-family:var(--mono);}
 .c-chg{font-size:9px;font-family:var(--mono);}
-.src-health-list{display:flex;flex-direction:column;gap:3px;}
-.shi{display:flex;align-items:center;gap:6px;padding:4px 7px;background:var(--panel2);border-radius:5px;font-size:9px;}
+.shi{display:flex;align-items:center;gap:6px;padding:4px 7px;background:var(--panel2);border-radius:5px;font-size:9px;margin-bottom:3px;}
 .shi-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 .shi-name{flex:1;color:var(--muted2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .shi-count{font-size:8px;font-family:var(--mono);color:var(--muted);}
 .alert-item{display:flex;align-items:flex-start;gap:7px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 9px;margin-bottom:5px;cursor:pointer;transition:border-color .15s;}
 .alert-item:hover{border-color:var(--border2);}
 .a-ico{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
-.a-text{font-size:10px;line-height:1.4;}
-.a-time{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
+.a-text{font-size:10px;line-height:1.4;}.a-time{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
 .pro-banner{background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(0,212,255,.08));border:1px solid rgba(139,92,246,.2);border-radius:var(--r);padding:12px;}
 .pro-title{font-size:12px;font-weight:700;margin-bottom:3px;}
 .pro-desc{font-size:10px;color:var(--muted2);line-height:1.5;margin-bottom:8px;}
@@ -214,7 +192,7 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
     <div class="hprice"><span class="hprice-sym">XRP</span><span class="hprice-val" id="hXRP">—</span><span id="hXRPc" style="font-size:9px"></span></div>
   </div>
   <div class="h-right">
-    <div class="h-src-count" id="srcBadge">📡 Loading sources…</div>
+    <div class="h-src" id="srcBadge">📡 Loading…</div>
     <a class="btn-sm" href="/alerts.html">🔔 Alerts<span class="badge" id="alertBadge">0</span></a>
     <a class="btn-pro" href="/alerts.html">Go Pro ↗</a>
   </div>
@@ -222,10 +200,10 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 <div class="app">
 <aside>
   <div class="al">Navigation</div>
-  <a class="nav-link active" href="/"><span class="nav-icon">⚡</span>Live Feed<span class="nc-badge nb" id="totalCount">—</span></a>
-  <a class="nav-link" href="/alerts.html"><span class="nav-icon">🔔</span>Alerts<span class="nc-badge nr">3</span></a>
+  <a class="nav-link active" href="/"><span class="nav-icon">⚡</span>Live Feed<span class="nbadge nb" id="totalCount">—</span></a>
+  <a class="nav-link" href="/alerts.html"><span class="nav-icon">🔔</span>Alerts<span class="nbadge nr">3</span></a>
   <a class="nav-link" href="#" onclick="toast('📊 Analytics — Pro feature')"><span class="nav-icon">📊</span>Analytics</a>
-  <a class="nav-link" href="#" onclick="toast('🤖 B2B API — contact us')"><span class="nav-icon">🤖</span>API<span class="nc-badge ng">B2B</span></a>
+  <a class="nav-link" href="#" onclick="toast('🤖 B2B API — contact us')"><span class="nav-icon">🤖</span>API<span class="nbadge ng">B2B</span></a>
   <div class="divider"></div>
   <div class="al">Signal Type</div>
   <div class="fi on" id="f-break" onclick="toggleF('break',this)"><div class="fdot" style="background:var(--accent)"></div>Breaking<span class="fcount" id="fc-break">0</span></div>
@@ -238,10 +216,10 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
   <div class="fi" id="f-hoax" onclick="toggleF('hoax',this)"><div class="fdot" style="background:rgba(242,64,96,.4)"></div>⚠️ AI Flagged<span class="fcount" id="fc-hoax">0</span></div>
   <div class="divider"></div>
   <div class="al">Coin</div>
-  <div class="fi on" id="cf-BTC" onclick="toggleCF(this)"><div class="fdot" style="background:#f7931a"></div>Bitcoin</div>
-  <div class="fi on" id="cf-ETH" onclick="toggleCF(this)"><div class="fdot" style="background:#627eea"></div>Ethereum</div>
-  <div class="fi on" id="cf-SOL" onclick="toggleCF(this)"><div class="fdot" style="background:#9945ff"></div>Solana</div>
-  <div class="fi on" id="cf-ALL" onclick="toggleCF(this)"><div class="fdot" style="background:var(--muted)"></div>All Others</div>
+  <div class="fi on" onclick="toggleCF(this,'BTC')"><div class="fdot" style="background:#f7931a"></div>Bitcoin</div>
+  <div class="fi on" onclick="toggleCF(this,'ETH')"><div class="fdot" style="background:#627eea"></div>Ethereum</div>
+  <div class="fi on" onclick="toggleCF(this,'SOL')"><div class="fdot" style="background:#9945ff"></div>Solana</div>
+  <div class="fi on" onclick="toggleCF(this,'ALL')"><div class="fdot" style="background:var(--muted)"></div>All Others</div>
   <div class="divider"></div>
   <div class="al">Source Health</div>
   <div id="sidebarSrc"></div>
@@ -249,18 +227,17 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 <main>
   <div class="ticker-bar">
     <div class="ticker-lbl">⚡ SIGNALS</div>
-    <div class="ticker-track"><div class="ticker-inner" id="ticker"><span class="titem">Fetching signals from 20+ sources…</span><span class="titem">Fetching signals from 20+ sources…</span></div></div>
+    <div class="ticker-track"><div class="ticker-inner" id="ticker"><span class="titem">Connecting to 20+ live sources…</span><span class="titem">Connecting to 20+ live sources…</span></div></div>
   </div>
   <div class="potus-banner" id="potusBanner">
     <div style="font-size:20px;flex-shrink:0">🇺🇸</div>
     <div style="flex:1">
-      <div class="potus-label">⚡ POTUS SIGNAL — Truth Social @realDonaldTrump</div>
-      <div class="potus-text" id="potusText">—</div>
+      <div class="potus-lbl">⚡ POTUS SIGNAL — Truth Social @realDonaldTrump</div>
+      <div class="potus-txt" id="potusText">—</div>
       <div class="potus-meta" id="potusMeta">—</div>
     </div>
-    <div class="potus-impact" id="potusImpact">—</div>
+    <div style="font-size:11px;font-weight:700;color:var(--potus);flex-shrink:0;font-family:var(--mono)" id="potusImpact">—</div>
   </div>
-  <div class="err-bar" id="errBar">⚠️ <span id="errMsg">Some sources unavailable</span></div>
   <div class="stats-row">
     <div class="stat sg"><div class="stat-lbl">Bullish</div><div class="stat-val" id="stBull">—</div><div class="stat-sub">signals</div></div>
     <div class="stat sr"><div class="stat-lbl">Bearish</div><div class="stat-val" id="stBear">—</div><div class="stat-sub">signals</div></div>
@@ -286,7 +263,7 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
   <div class="feed-hdr">
     <div class="feed-title">📡 Live Signal Feed</div>
     <div class="feed-count" id="feedCount">— signals</div>
-    <div class="feed-src-count" id="feedSrcCount"></div>
+    <div class="feed-src-c" id="feedSrcC"></div>
     <div class="ref-info"><span id="refSpinner"></span><span id="refLabel">Refresh in 90s</span></div>
   </div>
   <div class="news-list" id="newsFeed">
@@ -300,158 +277,146 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 <div class="right-panel">
   <div>
     <div class="rp-title">📈 Live Prices</div>
-    <div>
-      <div class="coin-row"><div class="c-ico" style="background:rgba(247,147,26,.12);color:#f7931a">₿</div><div><div class="c-nm">Bitcoin</div><div class="c-sy">BTC</div></div><div class="c-pr"><div class="c-usd" id="rBTC">—</div><div class="c-chg" id="rBTCc">—</div></div></div>
-      <div class="coin-row"><div class="c-ico" style="background:rgba(98,126,234,.12);color:#627eea">Ξ</div><div><div class="c-nm">Ethereum</div><div class="c-sy">ETH</div></div><div class="c-pr"><div class="c-usd" id="rETH">—</div><div class="c-chg" id="rETHc">—</div></div></div>
-      <div class="coin-row"><div class="c-ico" style="background:rgba(153,69,255,.12);color:#9945ff">◎</div><div><div class="c-nm">Solana</div><div class="c-sy">SOL</div></div><div class="c-pr"><div class="c-usd" id="rSOL">—</div><div class="c-chg" id="rSOLc">—</div></div></div>
-      <div class="coin-row"><div class="c-ico" style="background:rgba(243,186,47,.12);color:#f3ba2f">◈</div><div><div class="c-nm">BNB</div><div class="c-sy">BNB</div></div><div class="c-pr"><div class="c-usd" id="rBNB">—</div><div class="c-chg" id="rBNBc">—</div></div></div>
-      <div class="coin-row"><div class="c-ico" style="background:rgba(0,170,228,.12);color:#00aae4">✦</div><div><div class="c-nm">XRP</div><div class="c-sy">XRP</div></div><div class="c-pr"><div class="c-usd" id="rXRP">—</div><div class="c-chg" id="rXRPc">—</div></div></div>
-      <div class="coin-row"><div class="c-ico" style="background:rgba(232,65,66,.12);color:#e84142">▲</div><div><div class="c-nm">AVAX</div><div class="c-sy">AVAX</div></div><div class="c-pr"><div class="c-usd" id="rAVAX">—</div><div class="c-chg" id="rAVAXc">—</div></div></div>
-    </div>
+    <div class="coin-row"><div class="c-ico" style="background:rgba(247,147,26,.12);color:#f7931a">₿</div><div><div class="c-nm">Bitcoin</div><div class="c-sy">BTC</div></div><div class="c-pr"><div class="c-usd" id="rBTC">—</div><div class="c-chg" id="rBTCc">—</div></div></div>
+    <div class="coin-row"><div class="c-ico" style="background:rgba(98,126,234,.12);color:#627eea">Ξ</div><div><div class="c-nm">Ethereum</div><div class="c-sy">ETH</div></div><div class="c-pr"><div class="c-usd" id="rETH">—</div><div class="c-chg" id="rETHc">—</div></div></div>
+    <div class="coin-row"><div class="c-ico" style="background:rgba(153,69,255,.12);color:#9945ff">◎</div><div><div class="c-nm">Solana</div><div class="c-sy">SOL</div></div><div class="c-pr"><div class="c-usd" id="rSOL">—</div><div class="c-chg" id="rSOLc">—</div></div></div>
+    <div class="coin-row"><div class="c-ico" style="background:rgba(243,186,47,.12);color:#f3ba2f">◈</div><div><div class="c-nm">BNB</div><div class="c-sy">BNB</div></div><div class="c-pr"><div class="c-usd" id="rBNB">—</div><div class="c-chg" id="rBNBc">—</div></div></div>
+    <div class="coin-row"><div class="c-ico" style="background:rgba(0,170,228,.12);color:#00aae4">✦</div><div><div class="c-nm">XRP</div><div class="c-sy">XRP</div></div><div class="c-pr"><div class="c-usd" id="rXRP">—</div><div class="c-chg" id="rXRPc">—</div></div></div>
+    <div class="coin-row"><div class="c-ico" style="background:rgba(232,65,66,.12);color:#e84142">▲</div><div><div class="c-nm">AVAX</div><div class="c-sy">AVAX</div></div><div class="c-pr"><div class="c-usd" id="rAVAX">—</div><div class="c-chg" id="rAVAXc">—</div></div></div>
   </div>
-  <div>
-    <div class="rp-title">📡 Source Health</div>
-    <div class="src-health-list" id="srcHealth"></div>
-  </div>
-  <div>
-    <div class="rp-title">🔔 Top Alerts</div>
-    <div id="alertPanel"></div>
-  </div>
+  <div><div class="rp-title">📡 Source Health</div><div id="srcHealth"></div></div>
+  <div><div class="rp-title">🔔 Top Alerts</div><div id="alertPanel"></div></div>
   <div class="pro-banner">
     <div class="pro-title">⚡ Go Pro</div>
     <div class="pro-desc">Unlimited signals, Telegram bot, custom alerts, 30-day archive, API access.</div>
     <div class="pro-price">$29<span>/month</span></div>
-    <button class="pro-btn" onclick="toast('🚀 Pro launching Q3 2025!')">Upgrade Now</button>
+    <button class="pro-btn" onclick="toast('🚀 Pro launching soon — join waitlist!')">Upgrade Now</button>
   </div>
 </div>
 </div>
 <div class="toast" id="toastEl"></div>
 <script>
-/* ============================================================
-   CryptoSignal — FULL LIVE ENGINE v3.0
-   Sources: 20+ RSS + Reddit + Telegram TG + Truth Social + GNews
-   AI: Hoax detection + signal classification + POTUS scoring
-   ============================================================ */
+// ============================================================
+// CryptoSignal v4.0 — FIXED multi-proxy engine
+// Key fix: multiple proxy fallbacks per RSS feed
+// Reddit fetched directly (allows CORS natively)
+// GNews API direct (no CORS needed)
+// ============================================================
 
 const GNEWS_KEY = '204f00771794b2f674c4f2e4a924623d';
 const CG_KEY    = 'CG-LUGa4vpkw7FgUiQ3wyGWaeVp';
 const TG_TOKEN  = '8725389396:AAE7ZsiruPDNX4ljGId88UGjOHjMh5GYTJc';
 const TG_CHAT   = '211783030';
-// Public CORS-safe RSS→JSON proxy
-const R2J = 'https://api.rss2json.com/v1/api.json?count=20&rss_url=';
-// allorigins for arbitrary HTTP resources
-const AOW = 'https://api.allorigins.win/get?url=';
 
-/* ── SOURCE REGISTRY ── */
-const SOURCES = [
-  /* Tier 1 — Elite Crypto Media */
-  {id:'cointelegraph', name:'CoinTelegraph',    trust:9.2, type:'rss', tier:1, url:'https://cointelegraph.com/rss'},
-  {id:'coindesk',      name:'CoinDesk',         trust:9.4, type:'rss', tier:1, url:'https://www.coindesk.com/arc/outboundfeeds/rss/'},
-  {id:'decrypt',       name:'Decrypt',          trust:8.8, type:'rss', tier:1, url:'https://decrypt.co/feed'},
-  {id:'theblock',      name:'The Block',        trust:9.1, type:'rss', tier:1, url:'https://www.theblock.co/rss.xml'},
-  {id:'bitcoinmag',    name:'Bitcoin Magazine', trust:8.6, type:'rss', tier:1, url:'https://bitcoinmagazine.com/feed'},
-  {id:'cryptoslate',   name:'CryptoSlate',      trust:7.6, type:'rss', tier:1, url:'https://cryptoslate.com/feed/'},
-  {id:'beincrypto',    name:'BeInCrypto',       trust:8.0, type:'rss', tier:1, url:'https://beincrypto.com/feed/'},
-  {id:'defiant',       name:'The Defiant',      trust:8.3, type:'rss', tier:1, url:'https://thedefiant.io/api/feed'},
-  {id:'unchained',     name:'Unchained',        trust:8.5, type:'rss', tier:1, url:'https://unchainedcrypto.com/feed/'},
-  /* Tier 2 — Good Crypto Media */
-  {id:'cryptonews',    name:'CryptoNews',       trust:7.8, type:'rss', tier:2, url:'https://crypto.news/feed/'},
-  {id:'newsbtc',       name:'NewsBTC',          trust:7.5, type:'rss', tier:2, url:'https://www.newsbtc.com/feed/'},
-  {id:'bitcoinnews',   name:'Bitcoin.com News', trust:7.2, type:'rss', tier:2, url:'https://news.bitcoin.com/feed/'},
-  {id:'cryptopotato',  name:'CryptoPotato',     trust:7.0, type:'rss', tier:2, url:'https://cryptopotato.com/feed/'},
-  {id:'ambcrypto',     name:'AMBCrypto',        trust:6.8, type:'rss', tier:2, url:'https://ambcrypto.com/feed/'},
-  {id:'investing',     name:'Investing.com',    trust:8.0, type:'rss', tier:2, url:'https://www.investing.com/rss/news_301.rss'},
-  {id:'coinmarketcap', name:'CoinMarketCap',    trust:8.7, type:'rss', tier:1, url:'https://coinmarketcap.com/headlines/feed/'},
-  /* Tier 3 — Community / Reddit */
-  {id:'reddit_btc',    name:'r/Bitcoin',        trust:5.5, type:'reddit', tier:3, url:'https://www.reddit.com/r/Bitcoin/new.json?limit=25'},
-  {id:'reddit_crypto', name:'r/CryptoCurrency', trust:5.2, type:'reddit', tier:3, url:'https://www.reddit.com/r/CryptoCurrency/hot.json?limit=25'},
-  {id:'reddit_eth',    name:'r/ethereum',       trust:5.8, type:'reddit', tier:3, url:'https://www.reddit.com/r/ethereum/new.json?limit=15'},
-  /* Tier 1 — Telegram Public Channels */
-  {id:'tg_whalealert', name:'Whale Alert TG',   trust:9.0, type:'telegram', tier:1, tgChannel:'whale_alert_io'},
-  {id:'tg_cointelegraph',name:'CoinTelegraph TG',trust:9.0,type:'telegram', tier:1, tgChannel:'cointelegraph'},
-  {id:'tg_wublockchain',name:'Wu Blockchain TG', trust:8.4, type:'telegram', tier:1, tgChannel:'WuBlockchainNews'},
-  /* Tier 0 — POTUS / Truth Social */
-  {id:'truthsocial', name:'Truth Social (Trump)', trust:10.0, type:'truthsocial', tier:0, url:'https://truthsocial.com/@realDonaldTrump/feed.rss'},
-  /* API — GNews (multi-query, fires separately) */
-  {id:'gnews', name:'GNews (60 sources)', trust:7.5, type:'gnews', tier:1},
+// ── PROXY CHAIN: tried in order until one works ──
+// Each RSS feed tries these proxies sequentially
+const PROXIES = [
+  url => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=20`,
+  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
 ];
 
-/* ── STATE ── */
-let allArticles = [], activeFilt = new Set(['break','bull','bear','whale','reg','potus','neutral']), activeCoin = 'ALL', activeSort = 'latest', sentAlerts = new Set(), srcStat = {}, refSecs = 90, refTimer = null;
+// ── SOURCE REGISTRY ──
+const SOURCES = [
+  // RSS Tier 1
+  {id:'cointelegraph', name:'CoinTelegraph',    trust:9.2, type:'rss', url:'https://cointelegraph.com/rss'},
+  {id:'coindesk',      name:'CoinDesk',         trust:9.4, type:'rss', url:'https://www.coindesk.com/arc/outboundfeeds/rss/'},
+  {id:'decrypt',       name:'Decrypt',          trust:8.8, type:'rss', url:'https://decrypt.co/feed'},
+  {id:'theblock',      name:'The Block',        trust:9.1, type:'rss', url:'https://www.theblock.co/rss.xml'},
+  {id:'bitcoinmag',    name:'Bitcoin Magazine', trust:8.6, type:'rss', url:'https://bitcoinmagazine.com/feed'},
+  {id:'cryptoslate',   name:'CryptoSlate',      trust:7.6, type:'rss', url:'https://cryptoslate.com/feed/'},
+  {id:'beincrypto',    name:'BeInCrypto',       trust:8.0, type:'rss', url:'https://beincrypto.com/feed/'},
+  {id:'defiant',       name:'The Defiant',      trust:8.3, type:'rss', url:'https://thedefiant.io/api/feed'},
+  {id:'unchained',     name:'Unchained',        trust:8.5, type:'rss', url:'https://unchainedcrypto.com/feed/'},
+  // RSS Tier 2
+  {id:'cryptonews',    name:'CryptoNews',       trust:7.8, type:'rss', url:'https://crypto.news/feed/'},
+  {id:'newsbtc',       name:'NewsBTC',          trust:7.5, type:'rss', url:'https://www.newsbtc.com/feed/'},
+  {id:'bitcoinnews',   name:'Bitcoin.com',      trust:7.2, type:'rss', url:'https://news.bitcoin.com/feed/'},
+  {id:'cryptopotato',  name:'CryptoPotato',     trust:7.0, type:'rss', url:'https://cryptopotato.com/feed/'},
+  {id:'ambcrypto',     name:'AMBCrypto',        trust:6.8, type:'rss', url:'https://ambcrypto.com/feed/'},
+  {id:'coinmarketcap', name:'CoinMarketCap',    trust:8.7, type:'rss', url:'https://coinmarketcap.com/headlines/feed/'},
+  {id:'investing',     name:'Investing.com',    trust:8.0, type:'rss', url:'https://www.investing.com/rss/news_301.rss'},
+  // Reddit — direct JSON (no proxy needed, Reddit allows CORS)
+  {id:'reddit_btc',    name:'r/Bitcoin',        trust:5.5, type:'reddit', url:'https://www.reddit.com/r/Bitcoin/new.json?limit=25'},
+  {id:'reddit_crypto', name:'r/CryptoCurrency', trust:5.2, type:'reddit', url:'https://www.reddit.com/r/CryptoCurrency/hot.json?limit=25'},
+  {id:'reddit_eth',    name:'r/ethereum',       trust:5.8, type:'reddit', url:'https://www.reddit.com/r/ethereum/new.json?limit=15'},
+  // Telegram via proxy
+  {id:'tg_whalealert', name:'Whale Alert TG',   trust:9.0, type:'telegram', tgChannel:'whale_alert_io'},
+  {id:'tg_wublockchain',name:'Wu Blockchain TG',trust:8.4, type:'telegram', tgChannel:'WuBlockchainNews'},
+  // Truth Social
+  {id:'truthsocial',   name:'Truth Social',     trust:10.0, type:'truthsocial', url:'https://truthsocial.com/@realDonaldTrump/feed.rss'},
+  // GNews API
+  {id:'gnews',         name:'GNews (60 src)',   trust:7.5, type:'gnews'},
+];
 
-/* ── UTILS ── */
-const fmt$ = n => !n&&n!==0?'—':n>=1000?'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}):n>=1?'$'+n.toFixed(2):'$'+n.toFixed(4);
-const fmtC = n => n==null?'—':(n>=0?'+':'')+n.toFixed(2)+'%';
-const esc  = s => s?(s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';
-const ago  = d => { const s=(Date.now()-new Date(d))/1000; return s<60?Math.round(s)+'s ago':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago'; };
+// ── STATE ──
+let allArticles=[], activeFilt=new Set(['break','bull','bear','whale','reg','potus','neutral']), activeCoin='ALL', activeSort='latest', sentAlerts=new Set(), srcStat={}, refSecs=90, refTimer=null;
+
+// ── UTILS ──
+const fmt$=n=>!n&&n!==0?'—':n>=1000?'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}):n>=1?'$'+n.toFixed(2):'$'+n.toFixed(4);
+const fmtC=n=>n==null?'—':(n>=0?'+':'')+n.toFixed(2)+'%';
+const esc=s=>s?(s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';
+const ago=d=>{const s=(Date.now()-new Date(d))/1000;return s<60?Math.round(s)+'s ago':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago';};
 function toast(m){const e=document.getElementById('toastEl');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3200);}
 
-/* ── AI HOAX DETECTION ── */
-const HOAX_RE = [
+// ── AI HOAX DETECTION ──
+const HOAX_RE=[
   /guaranteed.{0,20}profit|100%.{0,10}profit|risk.?free.{0,15}bitcoin/i,
-  /send.{0,20}btc.{0,20}(back|double|return)|giveaway.{0,20}send|elon.{0,20}giving/i,
-  /free\s+bitcoin|satoshi\s+nakamoto\s+(found|revealed|died)|vitalik\s+buterin\s+dies/i,
-  /hack.{0,20}all\s+(funds?|crypto)|100x\s+guaranteed|moon\s+guaranteed/i,
+  /send.{0,20}btc.{0,20}(back|double|return)|giveaway.{0,20}send/i,
+  /free\s+bitcoin|satoshi\s+nakamoto\s+(found|revealed)/i,
+  /hack.{0,20}all\s+(funds?|crypto)|100x\s+guaranteed/i,
 ];
 
-/* ── AI CLASSIFIER ── */
-function aiClassify(item) {
-  const txt = ((item.title||'')+(item.description||'')).toLowerCase();
-  const raw = (item.title||'')+(item.description||'');
-
-  // Hoax check
-  let hoaxReason='', hoaxScore=0;
-  HOAX_RE.forEach(re=>{ if(re.test(raw)) hoaxScore+=40; });
-  if(item.trust<4) hoaxScore+=20;
-  if(/giveaway|free.{0,8}coin|send.{0,8}receive/i.test(raw)) hoaxScore+=20;
-  if(hoaxScore>=50) hoaxReason = hoaxScore>=80?'🚨 Classic scam pattern detected by AI':hoaxScore>=65?'⚠️ Suspicious promotional language':'⚠️ Unverifiable claim from low-trust source';
-
+function aiClassify(item){
+  const txt=((item.title||'')+(item.description||'')).toLowerCase();
+  const raw=(item.title||'')+(item.description||'');
+  // Hoax
+  let hoaxReason='',hoaxScore=0;
+  HOAX_RE.forEach(re=>{if(re.test(raw))hoaxScore+=40;});
+  if(item.trust<4)hoaxScore+=20;
+  if(/giveaway|free.{0,8}coin|send.{0,8}receive/i.test(raw))hoaxScore+=20;
+  if(hoaxScore>=50)hoaxReason=hoaxScore>=80?'🚨 Classic scam pattern detected':hoaxScore>=65?'⚠️ Suspicious promotional language':'⚠️ Low-trust unverifiable claim';
   // Coins
-  const COINS={BTC:['bitcoin','btc'],ETH:['ethereum','eth','ether'],SOL:['solana','sol'],BNB:['binance','bnb'],XRP:['ripple','xrp'],AVAX:['avalanche','avax'],DOGE:['dogecoin','doge'],ADA:['cardano','ada'],LINK:['chainlink','link'],MATIC:['polygon','matic'],TON:['toncoin','ton '],TRUMP:['trump coin','$trump'],WLFI:['world liberty','wlfi']};
-  const coins=[]; for(const[sym,kws] of Object.entries(COINS)){if(kws.some(k=>txt.includes(k)))coins.push(sym);}
-
-  // Signal type
-  const BK=['breaking','just in','alert','sec ','etf','approved','rejected','hack','exploit','all-time high','ath','billion','trillion','congress','senate','fed ','federal reserve','law'];
-  const BL=['bullish','surge','rally','pump','gains','record high','adoption','partnership','inflow','etf approved','listing','buy'];
-  const BE=['bearish','crash','dump','decline','loss','hack','scam','rug','fraud','ban','restrict','penalty','lawsuit','seized','exit scam'];
+  const CM={BTC:['bitcoin','btc'],ETH:['ethereum','eth','ether'],SOL:['solana','sol'],BNB:['binance','bnb'],XRP:['ripple','xrp'],AVAX:['avalanche','avax'],DOGE:['dogecoin','doge'],ADA:['cardano','ada'],LINK:['chainlink','link'],MATIC:['polygon','matic'],TON:['toncoin'],TRUMP:['trump coin','$trump']};
+  const coins=[];for(const[sym,kws]of Object.entries(CM)){if(kws.some(k=>txt.includes(k)))coins.push(sym);}
+  // Type
+  const BK=['breaking','just in','alert','sec ','etf','approved','rejected','hack','exploit','all-time high','ath','billion','trillion','congress','senate','fed ','federal reserve'];
+  const BL=['bullish','surge','rally','pump','gains','record high','adoption','partnership','inflow','listing','buy'];
+  const BE=['bearish','crash','dump','decline','loss','hack','scam','rug','fraud','ban','restrict','penalty','lawsuit','seized'];
   const WH=['whale','million btc','billion btc','large transfer','cold storage','exchange outflow','exchange inflow'];
-  const RG=['sec','regulatory','cftc','congress','senate','compliance','license','framework','government','doj','treasury'];
+  const RG=['sec','regulatory','cftc','congress','senate','compliance','license','framework','government','treasury'];
   const sc={break:BK.filter(k=>txt.includes(k)).length*3,bull:BL.filter(k=>txt.includes(k)).length*2,bear:BE.filter(k=>txt.includes(k)).length*2,whale:WH.filter(k=>txt.includes(k)).length*4,reg:RG.filter(k=>txt.includes(k)).length*2};
   let type='neutral',impact=35+Math.floor(Math.random()*20);
   const best=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0];
   if(best[1]>2){type=best[0];impact=Math.min(95,45+best[1]*4+Math.floor(Math.random()*12));}
-  if(hoaxReason) type='hoax';
-
+  if(hoaxReason)type='hoax';
   const sentiment=type==='bull'?60+Math.floor(Math.random()*30):type==='bear'?8+Math.floor(Math.random()*28):40+Math.floor(Math.random()*25);
   const virality=Math.floor(Math.random()*40+40);
   const novelty=Math.floor(Math.random()*30+55);
-
   let verdict='',verdictCls='vu';
   if(hoaxReason){verdict=hoaxReason;verdictCls='vh';}
-  else if(item.trust>=8.5){verdict='✅ High-trust source ('+item.trust.toFixed(1)+'/10). Content appears credible and verifiable.';verdictCls='vr';}
-  else if(item.trust>=6.5){verdict='🔍 Mid-tier source. Content seems plausible — cross-check with Tier-1 outlets before acting.';verdictCls='vu';}
-  else{verdict='⚠️ Lower-trust source. Treat as unverified. May be speculative or opinion-based.';verdictCls='vu';}
-
-  return {type,impact,sentiment,virality,novelty,coins:coins.length?coins:['CRYPTO'],hoaxReason,verdict,verdictCls};
+  else if(item.trust>=8.5){verdict='✅ High-trust source ('+item.trust.toFixed(1)+'/10). Content appears credible.';verdictCls='vr';}
+  else if(item.trust>=6.5){verdict='🔍 Mid-tier source. Cross-check with Tier-1 outlets before acting.';verdictCls='vu';}
+  else{verdict='⚠️ Lower-trust source. Treat as unverified — may be speculative.';verdictCls='vu';}
+  return{type,impact,sentiment,virality,novelty,coins:coins.length?coins:['CRYPTO'],hoaxReason,verdict,verdictCls};
 }
 
-function classifyPotus(text) {
+function classifyPotus(text){
   const t=text.toLowerCase();
-  const kws=['bitcoin','btc','crypto','ethereum','blockchain','digital asset','coin','token','tariff','trade','economy','dollar','inflation','fed ','interest rate','market','stock','gold'];
+  const kws=['bitcoin','btc','crypto','ethereum','blockchain','digital','coin','token','tariff','trade','economy','dollar','inflation','fed','interest rate','market','stock'];
   const hits=kws.filter(k=>t.includes(k)).length;
   const impact=Math.min(98,50+hits*9+Math.floor(Math.random()*8));
   const bull=['great','win','strong','record','best','tremendous','deal','growth'];
   const bear=['tariff','ban','restrict','fine','sanction','bad','disaster','war'];
-  const b1=bull.filter(k=>t.includes(k)).length, b2=bear.filter(k=>t.includes(k)).length;
-  const dir=b1>b2?'📈 Potentially Bullish':b2>b1?'📉 Potentially Bearish':'⚡ Market Sensitive';
-  return {impact,direction:dir,hits};
+  const b1=bull.filter(k=>t.includes(k)).length,b2=bear.filter(k=>t.includes(k)).length;
+  return{impact,direction:b1>b2?'📈 Potentially Bullish':b2>b1?'📉 Potentially Bearish':'⚡ Market Sensitive'};
 }
 
-/* ── PRICE FETCH ── */
+// ── PRICES ──
 async function fetchPrices(){
   try{
     const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,ripple,avalanche-2&vs_currencies=usd&include_24hr_change=true&x_cg_demo_api_key=${CG_KEY}`);
-    if(!r.ok) return;
+    if(!r.ok)return;
     const d=await r.json();
     [['bitcoin','BTC'],['ethereum','ETH'],['solana','SOL'],['binancecoin','BNB'],['ripple','XRP'],['avalanche-2','AVAX']].forEach(([id,sym])=>{
       const p=d[id];if(!p)return;
@@ -464,140 +429,192 @@ async function fetchPrices(){
   }catch(e){}
 }
 
-/* ── RSS FETCH ── */
-async function fetchRSS(src){
-  const r=await fetch(R2J+encodeURIComponent(src.url));
-  if(!r.ok) throw new Error('r2j '+r.status);
-  const d=await r.json();
-  if(d.status!=='ok') throw new Error(d.message||'rss err');
-  return (d.items||[]).map(it=>({
-    id:it.link||it.guid, title:it.title||'',
+// ── RSS WITH MULTI-PROXY FALLBACK ──
+async function parseRSS2JSON(data){
+  // rss2json format
+  if(data.status==='ok'&&data.items) return data.items.map(it=>({
+    title:it.title||'',
     description:(it.description||'').replace(/<[^>]*>/g,' ').substring(0,300),
-    url:it.link||'#', source:src.name, trust:src.trust,
-    publishedAt:it.pubDate||new Date().toISOString(),
-    srcType:'rss', srcId:src.id, tier:src.tier
+    link:it.link||it.guid||'',
+    pubDate:it.pubDate||new Date().toISOString(),
   }));
+  return [];
 }
 
-/* ── REDDIT FETCH ── */
+async function parseXML(xmlText){
+  try{
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(xmlText,'text/xml');
+    const items=[...doc.querySelectorAll('item')];
+    return items.map(it=>({
+      title:it.querySelector('title')?.textContent||'',
+      description:(it.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,' ').substring(0,300),
+      link:it.querySelector('link')?.textContent||it.querySelector('guid')?.textContent||'',
+      pubDate:it.querySelector('pubDate')?.textContent||new Date().toISOString(),
+    }));
+  }catch(e){return [];}
+}
+
+async function fetchRSS(src){
+  // Try each proxy in order
+  for(let i=0;i<PROXIES.length;i++){
+    try{
+      const proxyUrl=PROXIES[i](src.url);
+      const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(8000)});
+      if(!r.ok) continue;
+      const ct=r.headers.get('content-type')||'';
+      let items=[];
+      if(ct.includes('json')){
+        const d=await r.json();
+        // rss2json format
+        if(d.status==='ok'&&d.items){items=await parseRSS2JSON(d);}
+        // allorigins wraps in .contents
+        else if(d.contents){items=await parseXML(d.contents);}
+      } else {
+        const text=await r.text();
+        items=await parseXML(text);
+      }
+      if(items.length>0){
+        return items.map(it=>({
+          id:it.link||it.title,title:it.title,
+          description:it.description,url:it.link||src.url,
+          source:src.name,trust:src.trust,
+          publishedAt:it.pubDate,srcType:'rss',srcId:src.id,
+        }));
+      }
+    }catch(e){continue;}
+  }
+  throw new Error('all proxies failed for '+src.name);
+}
+
+// ── REDDIT DIRECT (no proxy needed) ──
 async function fetchReddit(src){
-  const r=await fetch(AOW+encodeURIComponent(src.url));
-  if(!r.ok) throw new Error('reddit '+r.status);
-  const wrap=await r.json();
-  const d=JSON.parse(wrap.contents);
-  return (d.data?.children||[])
-    .filter(c=>c.data?.score>30&&c.data?.title)
+  const r=await fetch(src.url,{
+    headers:{'User-Agent':'CryptoSignal/1.0'},
+    signal:AbortSignal.timeout(8000)
+  });
+  if(!r.ok)throw new Error('Reddit '+r.status);
+  const d=await r.json();
+  return(d.data?.children||[])
+    .filter(c=>c.data?.score>20&&c.data?.title)
     .map(c=>({
       id:'https://reddit.com'+c.data.permalink,
       title:c.data.title,
       description:(c.data.selftext||'').substring(0,300),
       url:'https://reddit.com'+c.data.permalink,
-      source:src.name, trust:src.trust+(c.data.score>1000?1.5:c.data.score>200?.5:0),
+      source:src.name,trust:src.trust+(c.data.score>500?.5:0),
       publishedAt:new Date(c.data.created_utc*1000).toISOString(),
-      srcType:'reddit', srcId:src.id, tier:src.tier
+      srcType:'reddit',srcId:src.id,
     }));
 }
 
-/* ── TELEGRAM CHANNEL SCRAPE ── */
+// ── TELEGRAM via allorigins ──
 async function fetchTelegram(src){
-  // Telegram preview page via allorigins
   const tgUrl='https://t.me/s/'+src.tgChannel;
-  const r=await fetch(AOW+encodeURIComponent(tgUrl));
-  if(!r.ok) throw new Error('tg '+r.status);
+  const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(tgUrl)}`;
+  const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(10000)});
+  if(!r.ok)throw new Error('TG proxy failed');
   const wrap=await r.json();
-  const html=wrap.contents;
+  const html=wrap.contents||'';
   const msgs=[];
   const msgRe=/class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>/g;
   const dateRe=/<time[^>]+datetime="([^"]+)"/g;
-  const times=[]; let dm;
-  while((dm=dateRe.exec(html))!==null) times.push(dm[1]);
+  const times=[];let dm;
+  while((dm=dateRe.exec(html))!==null)times.push(dm[1]);
   let m,i=0;
   while((m=msgRe.exec(html))!==null){
     const text=m[1].replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
     if(text.length>20){
-      msgs.push({
-        id:tgUrl+'#'+(i),
-        title:text.substring(0,140)+(text.length>140?'…':''),
-        description:text.substring(0,400),
-        url:tgUrl, source:src.name, trust:src.trust,
-        publishedAt:times[i]||new Date().toISOString(),
-        srcType:'telegram', srcId:src.id, tier:src.tier
-      });
-      i++;
+      msgs.push({id:tgUrl+'#'+i,title:text.substring(0,140)+(text.length>140?'…':''),
+        description:text.substring(0,400),url:tgUrl,source:src.name,trust:src.trust,
+        publishedAt:times[i]||new Date().toISOString(),srcType:'telegram',srcId:src.id});
+      i++;if(msgs.length>=12)break;
     }
-    if(msgs.length>=12) break;
   }
+  if(msgs.length===0)throw new Error('no TG messages parsed');
   return msgs;
 }
 
-/* ── TRUTH SOCIAL ── */
+// ── TRUTH SOCIAL ──
 async function fetchTruthSocial(src){
-  // Try RSS first
+  // Try rss2json first
   try{
-    const r=await fetch(R2J+encodeURIComponent(src.url));
-    if(!r.ok) throw new Error('ts rss');
+    const url=PROXIES[0](src.url);
+    const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
+    if(!r.ok)throw new Error('ts rss2json');
     const d=await r.json();
-    if(d.status!=='ok') throw new Error('ts rss err');
-    return (d.items||[]).map(it=>{
-      const text=(it.description||it.title||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
-      return {
-        id:it.link||it.guid,
-        title:'🇺🇸 POTUS: '+text.substring(0,140)+(text.length>140?'…':''),
-        description:text.substring(0,500),
-        url:it.link||'https://truthsocial.com/@realDonaldTrump',
-        source:'Truth Social — @realDonaldTrump', trust:10.0,
-        publishedAt:it.pubDate||new Date().toISOString(),
-        srcType:'truthsocial', srcId:'truthsocial', tier:0, isPotus:true, rawText:text
-      };
-    });
-  }catch(e){
-    // Fallback — scrape via allorigins
-    try{
-      const r=await fetch(AOW+encodeURIComponent('https://truthsocial.com/@realDonaldTrump'));
-      const wrap=await r.json();
-      const matches=[...wrap.contents.matchAll(/class="status__content[^"]*"[^>]*>([\s\S]*?)<\/p>/g)];
-      return matches.slice(0,5).map((m,i)=>{
-        const text=m[1].replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
-        return {id:'potus-'+i,title:'🇺🇸 POTUS: '+text.substring(0,140),description:text,
-          url:'https://truthsocial.com/@realDonaldTrump',source:'Truth Social — @realDonaldTrump',
-          trust:10.0,publishedAt:new Date().toISOString(),srcType:'truthsocial',srcId:'truthsocial',tier:0,isPotus:true,rawText:text};
+    if(d.status==='ok'&&d.items?.length>0){
+      return d.items.map(it=>{
+        const text=(it.description||it.title||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+        return{id:it.link||it.guid,title:'🇺🇸 POTUS: '+text.substring(0,140),
+          description:text,url:it.link||'https://truthsocial.com/@realDonaldTrump',
+          source:'Truth Social — @realDonaldTrump',trust:10.0,
+          publishedAt:it.pubDate||new Date().toISOString(),
+          srcType:'truthsocial',srcId:'truthsocial',isPotus:true,rawText:text};
       });
-    }catch(e2){return [];}
-  }
+    }
+  }catch(e){}
+  // Fallback: allorigins raw
+  try{
+    const url=`https://api.allorigins.win/raw?url=${encodeURIComponent(src.url)}`;
+    const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+    if(!r.ok)throw new Error('ts raw');
+    const xml=await r.text();
+    const items=await parseXML(xml);
+    return items.map(it=>{
+      const text=(it.description||it.title||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+      return{id:it.link||it.title,title:'🇺🇸 POTUS: '+text.substring(0,140),
+        description:text,url:it.link||'https://truthsocial.com/@realDonaldTrump',
+        source:'Truth Social — @realDonaldTrump',trust:10.0,
+        publishedAt:it.pubDate||new Date().toISOString(),
+        srcType:'truthsocial',srcId:'truthsocial',isPotus:true,rawText:text};
+    });
+  }catch(e){throw new Error('Truth Social unavailable');}
 }
 
-/* ── GNEWS ── */
+// ── GNEWS ──
 async function fetchGNews(){
   const qs=['bitcoin','ethereum crypto','solana blockchain','cryptocurrency SEC regulation','DeFi crypto','crypto whale altcoin'];
-  const rs=await Promise.all(qs.map(q=>fetch(`https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&lang=en&max=10&sortby=publishedAt&apikey=${GNEWS_KEY}`).then(r=>r.ok?r.json():{articles:[]}).catch(()=>({articles:[]}))));
+  const rs=await Promise.all(qs.map(q=>
+    fetch(`https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&lang=en&max=10&sortby=publishedAt&apikey=${GNEWS_KEY}`,{signal:AbortSignal.timeout(10000)})
+      .then(r=>r.ok?r.json():{articles:[]}).catch(()=>({articles:[]}))
+  ));
   const seen=new Set(),out=[];
-  for(const res of rs) for(const a of(res.articles||[])){
-    if(a.url&&!seen.has(a.url)){seen.add(a.url);out.push({id:a.url,title:a.title||'',description:a.description||'',url:a.url,source:a.source?.name||'GNews',trust:7.5,publishedAt:a.publishedAt,srcType:'api',srcId:'gnews',tier:1});}
+  for(const res of rs)for(const a of(res.articles||[])){
+    if(a.url&&!seen.has(a.url)){seen.add(a.url);out.push({
+      id:a.url,title:a.title||'',description:a.description||'',
+      url:a.url,source:a.source?.name||'GNews',trust:7.5,
+      publishedAt:a.publishedAt,srcType:'api',srcId:'gnews'
+    });}
   }
   return out;
 }
 
-/* ── MASTER FETCH ── */
+// ── MASTER FETCH ──
 async function fetchAll(){
   document.getElementById('refSpinner').innerHTML='<span class="spin">↻</span> ';
-  document.getElementById('errBar').classList.remove('show');
-  const seen=new Set(), fresh=[];
+  const seen=new Set(),fresh=[];
+
   const results=await Promise.allSettled(SOURCES.map(async src=>{
     try{
       let items=[];
-      if(src.type==='rss')         items=await fetchRSS(src);
-      else if(src.type==='reddit') items=await fetchReddit(src);
+      if(src.type==='rss')          items=await fetchRSS(src);
+      else if(src.type==='reddit')  items=await fetchReddit(src);
       else if(src.type==='telegram')items=await fetchTelegram(src);
       else if(src.type==='truthsocial')items=await fetchTruthSocial(src);
-      else if(src.type==='gnews') items=await fetchGNews();
+      else if(src.type==='gnews')   items=await fetchGNews();
       srcStat[src.id]={ok:true,count:items.length,name:src.name,type:src.type};
       return items;
-    }catch(e){srcStat[src.id]={ok:false,count:0,name:src.name,type:src.type};return [];}
+    }catch(e){
+      srcStat[src.id]={ok:false,count:0,name:src.name,type:src.type,err:e.message};
+      return[];
+    }
   }));
+
   for(const r of results){
-    if(r.status!=='fulfilled') continue;
+    if(r.status!=='fulfilled')continue;
     for(const item of r.value){
-      if(!item.id||seen.has(item.id)) continue;
+      if(!item.id||seen.has(item.id))continue;
       seen.add(item.id);
       const cls=aiClassify(item);
       fresh.push({...item,...cls});
@@ -611,41 +628,43 @@ async function fetchAll(){
   if(potus){
     const pc=classifyPotus(potus.rawText);
     document.getElementById('potusText').textContent=potus.rawText.substring(0,200)+(potus.rawText.length>200?'…':'');
-    document.getElementById('potusMeta').textContent=`Posted ${ago(potus.publishedAt)} · ${pc.direction} · Impact ${pc.impact}/100`;
+    document.getElementById('potusMeta').textContent=`${ago(potus.publishedAt)} · ${pc.direction} · Impact ${pc.impact}/100`;
     document.getElementById('potusImpact').textContent=`${pc.impact}/100`;
     document.getElementById('potusBanner').classList.add('show');
   }
 
   const ok=Object.values(srcStat).filter(s=>s.ok).length;
   document.getElementById('srcBadge').textContent=`📡 ${ok}/${SOURCES.length} sources live`;
-
-  renderFeed(); updateTicker(); updateStats(); updateSrcHealth(); updateAlerts(); checkAlerts();
+  renderFeed();updateTicker();updateStats();updateSrcHealth();updateAlerts();checkAlerts();
   document.getElementById('refSpinner').innerHTML='';
+  document.getElementById('refLabel').textContent='Refresh in 90s';
 }
 
-/* ── RENDER ── */
+// ── RENDER ──
 function renderFeed(){
   const q=document.getElementById('searchInput').value.toLowerCase();
   let f=allArticles.filter(a=>{
-    if(!activeFilt.has(a.type)) return false;
-    if(activeCoin!=='ALL'&&activeCoin!=='DeFi'&&!a.coins.includes(activeCoin)) return false;
-    if(activeCoin==='DeFi'&&!a.coins.some(c=>['SOL','MATIC','LINK','UNI','AAVE'].includes(c))) return false;
-    if(q&&!a.title.toLowerCase().includes(q)&&!a.source.toLowerCase().includes(q)) return false;
+    if(!activeFilt.has(a.type))return false;
+    if(activeCoin!=='ALL'&&activeCoin!=='DeFi'&&!a.coins.includes(activeCoin))return false;
+    if(activeCoin==='DeFi'&&!a.coins.some(c=>['SOL','MATIC','LINK','UNI','AAVE'].includes(c)))return false;
+    if(q&&!a.title.toLowerCase().includes(q)&&!a.source.toLowerCase().includes(q))return false;
     return true;
   });
-  if(activeSort==='impact') f.sort((a,b)=>b.impact-a.impact);
-  else if(activeSort==='trust') f.sort((a,b)=>b.trust-a.trust);
+  if(activeSort==='impact')f.sort((a,b)=>b.impact-a.impact);
+  else if(activeSort==='trust')f.sort((a,b)=>b.trust-a.trust);
   document.getElementById('feedCount').textContent=f.length+' signals';
   document.getElementById('totalCount').textContent=allArticles.length;
-  document.getElementById('feedSrcCount').textContent='from '+Object.values(srcStat).filter(s=>s.ok).length+' sources';
-  if(!f.length){document.getElementById('newsFeed').innerHTML='<div class="empty"><div style="font-size:36px;margin-bottom:8px">🔍</div><div style="font-size:13px">No signals match filters</div></div>';return;}
+  document.getElementById('feedSrcC').textContent='from '+Object.values(srcStat).filter(s=>s.ok).length+' sources';
+  if(!f.length){
+    document.getElementById('newsFeed').innerHTML='<div class="empty"><div style="font-size:36px;margin-bottom:8px">🔍</div><div style="font-size:13px;color:var(--muted2)">No signals yet — sources loading…</div><div style="font-size:11px;color:var(--muted);margin-top:6px">Auto-refreshes every 90 seconds</div></div>';
+    return;
+  }
   const tC={break:'t-break',bull:'t-bull',bear:'t-bear',whale:'t-whale',reg:'t-reg',potus:'t-potus',hoax:'t-hoax',neutral:'t-neutral'};
   const sL={break:'⚡ BREAKING',bull:'📈 BULLISH',bear:'📉 BEARISH',whale:'🐋 WHALE',reg:'⚖️ REGULATION',potus:'🇺🇸 POTUS',hoax:'🚫 AI FLAGGED',neutral:'📰 NEWS'};
   const sC={break:'s-break',bull:'s-bull',bear:'s-bear',whale:'s-whale',reg:'s-reg',potus:'s-potus',hoax:'s-hoax',neutral:'s-neutral'};
   const iC={break:'var(--accent)',bull:'var(--green)',bear:'var(--red)',whale:'var(--violet)',reg:'var(--amber)',potus:'var(--potus)',hoax:'rgba(242,64,96,.35)',neutral:'var(--muted)'};
-  const sTB={rss:'<span class="src-type-badge st-rss">RSS</span>',telegram:'<span class="src-type-badge st-tg">TG</span>',reddit:'<span class="src-type-badge st-reddit">REDDIT</span>',truthsocial:'<span class="src-type-badge st-ts">TRUTH</span>',api:'<span class="src-type-badge st-api">API</span>'};
+  const sTB={rss:'<span class="stb st-rss">RSS</span>',telegram:'<span class="stb st-tg">TG</span>',reddit:'<span class="stb st-reddit">REDDIT</span>',truthsocial:'<span class="stb st-ts">TRUTH</span>',api:'<span class="stb st-api">API</span>'};
   const sSrc={telegram:'tg-src',reddit:'reddit-src',truthsocial:'potus-src'};
-  const tierLbl=['🇺🇸 POTUS Priority','⭐ Tier 1 — Elite','📰 Tier 2 — Good','💬 Tier 3 — Community'];
   document.getElementById('newsFeed').innerHTML=f.map((a,i)=>`
 <div class="ncard ${tC[a.type]||'t-neutral'}" id="nc${i}">
   ${a.type==='hoax'?'<div class="hoax-overlay">⚠️ AI FLAGGED</div>':''}
@@ -675,7 +694,7 @@ function renderFeed(){
       <div class="sbox"><div class="sbox-val" style="color:var(--amber)">${a.novelty}</div><div class="sbox-lbl">Novelty</div></div>
     </div>
     <div class="ai-verdict ${a.verdictCls}">${esc(a.verdict)}</div>
-    <div class="exp-src-meta">${tierLbl[a.tier]||'Tier '+a.tier} · Trust ${a.trust.toFixed(1)}/10 · Via ${a.srcType.toUpperCase()}</div>
+    <div class="exp-src-meta">Trust ${a.trust.toFixed(1)}/10 · Via ${(a.srcType||'').toUpperCase()}</div>
     ${a.url&&a.url!=='#'?`<a class="exp-link" href="${esc(a.url)}" target="_blank" rel="noopener">→ Read source ↗</a>`:''}
   </div>
 </div>`).join('');
@@ -686,7 +705,7 @@ function updateTicker(){
   const top=allArticles.filter(a=>a.impact>55&&a.type!=='hoax').slice(0,16);
   const ico={break:'⚡',bull:'🟢',bear:'🔴',whale:'🐋',reg:'⚠️',potus:'🇺🇸',neutral:'📰'};
   const it=top.map(a=>`<span class="titem">${ico[a.type]||'📰'} ${esc(a.title.substring(0,90))}${a.title.length>90?'…':''} <span style="color:var(--muted)">·</span></span>`).join('');
-  if(it) document.getElementById('ticker').innerHTML=it+it;
+  if(it)document.getElementById('ticker').innerHTML=it+it;
 }
 
 function updateStats(){
@@ -705,16 +724,14 @@ function updateSrcHealth(){
   const tIco={rss:'📰',telegram:'✈️',reddit:'🔴',truthsocial:'🇺🇸',gnews:'🔗',api:'🔗'};
   const rows=Object.entries(srcStat).sort((a,b)=>(b[1].ok?1:0)-(a[1].ok?1:0));
   document.getElementById('srcHealth').innerHTML=rows.map(([id,s])=>`
-    <div class="shi">
-      <div class="shi-dot" style="background:${s.ok?'var(--green)':'var(--red)'}"></div>
-      <div class="shi-name">${tIco[s.type]||'📡'} ${s.name}</div>
-      <div class="shi-count">${s.ok?s.count+'✓':'err'}</div>
-    </div>`).join('');
-  document.getElementById('sidebarSrc').innerHTML=rows.slice(0,8).map(([id,s])=>`
-    <div style="display:flex;align-items:center;gap:6px;padding:4px 9px;font-size:9px;color:var(--muted2)">
+    <div class="shi"><div class="shi-dot" style="background:${s.ok?'var(--green)':'var(--red)'}"></div>
+    <div class="shi-name">${tIco[s.type]||'📡'} ${s.name}</div>
+    <div class="shi-count">${s.ok?s.count+'✓':'err'}</div></div>`).join('');
+  document.getElementById('sidebarSrc').innerHTML=rows.slice(0,10).map(([id,s])=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:3px 9px;font-size:9px;color:var(--muted2)">
       <div style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:${s.ok?'var(--green)':'var(--muted)'}"></div>
-      ${s.name.substring(0,18)}
-      <span style="margin-left:auto;font-size:8px;color:${s.ok?'var(--green)':'var(--red)'}">${s.ok?'●':'○'}</span>
+      ${s.name.substring(0,20)}
+      <span style="margin-left:auto;color:${s.ok?'var(--green)':'var(--red)'};font-size:8px">${s.ok?s.count+'✓':'✗'}</span>
     </div>`).join('');
 }
 
@@ -722,45 +739,31 @@ function updateAlerts(){
   const top=allArticles.filter(a=>a.impact>=70&&a.type!=='hoax').slice(0,5);
   const ico={break:'⚡',bull:'📈',bear:'📉',whale:'🐋',reg:'⚖️',potus:'🇺🇸',neutral:'📰'};
   const bg={break:'rgba(0,212,255,.07)',bull:'rgba(16,217,138,.07)',bear:'rgba(242,64,96,.07)',whale:'rgba(139,92,246,.07)',reg:'rgba(251,191,36,.07)',potus:'rgba(255,69,0,.1)'};
-  document.getElementById('alertPanel').innerHTML=top.map(a=>`
+  document.getElementById('alertPanel').innerHTML=top.length?top.map(a=>`
     <div class="alert-item" onclick="window.open('${esc(a.url)}','_blank')">
       <div class="a-ico" style="background:${bg[a.type]||'rgba(255,255,255,.04)'}">${ico[a.type]||'📰'}</div>
       <div><div class="a-text">${esc(a.title.substring(0,58))}${a.title.length>58?'…':''}</div>
       <div class="a-time">${ago(a.publishedAt)} · Impact ${a.impact}</div></div>
-    </div>`).join('');
+    </div>`).join(''):'<div style="font-size:10px;color:var(--muted);padding:8px">Loading alerts…</div>';
   document.getElementById('alertBadge').textContent=top.length;
 }
 
 async function tgSend(a){
   const ico={break:'⚡',bull:'📈',bear:'📉',whale:'🐋',reg:'⚖️',potus:'🇺🇸',hoax:'🚫',neutral:'📰'};
-  const lbl={break:'BREAKING',bull:'BULLISH',bear:'BEARISH',whale:'WHALE',reg:'REGULATION',potus:'POTUS SIGNAL',hoax:'AI FLAGGED - POSSIBLE HOAX',neutral:'NEWS'};
-  const msg=`${ico[a.type]||'📰'} *${lbl[a.type]||'NEWS'}*\n`+
-    `Impact: *${a.impact}/100* · Trust: *${a.trust.toFixed(1)}/10*\n\n`+
-    `*${(a.title||'').replace(/[*_`]/g,'\\$&').substring(0,200)}*\n\n`+
-    `📡 ${a.source} · ${a.srcType.toUpperCase()}\n`+
-    `🪙 ${a.coins.slice(0,4).join(', ')}\n`+
-    (a.hoaxReason?`⚠️ ${a.hoaxReason}\n`:'')+
-    (a.isPotus?(a.direction||'')+'\n':'')+
-    `⏱ ${ago(a.publishedAt)}\n\n`+
-    (a.url&&a.url!=='#'?`[→ Read Source](${a.url})\n`:'')+
-    `\n_cryptosignal.id — AI Market Intelligence_`;
+  const lbl={break:'BREAKING',bull:'BULLISH',bear:'BEARISH',whale:'WHALE',reg:'REGULATION',potus:'POTUS SIGNAL',hoax:'AI FLAGGED',neutral:'NEWS'};
+  const msg=`${ico[a.type]||'📰'} *${lbl[a.type]||'NEWS'}*\nImpact: *${a.impact}/100* · Trust: *${a.trust.toFixed(1)}/10*\n\n*${(a.title||'').replace(/[*_`[\]]/g,'\\$&').substring(0,200)}*\n\n📡 ${a.source}\n🪙 ${a.coins.slice(0,4).join(', ')}\n${a.hoaxReason?'⚠️ '+a.hoaxReason+'\n':''}⏱ ${ago(a.publishedAt)}\n\n${a.url&&a.url!=='#'?'[→ Read Source]('+a.url+')\n':''}\n_cryptosignal.id_`;
   try{await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'Markdown',disable_web_page_preview:false})});}catch(e){}
 }
 
 async function checkAlerts(){
-  // POTUS — always alert
   const potus=allArticles.filter(a=>a.isPotus&&!sentAlerts.has(a.id));
   for(const a of potus.slice(0,1)){sentAlerts.add(a.id);await tgSend(a);toast('🇺🇸 POTUS post — Telegram alert sent!');}
-  // Breaking ≥78
   const brk=allArticles.filter(a=>a.type==='break'&&a.impact>=78&&!sentAlerts.has(a.id));
   for(const a of brk.slice(0,2)){sentAlerts.add(a.id);await tgSend(a);toast(`⚡ Breaking (${a.impact}) — Telegram sent!`);}
-  // Hoax warnings
-  const hoax=allArticles.filter(a=>a.type==='hoax'&&!sentAlerts.has(a.id));
-  for(const a of hoax.slice(0,1)){sentAlerts.add(a.id);await tgSend(a);}
 }
 
 function toggleF(t,el){el.classList.toggle('on');activeFilt.has(t)?activeFilt.delete(t):activeFilt.add(t);renderFeed();}
-function toggleCF(el){el.classList.toggle('on');renderFeed();}
+function toggleCF(el,coin){el.classList.toggle('on');renderFeed();}
 function setCoin(el){document.querySelectorAll('#coinTabs .tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');activeCoin=el.dataset.coin;renderFeed();}
 function setSort(el){document.querySelectorAll('#sortTabs .tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');activeSort=el.dataset.sort;renderFeed();}
 
