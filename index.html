@@ -308,42 +308,68 @@ const CG_KEY    = 'CG-LUGa4vpkw7FgUiQ3wyGWaeVp';
 const TG_TOKEN  = '8725389396:AAE7ZsiruPDNX4ljGId88UGjOHjMh5GYTJc';
 const TG_CHAT   = '211783030';
 
-// ── PROXY CHAIN: tried in order until one works ──
+// ── PROXY CHAIN ──
+// Each function receives a URL and returns parsed {title,description,link,pubDate}[]
+// Tried in order; first success wins. Errors are caught and next proxy is tried.
 const PROXIES = [
-  // 1. allorigins raw — returns raw XML, very reliable, no rate limit
+  // 1. allorigins RAW — returns raw XML/HTML directly, best for RSS
   async url => {
-    const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, {signal:AbortSignal.timeout(9000)});
+    const r = await fetch(
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      {signal: AbortSignal.timeout(10000)}
+    );
     if(!r.ok) throw new Error('ao-raw '+r.status);
     const text = await r.text();
     const items = await parseXML(text);
-    if(items.length===0) throw new Error('ao-raw empty');
+    if(!items.length) throw new Error('ao-raw 0 items');
     return items;
   },
-  // 2. rss2json — returns JSON, fast when working
+  // 2. rss2json free API — great JSON response
   async url => {
-    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=20`, {signal:AbortSignal.timeout(9000)});
+    const r = await fetch(
+      `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=20`,
+      {signal: AbortSignal.timeout(10000)}
+    );
     if(!r.ok) throw new Error('r2j '+r.status);
     const d = await r.json();
-    if(d.status!=='ok') throw new Error('r2j:'+d.message);
+    if(d.status !== 'ok') throw new Error('r2j status:'+d.message);
     return await parseRSS2JSON(d);
   },
-  // 3. allorigins get — returns JSON wrapper with contents string
+  // 3. allorigins GET — JSON wrapper with .contents field
   async url => {
-    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, {signal:AbortSignal.timeout(9000)});
+    const r = await fetch(
+      `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+      {signal: AbortSignal.timeout(10000)}
+    );
     if(!r.ok) throw new Error('ao-get '+r.status);
     const d = await r.json();
     if(!d.contents) throw new Error('ao-get empty');
     const items = await parseXML(d.contents);
-    if(items.length===0) throw new Error('ao-get no items');
+    if(!items.length) throw new Error('ao-get 0 items');
     return items;
   },
-  // 4. corsproxy.io — last resort
+  // 4. corsproxy.io — reliable free proxy
   async url => {
-    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, {signal:AbortSignal.timeout(9000)});
+    const r = await fetch(
+      `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      {signal: AbortSignal.timeout(10000)}
+    );
     if(!r.ok) throw new Error('cpio '+r.status);
     const text = await r.text();
     const items = await parseXML(text);
-    if(items.length===0) throw new Error('cpio empty');
+    if(!items.length) throw new Error('cpio 0 items');
+    return items;
+  },
+  // 5. cors.sh proxy
+  async url => {
+    const r = await fetch(
+      `https://proxy.cors.sh/${url}`,
+      {headers:{'x-cors-api-key':'temp_test'}, signal: AbortSignal.timeout(10000)}
+    );
+    if(!r.ok) throw new Error('cors.sh '+r.status);
+    const text = await r.text();
+    const items = await parseXML(text);
+    if(!items.length) throw new Error('cors.sh 0 items');
     return items;
   },
 ];
@@ -511,20 +537,33 @@ async function fetchRSS(src){
   throw new Error('all proxies failed: '+src.name);
 }
 
-// ── REDDIT DIRECT (no proxy needed) ──
+// ── REDDIT ──
 async function fetchReddit(src){
-  const r=await fetch(src.url,{
-    headers:{'User-Agent':'CryptoSignal/1.0'},
-    signal:AbortSignal.timeout(8000)
-  });
-  if(!r.ok)throw new Error('Reddit '+r.status);
-  const d=await r.json();
+  // Try direct first (Reddit allows CORS on .json), fallback to proxy
+  const tryFetch = async (url, opts={}) => {
+    const r = await fetch(url, {...opts, signal: AbortSignal.timeout(9000)});
+    if(!r.ok) throw new Error('reddit '+r.status);
+    return r.json();
+  };
+  let d;
+  try {
+    d = await tryFetch(src.url);
+  } catch(e) {
+    // Fallback: use allorigins proxy
+    const wrapped = await fetch(
+      `https://api.allorigins.win/get?url=${encodeURIComponent(src.url)}`,
+      {signal: AbortSignal.timeout(10000)}
+    );
+    if(!wrapped.ok) throw new Error('reddit proxy failed');
+    const wrap = await wrapped.json();
+    d = JSON.parse(wrap.contents||'{}');
+  }
   return(d.data?.children||[])
-    .filter(c=>c.data?.score>20&&c.data?.title)
+    .filter(c=>c.data?.score>10&&c.data?.title)
     .map(c=>({
       id:'https://reddit.com'+c.data.permalink,
-      title:c.data.title,
-      description:(c.data.selftext||'').substring(0,300),
+      title:decodeEntities(c.data.title||''),
+      description:decodeEntities((c.data.selftext||'').substring(0,300)),
       url:'https://reddit.com'+c.data.permalink,
       source:src.name,trust:src.trust+(c.data.score>500?.5:0),
       publishedAt:new Date(c.data.created_utc*1000).toISOString(),
@@ -615,25 +654,42 @@ async function fetchGNews(){
 }
 
 // ── MASTER FETCH ──
+// Fetches in batches to avoid rate-limiting all proxies simultaneously
+async function fetchSrc(src){
+  try{
+    let items=[];
+    if(src.type==='rss')          items=await fetchRSS(src);
+    else if(src.type==='reddit')  items=await fetchReddit(src);
+    else if(src.type==='telegram')items=await fetchTelegram(src);
+    else if(src.type==='truthsocial')items=await fetchTruthSocial(src);
+    else if(src.type==='gnews')   items=await fetchGNews();
+    srcStat[src.id]={ok:true,count:items.length,name:src.name,type:src.type};
+    // Update UI progressively as each source loads
+    updateSrcHealth();
+    const ok=Object.values(srcStat).filter(s=>s.ok).length;
+    document.getElementById('srcBadge').textContent=`📡 ${ok}/${SOURCES.length} sources live`;
+    return items;
+  }catch(e){
+    srcStat[src.id]={ok:false,count:0,name:src.name,type:src.type,err:e.message};
+    return[];
+  }
+}
+
 async function fetchAll(){
   document.getElementById('refSpinner').innerHTML='<span class="spin">↻</span> ';
   const seen=new Set(),fresh=[];
 
-  const results=await Promise.allSettled(SOURCES.map(async src=>{
-    try{
-      let items=[];
-      if(src.type==='rss')          items=await fetchRSS(src);
-      else if(src.type==='reddit')  items=await fetchReddit(src);
-      else if(src.type==='telegram')items=await fetchTelegram(src);
-      else if(src.type==='truthsocial')items=await fetchTruthSocial(src);
-      else if(src.type==='gnews')   items=await fetchGNews();
-      srcStat[src.id]={ok:true,count:items.length,name:src.name,type:src.type};
-      return items;
-    }catch(e){
-      srcStat[src.id]={ok:false,count:0,name:src.name,type:src.type,err:e.message};
-      return[];
-    }
-  }));
+  // Batch into groups of 4 with 300ms delay between batches
+  // This prevents hitting rate limits on proxies
+  const BATCH=4, DELAY=400;
+  const allResults=[];
+  for(let i=0;i<SOURCES.length;i+=BATCH){
+    const batch=SOURCES.slice(i,i+BATCH);
+    const batchResults=await Promise.allSettled(batch.map(src=>fetchSrc(src)));
+    allResults.push(...batchResults);
+    if(i+BATCH<SOURCES.length) await new Promise(r=>setTimeout(r,DELAY));
+  }
+  const results=allResults;
 
   for(const r of results){
     if(r.status!=='fulfilled')continue;
@@ -646,6 +702,11 @@ async function fetchAll(){
   }
   fresh.sort((a,b)=>new Date(b.publishedAt)-new Date(a.publishedAt));
   allArticles=fresh;
+  // Count failed sources and show retry hint
+  const failedSrcs=Object.values(srcStat).filter(s=>!s.ok);
+  if(failedSrcs.length>0){
+    console.log(`${failedSrcs.length} sources failed:`,failedSrcs.map(s=>s.name+':'+s.err).join(', '));
+  }
 
   // POTUS banner
   const potus=allArticles.find(a=>a.isPotus&&a.rawText?.length>10);
