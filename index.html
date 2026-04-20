@@ -309,11 +309,43 @@ const TG_TOKEN  = '8725389396:AAE7ZsiruPDNX4ljGId88UGjOHjMh5GYTJc';
 const TG_CHAT   = '211783030';
 
 // ── PROXY CHAIN: tried in order until one works ──
-// Each RSS feed tries these proxies sequentially
 const PROXIES = [
-  url => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=20`,
-  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  // 1. allorigins raw — returns raw XML, very reliable, no rate limit
+  async url => {
+    const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, {signal:AbortSignal.timeout(9000)});
+    if(!r.ok) throw new Error('ao-raw '+r.status);
+    const text = await r.text();
+    const items = await parseXML(text);
+    if(items.length===0) throw new Error('ao-raw empty');
+    return items;
+  },
+  // 2. rss2json — returns JSON, fast when working
+  async url => {
+    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=20`, {signal:AbortSignal.timeout(9000)});
+    if(!r.ok) throw new Error('r2j '+r.status);
+    const d = await r.json();
+    if(d.status!=='ok') throw new Error('r2j:'+d.message);
+    return await parseRSS2JSON(d);
+  },
+  // 3. allorigins get — returns JSON wrapper with contents string
+  async url => {
+    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, {signal:AbortSignal.timeout(9000)});
+    if(!r.ok) throw new Error('ao-get '+r.status);
+    const d = await r.json();
+    if(!d.contents) throw new Error('ao-get empty');
+    const items = await parseXML(d.contents);
+    if(items.length===0) throw new Error('ao-get no items');
+    return items;
+  },
+  // 4. corsproxy.io — last resort
+  async url => {
+    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, {signal:AbortSignal.timeout(9000)});
+    if(!r.ok) throw new Error('cpio '+r.status);
+    const text = await r.text();
+    const items = await parseXML(text);
+    if(items.length===0) throw new Error('cpio empty');
+    return items;
+  },
 ];
 
 // ── SOURCE REGISTRY ──
@@ -356,6 +388,13 @@ let allArticles=[], activeFilt=new Set(['break','bull','bear','whale','reg','pot
 const fmt$=n=>!n&&n!==0?'—':n>=1000?'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}):n>=1?'$'+n.toFixed(2):'$'+n.toFixed(4);
 const fmtC=n=>n==null?'—':(n>=0?'+':'')+n.toFixed(2)+'%';
 const esc=s=>s?(s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';
+// Decode HTML entities from RSS feeds (&#036; → $, &amp; → &, etc.)
+function decodeEntities(s){
+  if(!s) return '';
+  const d=document.createElement('div');
+  d.innerHTML=s.replace(/<[^>]*>/g,' ');
+  return d.textContent||d.innerText||s;
+}
 const ago=d=>{const s=(Date.now()-new Date(d))/1000;return s<60?Math.round(s)+'s ago':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago';};
 function toast(m){const e=document.getElementById('toastEl');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3200);}
 
@@ -431,10 +470,9 @@ async function fetchPrices(){
 
 // ── RSS WITH MULTI-PROXY FALLBACK ──
 async function parseRSS2JSON(data){
-  // rss2json format
   if(data.status==='ok'&&data.items) return data.items.map(it=>({
-    title:it.title||'',
-    description:(it.description||'').replace(/<[^>]*>/g,' ').substring(0,300),
+    title:decodeEntities(it.title||''),
+    description:decodeEntities((it.description||'').replace(/<[^>]*>/g,' ')).substring(0,300),
     link:it.link||it.guid||'',
     pubDate:it.pubDate||new Date().toISOString(),
   }));
@@ -447,8 +485,8 @@ async function parseXML(xmlText){
     const doc=parser.parseFromString(xmlText,'text/xml');
     const items=[...doc.querySelectorAll('item')];
     return items.map(it=>({
-      title:it.querySelector('title')?.textContent||'',
-      description:(it.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,' ').substring(0,300),
+      title:decodeEntities(it.querySelector('title')?.textContent||''),
+      description:decodeEntities((it.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,' ')).substring(0,300),
       link:it.querySelector('link')?.textContent||it.querySelector('guid')?.textContent||'',
       pubDate:it.querySelector('pubDate')?.textContent||new Date().toISOString(),
     }));
@@ -456,35 +494,21 @@ async function parseXML(xmlText){
 }
 
 async function fetchRSS(src){
-  // Try each proxy in order
   for(let i=0;i<PROXIES.length;i++){
     try{
-      const proxyUrl=PROXIES[i](src.url);
-      const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(8000)});
-      if(!r.ok) continue;
-      const ct=r.headers.get('content-type')||'';
-      let items=[];
-      if(ct.includes('json')){
-        const d=await r.json();
-        // rss2json format
-        if(d.status==='ok'&&d.items){items=await parseRSS2JSON(d);}
-        // allorigins wraps in .contents
-        else if(d.contents){items=await parseXML(d.contents);}
-      } else {
-        const text=await r.text();
-        items=await parseXML(text);
-      }
+      const items=await PROXIES[i](src.url);
       if(items.length>0){
         return items.map(it=>({
-          id:it.link||it.title,title:it.title,
-          description:it.description,url:it.link||src.url,
-          source:src.name,trust:src.trust,
-          publishedAt:it.pubDate,srcType:'rss',srcId:src.id,
+          id:it.link||it.title||String(Math.random()),
+          title:it.title||'',description:it.description||'',
+          url:it.link||src.url,source:src.name,trust:src.trust,
+          publishedAt:it.pubDate||new Date().toISOString(),
+          srcType:'rss',srcId:src.id,
         }));
       }
     }catch(e){continue;}
   }
-  throw new Error('all proxies failed for '+src.name);
+  throw new Error('all proxies failed: '+src.name);
 }
 
 // ── REDDIT DIRECT (no proxy needed) ──
@@ -523,7 +547,7 @@ async function fetchTelegram(src){
   while((dm=dateRe.exec(html))!==null)times.push(dm[1]);
   let m,i=0;
   while((m=msgRe.exec(html))!==null){
-    const text=m[1].replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+    const text=decodeEntities(m[1].replace(/<[^>]*>/g,' ')).replace(/\s+/g,' ').trim();
     if(text.length>20){
       msgs.push({id:tgUrl+'#'+i,title:text.substring(0,140)+(text.length>140?'…':''),
         description:text.substring(0,400),url:tgUrl,source:src.name,trust:src.trust,
@@ -545,7 +569,7 @@ async function fetchTruthSocial(src){
     const d=await r.json();
     if(d.status==='ok'&&d.items?.length>0){
       return d.items.map(it=>{
-        const text=(it.description||it.title||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+        const text=decodeEntities((it.description||it.title||'').replace(/<[^>]*>/g,' ')).replace(/\s+/g,' ').trim();
         return{id:it.link||it.guid,title:'🇺🇸 POTUS: '+text.substring(0,140),
           description:text,url:it.link||'https://truthsocial.com/@realDonaldTrump',
           source:'Truth Social — @realDonaldTrump',trust:10.0,
@@ -562,7 +586,7 @@ async function fetchTruthSocial(src){
     const xml=await r.text();
     const items=await parseXML(xml);
     return items.map(it=>{
-      const text=(it.description||it.title||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+      const text=decodeEntities((it.description||it.title||'').replace(/<[^>]*>/g,' ')).replace(/\s+/g,' ').trim();
       return{id:it.link||it.title,title:'🇺🇸 POTUS: '+text.substring(0,140),
         description:text,url:it.link||'https://truthsocial.com/@realDonaldTrump',
         source:'Truth Social — @realDonaldTrump',trust:10.0,
