@@ -175,7 +175,8 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 @media(max-width:1080px){.right-panel{display:none;}}
 @media(max-width:760px){aside{display:none;}}
-@media(max-width:580px){.stats-row{grid-template-columns:1fr 1fr;}.h-prices{display:none;}}
+@media(max-width:680px){.stats-row{grid-template-columns:repeat(3,1fr)!important;}.h-prices{display:none;}}
+@media(max-width:420px){.stats-row{grid-template-columns:repeat(2,1fr)!important;}}
 </style>
 </head>
 <body>
@@ -236,11 +237,40 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
     </div>
     <div style="font-size:11px;font-weight:700;color:var(--potus);flex-shrink:0;font-family:var(--mono)" id="potusImpact">—</div>
   </div>
-  <div class="stats-row">
+  <!-- Fear & Greed Banner -->
+  <div id="fngBanner" style="display:none;background:var(--panel);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div style="font-size:22px" id="fngEmoji">😐</div>
+      <div>
+        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:var(--mono)">Fear &amp; Greed Index</div>
+        <div style="font-size:18px;font-weight:700;font-family:var(--mono)" id="fngScore">—</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;font-family:var(--mono)" id="fngLabel">—</div>
+    </div>
+    <div style="flex:1;min-width:120px">
+      <div style="height:6px;background:linear-gradient(90deg,#f24060 0%,#fbbf24 40%,#10d98a 100%);border-radius:3px;position:relative">
+        <div id="fngMarker" style="position:absolute;top:-3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #000;transform:translateX(-50%);left:50%;transition:left .8s ease"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:9px;font-family:var(--mono);color:var(--muted)"><span>Extreme Fear</span><span>Fear</span><span>Neutral</span><span>Greed</span><span>Extreme Greed</span></div>
+    </div>
+    <div style="flex-shrink:0;text-align:right">
+      <div style="font-size:9px;color:var(--muted);font-family:var(--mono)" id="fngUpdate">—</div>
+      <div style="font-size:10px;color:var(--muted2);margin-top:2px" id="fngSignal">—</div>
+    </div>
+  </div>
+
+  <!-- Trending Coins Bar -->
+  <div id="trendingBar" style="display:none;background:rgba(139,92,246,.05);border:1px solid rgba(139,92,246,.15);border-radius:9px;padding:8px 12px;align-items:center;gap:10px;overflow:hidden">
+    <div style="font-size:9px;font-weight:700;color:var(--violet);font-family:var(--mono);letter-spacing:.8px;flex-shrink:0">🔥 TRENDING</div>
+    <div id="trendingCoins" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+
+  <div class="stats-row" style="grid-template-columns:repeat(6,1fr)">
     <div class="stat sg"><div class="stat-lbl">Bullish</div><div class="stat-val" id="stBull">—</div><div class="stat-sub">signals</div></div>
     <div class="stat sr"><div class="stat-lbl">Bearish</div><div class="stat-val" id="stBear">—</div><div class="stat-sub">signals</div></div>
     <div class="stat sa"><div class="stat-lbl">Breaking</div><div class="stat-val" id="stBreak">—</div><div class="stat-sub">signals</div></div>
     <div class="stat sp"><div class="stat-lbl">POTUS</div><div class="stat-val" id="stPotus">—</div><div class="stat-sub">posts</div></div>
+    <div class="stat" style="--val-color:var(--violet)"><div class="stat-lbl">Sentiment</div><div class="stat-val" id="stFng" style="color:var(--violet)">—</div><div class="stat-sub" id="stFngLbl">fear &amp; greed</div></div>
     <div class="stat sb"><div class="stat-lbl">Total</div><div class="stat-val" id="stTotal">—</div><div class="stat-sub">signals</div></div>
   </div>
   <div class="ctrl-row">
@@ -593,36 +623,203 @@ async function fetchTruthSocial(){
   }
 }
 
+// ── SOURCE 6: ChainGPT RSS (AI-curated, no key, no proxy needed) ──
+async function fetchChainGPT(){
+  const feeds=[
+    {url:'https://app.chaingpt.org/rssfeeds.xml',      id:'chaingpt_all',  name:'ChainGPT AI News', trust:8.5},
+    {url:'https://app.chaingpt.org/rssfeeds-bitcoin.xml',id:'chaingpt_btc', name:'ChainGPT BTC',     trust:8.5},
+    {url:'https://app.chaingpt.org/rssfeeds-ethereum.xml',id:'chaingpt_eth',name:'ChainGPT ETH',     trust:8.5},
+  ];
+  const out=[], seen=new Set();
+  for(const feed of feeds){
+    try{
+      // ChainGPT RSS has CORS headers — try direct first, proxy fallback
+      let items=[];
+      try{
+        const r=await fetch(feed.url,{signal:AbortSignal.timeout(10000)});
+        if(r.ok) items=parseXML(await r.text());
+      }catch(e){}
+      if(!items.length){
+        const r=await fetch(AO_RAW+encodeURIComponent(feed.url),{signal:AbortSignal.timeout(10000)});
+        if(r.ok) items=parseXML(await r.text());
+      }
+      const mapped=items.filter(i=>!seen.has(i.link)).slice(0,25).map(it=>{
+        seen.add(it.link);
+        return{id:it.link,title:decodeHTML(it.title),description:decodeHTML(it.description),
+          url:it.link,source:feed.name,trust:feed.trust,
+          publishedAt:it.pubDate,srcType:'rss',srcId:feed.id};
+      });
+      out.push(...mapped);
+      srcStat[feed.id]={ok:mapped.length>0,count:mapped.length,name:feed.name,icon:'🤖'};
+    }catch(e){
+      srcStat[feed.id]={ok:false,count:0,name:feed.name,icon:'🤖',err:e.message};
+    }
+    await new Promise(r=>setTimeout(r,200));
+  }
+  return out;
+}
+
+// ── SOURCE 7: Fear & Greed Index (alternative.me — free, CORS) ──
+async function fetchFearGreed(){
+  try{
+    const r=await fetch('https://api.alternative.me/fng/?limit=1&format=json',{signal:AbortSignal.timeout(8000)});
+    if(!r.ok) throw new Error('fng '+r.status);
+    const d=await r.json();
+    const fng=d.data?.[0];
+    if(!fng) throw new Error('fng empty');
+    const score=parseInt(fng.value);
+    const label=fng.value_classification;
+    // Update UI
+    const emoji=score<=20?'😱':score<=40?'😨':score<=60?'😐':score<=80?'😏':'🤑';
+    const color=score<=20?'var(--red)':score<=40?'var(--amber)':score<=60?'var(--muted2)':score<=80?'var(--green)':'#10d98a';
+    const el=id=>document.getElementById(id);
+    if(el('fngEmoji')) el('fngEmoji').textContent=emoji;
+    if(el('fngScore')){el('fngScore').textContent=score;el('fngScore').style.color=color;}
+    if(el('fngLabel')){el('fngLabel').textContent=label;el('fngLabel').style.background=color+'22';el('fngLabel').style.color=color;el('fngLabel').style.border='1px solid '+color+'44';}
+    if(el('fngMarker')) el('fngMarker').style.left=score+'%';
+    if(el('fngUpdate')) el('fngUpdate').textContent='Updated: '+(fng.time_until_update?'in '+Math.round(fng.time_until_update/3600)+'h':'now');
+    if(el('fngSignal')) el('fngSignal').textContent=score<=25?'⚡ Extreme fear — historic buy zone':score<=40?'📉 Fear dominates market':score>=75?'⚠️ Extreme greed — correction risk':score>=60?'📈 Greed rising':'➡️ Neutral sentiment';
+    if(el('fngBanner')) el('fngBanner').style.display='flex';
+    if(el('stFng')){el('stFng').textContent=score;el('stFng').style.color=color;}
+    if(el('stFngLbl')) el('stFngLbl').textContent=label.toLowerCase();
+    srcStat['feargreed']={ok:true,count:1,name:'Fear & Greed Index',icon:'📊'};
+    // Return as a signal article
+    return [{
+      id:'fng-'+Date.now(),
+      title:`📊 Market Sentiment: ${label} — Fear & Greed Index at ${score}/100`,
+      description:`The Crypto Fear & Greed Index currently reads ${score} out of 100 — classified as "${label}". ${score<=25?'Extreme fear often signals a market bottom and potential buying opportunity.':score<=40?'Fear is dominant. Markets may be oversold.':score>=75?'Extreme greed detected. Markets may be overheated — correction risk high.':score>=60?'Greed is rising. Monitor for overextension.':'Market sentiment is neutral.'}`,
+      url:'https://alternative.me/crypto/fear-and-greed-index/',
+      source:'Fear & Greed Index (Alternative.me)',trust:9.0,
+      publishedAt:new Date().toISOString(),srcType:'api',srcId:'feargreed',
+      fngScore:score,fngLabel:label,
+    }];
+  }catch(e){
+    srcStat['feargreed']={ok:false,count:0,name:'Fear & Greed Index',icon:'📊',err:e.message};
+    return[];
+  }
+}
+
+// ── SOURCE 8: CoinGecko Trending Coins ──
+async function fetchTrending(){
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/search/trending?x_cg_demo_api_key=${CG_KEY}`,{signal:AbortSignal.timeout(10000)});
+    if(!r.ok) throw new Error('trending '+r.status);
+    const d=await r.json();
+    const coins=(d.coins||[]).slice(0,7).map(c=>c.item);
+    // Update trending bar UI
+    const bar=document.getElementById('trendingCoins');
+    if(bar&&coins.length){
+      bar.innerHTML=coins.map(c=>`<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;font-family:var(--mono);color:#a78bfa">${c.thumb?`<img src="${c.thumb}" width="14" height="14" style="border-radius:50%">`:''} ${c.symbol.toUpperCase()} <span style="color:var(--muted2);font-weight:400">#${c.market_cap_rank||'?'}</span></span>`).join('');
+      document.getElementById('trendingBar').style.display='flex';
+    }
+    srcStat['trending']={ok:true,count:coins.length,name:'CoinGecko Trending',icon:'🔥'};
+    // Return trending coins as signals
+    return coins.map(c=>({
+      id:'trend-'+c.id,
+      title:`🔥 TRENDING: ${c.name} (${c.symbol.toUpperCase()}) — #${c.score+1} trending on CoinGecko right now`,
+      description:`${c.name} is currently trending #${c.score+1} on CoinGecko with market cap rank #${c.market_cap_rank||'?'}. Rising search interest often precedes significant price movement.`,
+      url:`https://www.coingecko.com/en/coins/${c.id}`,
+      source:'CoinGecko Trending',trust:8.7,
+      publishedAt:new Date().toISOString(),srcType:'api',srcId:'trending',
+      coins:[c.symbol.toUpperCase()],
+    }));
+  }catch(e){
+    srcStat['trending']={ok:false,count:0,name:'CoinGecko Trending',icon:'🔥',err:e.message};
+    return[];
+  }
+}
+
+// ── SOURCE 9: Mempool.space — BTC on-chain activity signal ──
+async function fetchMempool(){
+  try{
+    const [feesR,statsR]=await Promise.all([
+      fetch('https://mempool.space/api/v1/fees/recommended',{signal:AbortSignal.timeout(8000)}),
+      fetch('https://mempool.space/api/v1/mining/hashrate/3d',{signal:AbortSignal.timeout(8000)}),
+    ]);
+    const fees=feesR.ok?await feesR.json():{};
+    const fastest=fees.fastestFee||0;
+    const halfHour=fees.halfHourFee||0;
+    const normal=fees.hourFee||0;
+    // Fee levels: low<5, normal 5-30, high 30-100, extreme >100 sat/vB
+    const feeLevel=fastest<5?'Low':fastest<30?'Normal':fastest<100?'High':'Extreme';
+    const isWhaleSignal=fastest>50;
+    srcStat['mempool']={ok:true,count:1,name:'Mempool.space',icon:'⛓️'};
+    return [{
+      id:'mempool-'+Math.floor(Date.now()/300000), // changes every 5min
+      title:`⛓️ BTC Network: Fees ${feeLevel} — ${fastest} sat/vB fastest · ${halfHour} sat/vB 30min · ${normal} sat/vB 1hr`,
+      description:`Bitcoin mempool fee data: Fastest confirmation costs ${fastest} sat/vB, 30-minute target ${halfHour} sat/vB, 1-hour target ${normal} sat/vB. ${fastest>80?'⚠️ Extreme network congestion — unusually high whale/institutional on-chain activity.':fastest>30?'Elevated fees indicate above-average transaction volume.':'Network congestion is normal.'}`,
+      url:'https://mempool.space',source:'Mempool.space',trust:9.5,
+      publishedAt:new Date().toISOString(),srcType:'api',srcId:'mempool',
+      coins:['BTC'],mempoolFees:fees,
+    }];
+  }catch(e){
+    srcStat['mempool']={ok:false,count:0,name:'Mempool.space',icon:'⛓️',err:e.message};
+    return[];
+  }
+}
+
+// ── SOURCE 10: cryptocurrency.cv — Social/X sentiment ──
+async function fetchSocialSentiment(){
+  try{
+    const r=await fetch('https://cryptocurrency.cv/api/social/x/sentiment',{signal:AbortSignal.timeout(10000)});
+    if(!r.ok) throw new Error('social '+r.status);
+    const d=await r.json();
+    const score=d.overall?.score||0; // -1 to +1
+    const posts=d.overall?.postCount||0;
+    const bullish=d.breakdown?.bullish||0;
+    const bearish=d.breakdown?.bearish||0;
+    const pct=Math.round((score+1)*50); // 0-100
+    const label=score>0.3?'Bullish':score<-0.3?'Bearish':'Neutral';
+    srcStat['social_x']={ok:true,count:1,name:'X/Twitter Sentiment',icon:'🐦'};
+    return [{
+      id:'social-x-'+Math.floor(Date.now()/600000),
+      title:`🐦 X/Twitter Crypto Sentiment: ${label} — ${posts.toLocaleString()} posts analyzed · ${bullish} bullish · ${bearish} bearish`,
+      description:`Real-time X/Twitter social sentiment analysis: Score ${score.toFixed(2)} (${label}). ${posts.toLocaleString()} crypto posts analyzed. Bullish posts: ${bullish}, Bearish posts: ${bearish}. ${score>0.5?'Strong bullish social momentum.':score<-0.5?'Heavy fear/panic across social media.':'Mixed social signals — market uncertain.'}`,
+      url:'https://cryptocurrency.cv',source:'X/Twitter Sentiment (cryptocurrency.cv)',trust:7.5,
+      publishedAt:new Date().toISOString(),srcType:'api',srcId:'social_x',
+    }];
+  }catch(e){
+    srcStat['social_x']={ok:false,count:0,name:'X/Twitter Sentiment',icon:'🐦',err:e.message};
+    return[];
+  }
+}
+
 // ── MASTER FETCH ──
 async function fetchAll(){
   document.getElementById('refSpinner').innerHTML='<span class="spin">↻</span> ';
   const seen=new Set(),fresh=[];
 
-  // Run all sources — GNews first (fastest, most reliable)
-  // then RSS, Reddit, Telegram, Truth Social in parallel
+  // Run all sources in parallel — GNews fastest, new APIs alongside
   srcStat['gnews']={ok:false,count:0,name:'GNews (80 sources)',icon:'🔗'};
 
-  const [gnewsResult,rssResult,redditResult,tgResult,tsResult]=await Promise.allSettled([
-    // GNews — proven working, most articles
+  const [gnewsResult,rssResult,cgptResult,redditResult,tgResult,tsResult,fngResult,trendResult,mempoolResult,socialResult]=await Promise.allSettled([
+    // LAYER 1: Proven working APIs
     fetchGNews().then(items=>{srcStat['gnews']={ok:true,count:items.length,name:'GNews (80 sources)',icon:'🔗'};return items;}),
-    // RSS feeds via allorigins (sequential to avoid rate limits)
     fetchRSSFeeds(),
-    // Reddit direct
+    fetchChainGPT(),
+    // LAYER 2: Community sources
     fetchReddit(),
-    // Telegram via allorigins
     fetchTelegram(),
-    // Truth Social
     fetchTruthSocial(),
+    // LAYER 3: Market intelligence (new)
+    fetchFearGreed(),
+    fetchTrending(),
+    fetchMempool(),
+    fetchSocialSentiment(),
   ]);
 
   // Merge all results
-  const allResults=[gnewsResult,rssResult,redditResult,tgResult,tsResult];
+  const allResults=[gnewsResult,rssResult,cgptResult,redditResult,tgResult,tsResult,fngResult,trendResult,mempoolResult,socialResult];
   for(const r of allResults){
     if(r.status!=='fulfilled')continue;
     for(const item of(Array.isArray(r.value)?r.value:[])){
       if(!item.id||seen.has(item.id))continue;
       seen.add(item.id);
       const cls=aiClassify(item);
+      // Preserve fngScore for special F&G cards
+      if(item.fngScore!=null) cls.type='neutral';
+      if(item.srcId==='trending') cls.type='bull';
+      if(item.srcId==='mempool'&&item.mempoolFees?.fastestFee>50) cls.type='whale';
       fresh.push({...item,...cls});
     }
   }
@@ -663,11 +860,11 @@ function renderFeed(){
   document.getElementById('totalCount').textContent=allArticles.length;
   document.getElementById('feedSrcC').textContent='from '+Object.values(srcStat).filter(s=>s.ok).length+' sources';
   if(!f.length){document.getElementById('newsFeed').innerHTML='<div class="empty"><div style="font-size:36px;margin-bottom:8px">🔍</div><div style="font-size:13px;color:var(--muted2)">No signals — loading…</div><div style="font-size:11px;color:var(--muted);margin-top:6px">Auto-refreshes every 90s</div></div>';return;}
-  const tC={break:'t-break',bull:'t-bull',bear:'t-bear',whale:'t-whale',reg:'t-reg',potus:'t-potus',hoax:'t-hoax',neutral:'t-neutral'};
-  const sL={break:'⚡ BREAKING',bull:'📈 BULLISH',bear:'📉 BEARISH',whale:'🐋 WHALE',reg:'⚖️ REGULATION',potus:'🇺🇸 POTUS',hoax:'🚫 AI FLAGGED',neutral:'📰 NEWS'};
-  const sC={break:'s-break',bull:'s-bull',bear:'s-bear',whale:'s-whale',reg:'s-reg',potus:'s-potus',hoax:'s-hoax',neutral:'s-neutral'};
-  const iC={break:'var(--accent)',bull:'var(--green)',bear:'var(--red)',whale:'var(--violet)',reg:'var(--amber)',potus:'var(--potus)',hoax:'rgba(242,64,96,.35)',neutral:'var(--muted)'};
-  const sTB={rss:'<span class="stb st-rss">RSS</span>',telegram:'<span class="stb st-tg">TG</span>',reddit:'<span class="stb st-reddit">REDDIT</span>',truthsocial:'<span class="stb st-ts">TRUTH</span>',api:'<span class="stb st-api">API</span>'};
+  const tC={break:'t-break',bull:'t-bull',bear:'t-bear',whale:'t-whale',reg:'t-reg',potus:'t-potus',hoax:'t-hoax',neutral:'t-neutral',trending:'t-bull'};
+  const sL={break:'⚡ BREAKING',bull:'📈 BULLISH',bear:'📉 BEARISH',whale:'🐋 WHALE',reg:'⚖️ REGULATION',potus:'🇺🇸 POTUS',hoax:'🚫 AI FLAGGED',neutral:'📰 NEWS',trending:'🔥 TRENDING'};
+  const sC={break:'s-break',bull:'s-bull',bear:'s-bear',whale:'s-whale',reg:'s-reg',potus:'s-potus',hoax:'s-hoax',neutral:'s-neutral',trending:'s-bull'};
+  const iC={break:'var(--accent)',bull:'var(--green)',bear:'var(--red)',whale:'var(--violet)',reg:'var(--amber)',potus:'var(--potus)',hoax:'rgba(242,64,96,.35)',neutral:'var(--muted)',trending:'var(--violet)'};
+  const sTB={rss:'<span class="stb st-rss">RSS</span>',telegram:'<span class="stb st-tg">TG</span>',reddit:'<span class="stb st-reddit">REDDIT</span>',truthsocial:'<span class="stb st-ts">TRUTH</span>',api:'<span class="stb st-api">API</span>',coingecko:'<span class="stb st-api">CG</span>'};
   const sSrc={telegram:'tg-src',reddit:'reddit-src',truthsocial:'potus-src'};
   document.getElementById('newsFeed').innerHTML=f.map((a,i)=>`
 <div class="ncard ${tC[a.type]||'t-neutral'}" id="nc${i}">
@@ -706,7 +903,7 @@ function renderFeed(){
 
 function updateTicker(){
   const top=allArticles.filter(a=>a.impact>50&&a.type!=='hoax').slice(0,20);
-  const ico={break:'⚡',bull:'🟢',bear:'🔴',whale:'🐋',reg:'⚠️',potus:'🇺🇸',neutral:'📰'};
+  const ico={break:'⚡',bull:'🟢',bear:'🔴',whale:'🐋',reg:'⚠️',potus:'🇺🇸',neutral:'📰',trending:'🔥'};
   const it=top.map(a=>`<span class="titem">${ico[a.type]||'📰'} ${esc(a.title.substring(0,90))}${a.title.length>90?'…':''} <span style="color:var(--muted)">·</span></span>`).join('');
   if(it)document.getElementById('ticker').innerHTML=it+it;
 }
@@ -775,10 +972,29 @@ async function tgSend(a){
 }
 
 async function checkAlerts(){
+  // POTUS posts
   const potus=allArticles.filter(a=>a.isPotus&&!sentAlerts.has(a.id));
   for(const a of potus.slice(0,1)){sentAlerts.add(a.id);await tgSend(a);toast('🇺🇸 POTUS post — Telegram alert sent!');}
+  // Breaking high-impact
   const brk=allArticles.filter(a=>a.type==='break'&&a.impact>=80&&!sentAlerts.has(a.id));
   for(const a of brk.slice(0,2)){sentAlerts.add(a.id);await tgSend(a);toast(`⚡ Breaking (${a.impact}) — Telegram sent!`);}
+  // Fear & Greed extremes
+  const fngItem=allArticles.find(a=>a.srcId==='feargreed'&&a.fngScore!=null);
+  if(fngItem&&!sentAlerts.has('fng-extreme')){
+    const s=fngItem.fngScore;
+    if(s<=20){
+      sentAlerts.add('fng-extreme');
+      await tgSend({...fngItem,title:`😱 EXTREME FEAR: Fear & Greed Index at ${s}/100 — Historic buying signal`,type:'break',impact:88});
+      toast(`😱 Extreme Fear (${s}) — Telegram alert sent!`);
+    } else if(s>=80){
+      sentAlerts.add('fng-extreme');
+      await tgSend({...fngItem,title:`🤑 EXTREME GREED: Fear & Greed Index at ${s}/100 — Correction risk high`,type:'bear',impact:82});
+      toast(`🤑 Extreme Greed (${s}) — Telegram alert sent!`);
+    }
+  }
+  // Whale mempool signal
+  const mempoolItem=allArticles.find(a=>a.srcId==='mempool'&&a.mempoolFees?.fastestFee>80&&!sentAlerts.has('mempool-whale'));
+  if(mempoolItem){sentAlerts.add('mempool-whale');await tgSend({...mempoolItem,type:'whale',impact:75});toast('⛓️ BTC mempool spike — whale activity alert sent!');}
 }
 
 function toggleF(t,el){el.classList.toggle('on');activeFilt.has(t)?activeFilt.delete(t):activeFilt.add(t);renderFeed();}
