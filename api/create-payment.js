@@ -2,6 +2,7 @@
 // Signature fixed per official DOKU sample code (PHP/Python reference)
 
 import crypto from 'crypto';
+import { savePendingInvoice } from './db.js';
 
 const DOKU_CLIENT_ID  = process.env.DOKU_CLIENT_ID;
 const DOKU_SECRET_KEY = process.env.DOKU_SECRET_KEY;
@@ -113,6 +114,14 @@ export default async function handler(req, res) {
     });
 
     // Debug log — visible in Vercel Functions tab
+    // Save pending invoice to Redis BEFORE calling DOKU
+    try {
+      await savePendingInvoice(invoiceNumber, customer.email, tgChatId || '', planName || 'pro');
+      console.log('Invoice saved to Redis:', invoiceNumber);
+    } catch (e) {
+      console.error('Redis save failed (non-fatal):', e.message);
+    }
+
     console.log('── DOKU Request ──');
     console.log('URL:', DOKU_BASE_URL + requestTarget);
     console.log('Client-Id:', DOKU_CLIENT_ID);
