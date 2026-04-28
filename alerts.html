@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoSignal — Alert Center</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04060f;--bg2:#080c1a;--bg3:#0d1224;
+  --panel:#101726;--panel2:#151e30;
+  --border:rgba(255,255,255,0.055);--border2:rgba(255,255,255,0.11);
+  --text:#edf1fa;--muted:#4e5a78;--muted2:#8090b0;
+  --accent:#00d4ff;--violet:#8b5cf6;--green:#10d98a;
+  --red:#f24060;--amber:#fbbf24;--tg:#2aabee;
+  --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;
+  --radius:12px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 700px 400px at 5% 15%,rgba(0,212,255,0.04) 0%,transparent 65%),radial-gradient(ellipse 500px 350px at 98% 80%,rgba(139,92,246,0.045) 0%,transparent 65%);}
+header{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;padding:0 20px;height:56px;}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:17px;letter-spacing:-.4px;color:var(--text);text-decoration:none;}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo span{color:var(--accent);}
+.nav-back{font-size:12px;color:var(--muted2);cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);transition:all .15s;text-decoration:none;}
+.nav-back:hover{color:var(--text);border-color:var(--border2);}
+.h-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.save-btn{padding:8px 20px;border-radius:9px;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:13px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;transition:all .15s;}
+.save-btn:hover{opacity:.88;transform:translateY(-1px);}
+.unsaved-pill{font-size:10px;font-weight:700;font-family:var(--mono);padding:3px 9px;border-radius:4px;background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.2);opacity:0;transition:opacity .2s;}
+.unsaved-pill.show{opacity:1;}
+.tg-connected{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);color:var(--tg);background:rgba(42,171,238,.07);border:1px solid rgba(42,171,238,.18);padding:5px 12px;border-radius:20px;}
+.tg-dot{width:6px;height:6px;border-radius:50%;background:var(--tg);animation:tgpulse 2s infinite;}
+@keyframes tgpulse{0%,100%{opacity:1}50%{opacity:.3}}
+.page{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:26px 20px 60px;}
+.page-h{margin-bottom:24px;}
+.page-title{font-size:24px;font-weight:700;letter-spacing:-.6px;margin-bottom:5px;}
+.page-sub{font-size:13px;color:var(--muted2);line-height:1.6;}
+.page-sub em{color:var(--accent);font-style:normal;}
+.sec{margin-bottom:22px;}
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:680px){.grid2{grid-template-columns:1fr;}.grid3{grid-template-columns:1fr 1fr;}}
+
+/* CHANNEL CARDS */
+.ch-card{background:var(--panel);border:2px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;position:relative;}
+.ch-card.on-web{border-color:var(--accent);background:rgba(0,212,255,.04);}
+.ch-card.on-tg{border-color:var(--tg);background:rgba(42,171,238,.04);}
+.ch-icon{font-size:24px;margin-bottom:8px;}
+.ch-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.ch-desc{font-size:11px;color:var(--muted2);line-height:1.5;}
+.ch-badge{position:absolute;top:11px;right:11px;font-size:8px;font-weight:700;font-family:var(--mono);padding:2px 7px;border-radius:3px;letter-spacing:.4px;}
+.badge-free{background:rgba(16,217,138,.1);color:var(--green);border:1px solid rgba(16,217,138,.2);}
+.badge-pro{background:rgba(139,92,246,.1);color:#a78bfa;border:1px solid rgba(139,92,246,.2);}
+.ch-check{position:absolute;bottom:11px;right:11px;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all .18s;}
+.ch-card.on-web .ch-check,.ch-card.on-tg .ch-check{background:var(--accent);border-color:var(--accent);color:#000;font-weight:900;}
+
+/* SIGNAL TOGGLES */
+.sig-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+@media(max-width:500px){.sig-list{grid-template-columns:1fr;}}
+.sig-row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;background:var(--panel2);border:1px solid var(--border);cursor:pointer;transition:all .16s;position:relative;overflow:hidden;}
+.sig-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.sig-row.on{border-color:var(--border2);}
+.sig-icon{font-size:18px;flex-shrink:0;}
+.sig-info{flex:1;min-width:0;}
+.sig-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+.sig-desc{font-size:10.5px;color:var(--muted2);line-height:1.3;}
+.sig-toggle{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:all .2s;background:var(--border2);}
+.sig-toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;}
+.sig-row.on .sig-toggle{background:var(--accent);}
+.sig-row.on .sig-toggle::after{transform:translateX(16px);}
+
+/* THRESHOLD */
+.threshold-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.th-label{font-size:12px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.th-val{font-family:var(--mono);font-size:13px;color:var(--accent);}
+.th-slider{width:100%;-webkit-appearance:none;appearance:none;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+.th-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 0 3px rgba(0,212,255,.2);}
+.th-hint{font-size:10px;color:var(--muted);margin-top:7px;}
+
+/* COIN INPUT */
+.coin-input-wrap{display:flex;gap:8px;margin-bottom:8px;}
+.coin-input{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;text-transform:uppercase;}
+.coin-input:focus{border-color:var(--accent);}
+.add-coin-btn{padding:9px 16px;border-radius:8px;border:none;background:var(--accent);color:#000;font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;}
+.coin-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.coin-tag{display:flex;align-items:center;gap:5px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:6px;padding:4px 9px;font-size:12px;font-weight:700;font-family:var(--mono);color:var(--accent);}
+.coin-tag button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:11px;padding:0;line-height:1;}
+.coin-tag button:hover{color:var(--red);}
+
+/* TG CONNECT */
+.tg-connect-card{background:rgba(42,171,238,.04);border:1px solid rgba(42,171,238,.18);border-radius:var(--radius);padding:20px;}
+.tg-field{display:flex;gap:9px;margin-top:12px;}
+.tg-input{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;}
+.tg-input:focus{border-color:var(--tg);}
+.tg-btn{padding:10px 18px;border-radius:8px;border:none;background:var(--tg);color:#fff;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.tg-status{font-size:12px;color:var(--muted2);margin-top:8px;}
+
+/* ALERT HISTORY */
+.history-list{display:flex;flex-direction:column;gap:8px;}
+.hist-item{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:12px;position:relative;overflow:hidden;}
+.hist-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.hist-bull::before{background:var(--green);}
+.hist-bear::before{background:var(--red);}
+.hist-whale::before{background:var(--accent);}
+.hist-rug::before{background:var(--amber);}
+.hist-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.hist-body{flex:1;min-width:0;}
+.hist-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:5px;}
+.hist-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.hist-src{font-size:10px;font-weight:600;color:var(--muted2);background:var(--bg2);border:1px solid var(--border);padding:2px 6px;border-radius:4px;}
+.hist-time{font-size:10px;color:var(--muted);font-family:var(--mono);}
+.hist-type{font-size:8px;font-weight:800;font-family:var(--mono);padding:2px 6px;border-radius:3px;letter-spacing:.6px;}
+.hist-score{margin-left:auto;font-size:11px;font-family:var(--mono);font-weight:700;color:var(--accent);}
+
+/* PRO GATE */
+.pro-gate{background:var(--panel);border:1px solid var(--border2);border-radius:var(--radius);padding:32px;text-align:center;}
+.pro-gate-icon{font-size:36px;margin-bottom:12px;}
+.pro-gate-title{font-size:18px;font-weight:800;margin-bottom:8px;}
+.pro-gate-sub{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:20px;}
+.pro-gate-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:10px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;font-weight:800;font-size:14px;text-decoration:none;transition:all .18s;}
+.pro-gate-btn:hover{opacity:.9;transform:translateY(-1px);}
+
+/* EMPTY STATE */
+.empty-hist{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><div class="logo-icon">⚡</div>Crypto<span>Signal</span><span style="color:var(--muted2);font-weight:500">.id</span></a>
+  <a class="nav-back" href="/">← Live Feed</a>
+  <div class="h-right">
+    <span class="unsaved-pill" id="unsavedPill">Unsaved changes</span>
+    <div class="tg-connected" id="tgConnected" style="display:none"><div class="tg-dot"></div>TG Connected</div>
+    <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+  </div>
+</header>
+
+<div class="page">
+  <div class="page-h">
+    <div class="page-title">🔔 Alert Center</div>
+    <div class="page-sub">Configure which signals trigger alerts and how they're delivered. <em>Pro required</em> for Telegram delivery.</div>
+  </div>
+
+  <!-- DELIVERY CHANNELS -->
+  <div class="sec">
+    <div class="sec-lbl">Delivery Channels</div>
+    <div class="grid2">
+      <div class="ch-card on-web" id="chWeb" onclick="toggleChannel('web')">
+        <span class="ch-badge badge-free">FREE</span>
+        <div class="ch-icon">🌐</div>
+        <div class="ch-name">In-App Notifications</div>
+        <div class="ch-desc">Alerts appear in the feed and badge counter. Always active for all users.</div>
+        <div class="ch-check">✓</div>
+      </div>
+      <div class="ch-card" id="chTg" onclick="toggleChannel('tg')">
+        <span class="ch-badge badge-pro">PRO</span>
+        <div class="ch-icon">✈️</div>
+        <div class="ch-name">Telegram Instant Push</div>
+        <div class="ch-desc">Breaking signals pushed to your Telegram within 60 seconds. Requires Pro subscription.</div>
+        <div class="ch-check">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNAL TYPES -->
+  <div class="sec">
+    <div class="sec-lbl">Signal Types to Alert</div>
+    <div class="sig-list">
+      <div class="sig-row on" id="sigBull" onclick="toggleSig('bull',this)" style="--c:var(--green)">
+        <div class="sig-icon">📈</div>
+        <div class="sig-info"><div class="sig-name">Bullish Signals</div><div class="sig-desc">Price breakouts, listings, institutional buys</div></div>
+        <button class="sig-toggle" onclick="event.stopPropagation();toggleSig('bull',this.parentElement)"></button>
+      </div>
+      <div class="sig-row on" id="sigBear" onclick="toggleSig('bear',this)">
+        <div class="sig-icon">📉</div>
+        <div class="sig-info"><div class="sig-name">Bearish Signals</div><div class="sig-desc">Crashes, bans, regulatory crackdowns</div></div>
+        <button class="sig-toggle" onclick="event.stopPropagation();toggleSig('bear',this.parentElement)"></button>
+      </div>
+      <div class="sig-row on" id="sigWhale" onclick="toggleSig('whale',this)">
+        <div class="sig-icon">🐋</div>
+        <div class="sig-info"><div class="sig-name">Whale Movements</div><div class="sig-desc">Large on-chain transfers, BTC mempool spikes</div></div>
+        <button class="sig-toggle" onclick="event.stopPropagation();toggleSig('whale',this.parentElement)"></button>
+      </div>
+      <div class="sig-row on" id="sigRug" onclick="toggleSig('rug',this)">
+        <div class="sig-icon">⚠️</div>
+        <div class="sig-info"><div class="sig-name">Rug / Scam Alerts</div><div class="sig-desc">Fraud, exit scams, exploit warnings</div></div>
+        <button class="sig-toggle" onclick="event.stopPropagation();toggleSig('rug',this.parentElement)"></button>
+      </div>
+      <div class="sig-row on" id="sigPotus" onclick="toggleSig('potus',this)">
+        <div class="sig-icon">🇺🇸</div>
+        <div class="sig-info"><div class="sig-name">POTUS Market Posts</div><div class="sig-desc">Presidential posts with crypto/market relevance</div></div>
+        <button class="sig-toggle" onclick="event.stopPropagation();toggleSig('potus',this.parentElement)"></button>
+      </div>
+      <div class="sig-row on" id="sigFng" onclick="toggleSig('fng',this)">
+        <div class="sig-icon">😱</div>
+        <div class="sig-info"><div class="sig-name">Fear & Greed Extremes</div><div class="sig-desc">Index hits &lt;20 or &gt;80 — historical buy/sell zones</div></div>
+        <button class="sig-toggle" onclick="event.stopPropagation();toggleSig('fng',this.parentElement)"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THRESHOLDS -->
+  <div class="sec">
+    <div class="sec-lbl">Alert Thresholds</div>
+    <div class="grid2">
+      <div class="threshold-card">
+        <div class="th-label">Minimum Impact Score <span class="th-val" id="impactVal">70</span></div>
+        <input class="th-slider" type="range" min="0" max="99" value="70" id="impactSlider" oninput="updateThreshold('impact',this.value)">
+        <div class="th-hint">Only send alerts with impact score above this value. 0 = all signals, 75+ = only breaking news.</div>
+      </div>
+      <div class="threshold-card">
+        <div class="th-label">Minimum Trust Score <span class="th-val" id="trustVal">7.0</span></div>
+        <input class="th-slider" type="range" min="0" max="100" value="70" id="trustSlider" oninput="updateThreshold('trust',this.value)">
+        <div class="th-hint">Filter out low-trust sources. 70 = all sources, 90+ = Tier 1 only (CoinDesk, Bloomberg, Reuters).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COIN WATCHLIST -->
+  <div class="sec">
+    <div class="sec-lbl">Coin Watchlist (Pro)</div>
+    <div class="threshold-card" id="watchlistSection">
+      <div id="proWatchlist">
+        <div style="font-size:13px;color:var(--muted2);margin-bottom:12px">Receive alerts only when these coins are mentioned. Leave empty for all coins.</div>
+        <div class="coin-input-wrap">
+          <input class="coin-input" id="coinInput" type="text" placeholder="BTC, ETH, SOL…" maxlength="8">
+          <button class="add-coin-btn" onclick="addCoin()">+ Add</button>
+        </div>
+        <div class="coin-tags" id="coinTags"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELEGRAM CONNECT -->
+  <div class="sec" id="tgSection">
+    <div class="sec-lbl">Telegram Setup (Pro)</div>
+    <div class="tg-connect-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="font-size:22px">✈️</div>
+        <div>
+          <div style="font-size:14px;font-weight:700">Connect Telegram for Instant Alerts</div>
+          <div style="font-size:12px;color:var(--muted2)">Alerts arrive in your Telegram within 60 seconds of breaking news</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:4px">Step 1: Open <a href="https://t.me/userinfobot" target="_blank" style="color:var(--tg)">@userinfobot</a> on Telegram and send /start to get your Chat ID</div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:12px">Step 2: Enter your Chat ID below and click Connect</div>
+      <div class="tg-field">
+        <input class="tg-input" id="tgChatId" type="text" placeholder="e.g. 123456789 (numbers only)">
+        <button class="tg-btn" onclick="connectTelegram()">Connect Telegram</button>
+      </div>
+      <div class="tg-status" id="tgStatus"></div>
+    </div>
+  </div>
+
+  <!-- ALERT HISTORY -->
+  <div class="sec">
+    <div class="sec-lbl">Alert History</div>
+    <div id="alertHistorySection">
+      <div class="history-list" id="alertHistory">
+        <div class="empty-hist">
+          <div style="font-size:32px;margin-bottom:8px">🔔</div>
+          <div>No alerts yet. Your triggered alerts will appear here once signals are detected.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRO GATE (shown when not Pro) -->
+  <div class="sec" id="proGateSection" style="display:none">
+    <div class="pro-gate">
+      <div class="pro-gate-icon">👑</div>
+      <div class="pro-gate-title">Telegram Alerts Require Pro</div>
+      <div class="pro-gate-sub">You're on the free plan. Upgrade to Pro to receive instant Telegram alerts, configure watchlists, and access all 15+ signal sources with no limits.</div>
+      <a class="pro-gate-btn" href="/pro.html">⚡ Upgrade to Pro — Rp449K/mo →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const isPro = localStorage.getItem('cs_pro') === 'true';
+const userEmail = localStorage.getItem('cs_user_email') || '';
+const SETTINGS_KEY = 'cs_alert_settings';
+const HISTORY_KEY = 'cs_alert_history';
+
+// Load or init settings
+let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || JSON.stringify({
+  channels: { web: true, tg: false },
+  signals: { bull: true, bear: true, whale: true, rug: true, potus: true, fng: true },
+  thresholds: { impact: 70, trust: 70 },
+  watchCoins: [],
+  tgChatId: '',
+}));
+let dirty = false;
+let alertHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+function init() {
+  // Apply settings to UI
+  if (settings.channels.tg) document.getElementById('chTg').classList.add('on-tg');
+  if (settings.channels.web) document.getElementById('chWeb').classList.add('on-web');
+  for (const [key, val] of Object.entries(settings.signals)) {
+    if (!val) document.getElementById('sig' + key.charAt(0).toUpperCase() + key.slice(1))?.classList.remove('on');
+  }
+  document.getElementById('impactSlider').value = settings.thresholds.impact;
+  document.getElementById('impactVal').textContent = settings.thresholds.impact;
+  document.getElementById('trustSlider').value = settings.thresholds.trust;
+  document.getElementById('trustVal').textContent = (settings.thresholds.trust / 10).toFixed(1);
+  if (settings.tgChatId) {
+    document.getElementById('tgChatId').value = settings.tgChatId;
+    document.getElementById('tgConnected').style.display = 'flex';
+  }
+  // Render coin tags
+  for (const coin of settings.watchCoins) renderCoinTag(coin);
+
+  // Pro gate
+  if (!isPro) {
+    document.getElementById('proGateSection').style.display = 'block';
+    document.getElementById('tgSection').style.opacity = '0.4';
+    document.getElementById('tgSection').style.pointerEvents = 'none';
+    document.getElementById('watchlistSection').style.opacity = '0.4';
+    document.getElementById('watchlistSection').style.pointerEvents = 'none';
+  }
+
+  // Render alert history
+  renderAlertHistory();
+
+  // Populate history from main feed if any stored
+  syncHistoryFromFeed();
+}
+
+function toggleChannel(ch) {
+  if (ch === 'tg' && !isPro) { window.location = '/pro.html'; return; }
+  settings.channels[ch] = !settings.channels[ch];
+  const el = document.getElementById('ch' + ch.charAt(0).toUpperCase() + ch.slice(1));
+  el.classList.toggle(ch === 'tg' ? 'on-tg' : 'on-web');
+  markDirty();
+}
+
+function toggleSig(type, rowEl) {
+  const key = type;
+  settings.signals[key] = !settings.signals[key];
+  rowEl.classList.toggle('on');
+  markDirty();
+}
+
+function updateThreshold(type, value) {
+  if (type === 'impact') {
+    settings.thresholds.impact = parseInt(value);
+    document.getElementById('impactVal').textContent = value;
+  } else {
+    settings.thresholds.trust = parseInt(value);
+    document.getElementById('trustVal').textContent = (parseInt(value) / 10).toFixed(1);
+  }
+  markDirty();
+}
+
+function addCoin() {
+  const input = document.getElementById('coinInput');
+  const coin = input.value.trim().toUpperCase().replace(/[^A-Z]/g, '');
+  if (!coin || settings.watchCoins.includes(coin)) return;
+  settings.watchCoins.push(coin);
+  renderCoinTag(coin);
+  input.value = '';
+  markDirty();
+}
+function renderCoinTag(coin) {
+  const tag = document.createElement('div');
+  tag.className = 'coin-tag';
+  tag.innerHTML = `${coin} <button onclick="removeCoin('${coin}',this.parentElement)">✕</button>`;
+  document.getElementById('coinTags').appendChild(tag);
+}
+function removeCoin(coin, el) {
+  settings.watchCoins = settings.watchCoins.filter(c => c !== coin);
+  el.remove();
+  markDirty();
+}
+
+async function connectTelegram() {
+  if (!isPro) { window.location = '/pro.html'; return; }
+  const chatId = document.getElementById('tgChatId').value.trim();
+  if (!chatId || !userEmail) {
+    document.getElementById('tgStatus').textContent = 'Please enter your Chat ID and make sure you are logged in with your Pro email.';
+    return;
+  }
+  document.getElementById('tgStatus').textContent = '⏳ Connecting…';
+  try {
+    const r = await fetch(`/api/payment-webhook?action=update-chatid&email=${encodeURIComponent(userEmail)}&chatId=${encodeURIComponent(chatId)}`);
+    const d = await r.json();
+    if (d.ok) {
+      settings.tgChatId = chatId;
+      document.getElementById('tgConnected').style.display = 'flex';
+      document.getElementById('tgStatus').textContent = '✅ Connected! Check Telegram for confirmation message.';
+      settings.channels.tg = true;
+      document.getElementById('chTg').classList.add('on-tg');
+      markDirty();
+    } else {
+      document.getElementById('tgStatus').textContent = '❌ Error: ' + (d.message || 'Connection failed. Make sure you have an active Pro subscription.');
+    }
+  } catch (e) {
+    document.getElementById('tgStatus').textContent = '❌ Connection error. Please try again.';
+  }
+}
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  dirty = false;
+  document.getElementById('unsavedPill').classList.remove('show');
+  const btn = document.querySelector('.save-btn');
+  btn.textContent = '✓ Saved!';
+  setTimeout(() => btn.textContent = 'Save Settings', 2000);
+}
+
+function markDirty() {
+  dirty = true;
+  document.getElementById('unsavedPill').classList.add('show');
+}
+
+function renderAlertHistory() {
+  const container = document.getElementById('alertHistory');
+  if (!alertHistory.length) {
+    container.innerHTML = '<div class="empty-hist"><div style="font-size:32px;margin-bottom:8px">🔔</div><div>No alerts triggered yet. Signals matching your configuration will appear here.</div></div>';
+    return;
+  }
+  container.innerHTML = alertHistory.slice(0, 50).map(a => `
+    <div class="hist-item hist-${a.type || 'bull'}">
+      <div class="hist-icon">${a.type === 'bull' ? '📈' : a.type === 'bear' ? '📉' : a.type === 'whale' ? '🐋' : a.type === 'rug' ? '⚠️' : '⚡'}</div>
+      <div class="hist-body">
+        <div class="hist-title"><a href="${a.url || '#'}" target="_blank" style="color:inherit;text-decoration:none">${a.title}</a></div>
+        <div class="hist-meta">
+          <span class="hist-src">${a.source}</span>
+          <span class="hist-time">${ago(a.triggeredAt || a.publishedAt)}</span>
+          <span class="hist-type" style="background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2)">${(a.type || '').toUpperCase()}</span>
+          <span class="hist-score">⚡${a.impact}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function syncHistoryFromFeed() {
+  // Listen for signals from main feed via postMessage / localStorage events
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'cs_new_alert') {
+      try {
+        const alert = JSON.parse(e.newValue);
+        if (shouldAlert(alert)) {
+          alertHistory.unshift({ ...alert, triggeredAt: new Date().toISOString() });
+          alertHistory = alertHistory.slice(0, 200);
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(alertHistory));
+          renderAlertHistory();
+        }
+      } catch {}
+    }
+  });
+}
+
+function shouldAlert(signal) {
+  if (!settings.signals[signal.type]) return false;
+  if (signal.impact < settings.thresholds.impact) return false;
+  if ((signal.trust || 0) * 10 < settings.thresholds.trust) return false;
+  if (settings.watchCoins.length && !(signal.coins || []).some(c => settings.watchCoins.includes(c))) return false;
+  return true;
+}
+
+function ago(ts) {
+  if (!ts) return '—';
+  const d = (Date.now() - new Date(ts).getTime()) / 1000;
+  if (d < 60) return Math.round(d) + 's ago';
+  if (d < 3600) return Math.round(d / 60) + 'm ago';
+  if (d < 86400) return Math.round(d / 3600) + 'h ago';
+  return Math.round(d / 86400) + 'd ago';
+}
+
+// Keyboard shortcut: Enter on coin input
+document.getElementById('coinInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCoin(); });
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoSignal — Alert Center</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04060f;--bg2:#080c1a;--bg3:#0d1224;
+  --panel:#101726;--panel2:#151e30;
+  --border:rgba(255,255,255,0.055);--border2:rgba(255,255,255,0.11);
+  --text:#edf1fa;--muted:#4e5a78;--muted2:#8090b0;
+  --accent:#00d4ff;--violet:#8b5cf6;--green:#10d98a;
+  --red:#f24060;--amber:#fbbf24;--tg:#2aabee;
+  --mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif;
+  --radius:12px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 700px 400px at 5% 15%,rgba(0,212,255,0.04) 0%,transparent 65%),
+             radial-gradient(ellipse 500px 350px at 98% 80%,rgba(139,92,246,0.045) 0%,transparent 65%);}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;padding:0 20px;height:56px;}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:17px;letter-spacing:-.4px;color:var(--text);text-decoration:none;}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo span{color:var(--accent);}
+.nav-back{font-size:12px;color:var(--muted2);cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);transition:all .15s;text-decoration:none;}
+.nav-back:hover{color:var(--text);border-color:var(--border2);}
+.h-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.save-btn{padding:8px 20px;border-radius:9px;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:13px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;transition:all .15s;}
+.save-btn:hover{opacity:.88;transform:translateY(-1px);}
+.unsaved-pill{font-size:10px;font-weight:700;font-family:var(--mono);padding:3px 9px;border-radius:4px;background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.2);opacity:0;transition:opacity .2s;}
+.unsaved-pill.show{opacity:1;}
+.tg-connected{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);color:var(--tg);background:rgba(42,171,238,.07);border:1px solid rgba(42,171,238,.18);padding:5px 12px;border-radius:20px;}
+.tg-dot{width:6px;height:6px;border-radius:50%;background:var(--tg);animation:tgpulse 2s infinite;}
+@keyframes tgpulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* PAGE */
+.page{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:26px 20px 60px;}
+.page-h{margin-bottom:24px;}
+.page-title{font-size:24px;font-weight:700;letter-spacing:-.6px;margin-bottom:5px;}
+.page-sub{font-size:13px;color:var(--muted2);line-height:1.6;}
+.page-sub em{color:var(--accent);font-style:normal;}
+
+/* SECTION */
+.sec{margin-bottom:22px;}
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* GRIDS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:680px){.grid2{grid-template-columns:1fr;}.grid3{grid-template-columns:1fr 1fr;}}
+
+/* CHANNEL CARDS */
+.ch-card{background:var(--panel);border:2px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;position:relative;}
+.ch-card.on-web{border-color:var(--accent);background:rgba(0,212,255,.04);}
+.ch-card.on-tg{border-color:var(--tg);background:rgba(42,171,238,.04);}
+.ch-icon{font-size:24px;margin-bottom:8px;}
+.ch-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.ch-desc{font-size:11px;color:var(--muted2);line-height:1.5;}
+.ch-badge{position:absolute;top:11px;right:11px;font-size:8px;font-weight:700;font-family:var(--mono);padding:2px 7px;border-radius:3px;letter-spacing:.4px;}
+.badge-free{background:rgba(16,217,138,.1);color:var(--green);border:1px solid rgba(16,217,138,.2);}
+.badge-pro{background:rgba(139,92,246,.1);color:#a78bfa;border:1px solid rgba(139,92,246,.2);}
+.ch-check{position:absolute;bottom:11px;right:11px;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all .18s;}
+.ch-card.on-web .ch-check{background:var(--accent);border-color:var(--accent);color:#000;font-weight:900;}
+.ch-card.on-tg .ch-check{background:var(--tg);border-color:var(--tg);color:#fff;font-weight:900;}
+
+/* SIGNAL TOGGLES */
+.sig-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.sig-row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;background:var(--panel2);border:1px solid var(--border);cursor:pointer;transition:all .16s;position:relative;overflow:hidden;}
+.sig-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.sig-row.on{border-color:var(--border2);}
+.sig-row.on::before{opacity:1;}
+.sig-row.off::before{opacity:.15;}
+.sig-em{font-size:18px;flex-shrink:0;}
+.sig-info{flex:1;min-width:0;}
+.sig-name{font-size:12px;font-weight:700;}
+.sig-sub{font-size:10px;color:var(--muted2);}
+.sig-vol{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:8px;flex-shrink:0;}
+
+/* iOS Toggle */
+.tog{position:relative;width:38px;height:22px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;position:absolute;}
+.tog-track{position:absolute;inset:0;border-radius:11px;background:var(--panel);border:1px solid var(--border2);transition:all .2s;cursor:pointer;}
+.tog input:checked~.tog-track{background:var(--accent);border-color:var(--accent);}
+.tog-thumb{position:absolute;left:2px;top:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+.tog input:checked~.tog-track~.tog-thumb{transform:translateX(16px);}
+.tog label{position:absolute;inset:0;cursor:pointer;border-radius:11px;}
+
+/* SLIDER */
+.slider-row{display:flex;align-items:center;gap:11px;margin-bottom:9px;}
+.slider-lbl{font-size:11px;color:var(--muted2);width:110px;flex-shrink:0;}
+.slider-val{font-size:11px;font-family:var(--mono);font-weight:600;width:32px;text-align:right;flex-shrink:0;}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:linear-gradient(to right,var(--accent) 0%,var(--accent) var(--p,50%),rgba(255,255,255,0.08) var(--p,50%),rgba(255,255,255,0.08) 100%);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 2px rgba(0,212,255,.3);cursor:pointer;}
+
+/* CARD BASE */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.card-title{font-size:13px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:7px;}
+.card-sub{font-size:11px;color:var(--muted2);line-height:1.6;margin-bottom:13px;}
+
+/* TIME TABS */
+.time-tabs{display:flex;flex-wrap:wrap;gap:6px;}
+.tt{font-size:11px;font-family:var(--mono);padding:6px 13px;border-radius:8px;cursor:pointer;transition:all .15s;background:var(--panel2);color:var(--muted2);border:1px solid var(--border);}
+.tt.on{background:rgba(0,212,255,.08);color:var(--accent);border-color:rgba(0,212,255,.2);}
+
+/* COIN CHIPS */
+.coin-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.cc{font-size:10px;font-weight:700;font-family:var(--mono);padding:5px 11px;border-radius:6px;cursor:pointer;transition:all .15s;background:var(--panel2);color:var(--muted2);border:1px solid var(--border);}
+.cc:hover{color:var(--text);border-color:var(--border2);}
+.cc.on{color:#000;border-color:transparent;}
+
+/* QUIET HOURS */
+.quiet-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.t-input{background:var(--panel2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 11px;outline:none;transition:border-color .15s;}
+.t-input:focus{border-color:var(--accent);}
+
+/* TELEGRAM CONNECT */
+.tg-card{background:rgba(42,171,238,0.05);border:1px solid rgba(42,171,238,0.18);border-radius:var(--radius);padding:18px;}
+.tg-title{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.tg-sub{font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:14px;}
+.tg-steps{display:flex;flex-direction:column;gap:9px;margin-bottom:14px;}
+.tg-step{display:flex;align-items:flex-start;gap:11px;font-size:12px;}
+.step-n{width:22px;height:22px;border-radius:50%;border:1px solid rgba(42,171,238,.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--tg);flex-shrink:0;font-family:var(--mono);}
+.step-t{color:var(--muted2);line-height:1.5;}
+.step-t b{color:var(--text);}
+.tg-code-box{background:var(--bg);border:1px solid rgba(42,171,238,.2);border-radius:9px;padding:11px 14px;font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:4px;color:var(--tg);text-align:center;cursor:pointer;user-select:all;transition:border-color .15s;}
+.tg-code-box:hover{border-color:rgba(42,171,238,.4);}
+.tg-expire{font-size:9px;color:var(--muted);text-align:center;margin-top:5px;font-family:var(--mono);}
+.tg-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border-radius:9px;border:none;cursor:pointer;background:var(--tg);color:#fff;font-family:var(--sans);font-weight:700;font-size:13px;margin-top:12px;transition:all .15s;text-decoration:none;}
+.tg-open-btn:hover{opacity:.88;}
+
+/* PREVIEW */
+.preview-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:15px;}
+.preview-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
+.push-notif{background:var(--panel2);border:1px solid var(--border2);border-radius:11px;padding:11px 13px;display:flex;align-items:flex-start;gap:9px;margin-bottom:10px;}
+.notif-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--violet));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.notif-body{flex:1;}
+.notif-row{display:flex;justify-content:space-between;margin-bottom:3px;}
+.notif-app{font-size:10px;font-weight:700;color:var(--muted2);}
+.notif-ts{font-size:10px;color:var(--muted);}
+.notif-badge{font-size:8px;font-weight:700;font-family:var(--mono);padding:2px 5px;border-radius:3px;display:inline-block;margin-bottom:3px;}
+.notif-title{font-size:12px;font-weight:700;line-height:1.4;margin-bottom:2px;}
+.notif-sub{font-size:10px;color:var(--muted2);}
+.tg-preview{background:rgba(42,171,238,.05);border:1px solid rgba(42,171,238,.12);border-radius:11px;padding:12px 13px;}
+.tgp-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tgp-av{width:26px;height:26px;border-radius:50%;background:var(--tg);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.tgp-name{font-size:12px;font-weight:700;color:var(--tg);}
+.tgp-ts{font-size:10px;color:var(--muted);margin-left:auto;font-family:var(--mono);}
+.tgp-msg{font-size:11px;color:var(--muted2);line-height:1.7;}
+.tgp-msg b{color:var(--text);}
+.tgp-msg .tg-link{color:var(--tg);}
+.test-row{display:flex;gap:8px;margin-top:11px;}
+.test-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--sans);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.test-btn:hover{color:var(--text);border-color:var(--accent);background:rgba(0,212,255,.04);}
+
+/* LOG */
+.log-item{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--panel2);border-radius:8px;font-size:11px;margin-bottom:5px;}
+.log-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.log-txt{flex:1;color:var(--muted2);}
+.log-txt b{color:var(--text);}
+.log-ch{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:3px;flex-shrink:0;}
+.log-t{font-size:9px;font-family:var(--mono);color:var(--muted);}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel2);border:1px solid var(--border2);border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .28s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:90vw;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/index.html"><div class="logo-icon">⚡</div>Crypto<span>Signal</span></a>
+  <a class="nav-back" href="/index.html">← Live Feed</a>
+  <div class="h-right">
+    <div class="tg-connected" id="tgStatus"><div class="tg-dot"></div>Telegram ready</div>
+    <span class="unsaved-pill" id="unsavedPill">● Unsaved</span>
+    <button class="save-btn" onclick="savePrefs()">Save Preferences</button>
+  </div>
+</header>
+
+<div class="page">
+  <div class="page-h">
+    <div class="page-title">🔔 Alert Center</div>
+    <div class="page-sub">Customize which signals you receive, how, and when. Supports <em>web push</em>, <em>in-app</em>, and <em>Telegram bot</em> — all fully independent.</div>
+  </div>
+
+  <!-- DELIVERY CHANNELS -->
+  <div class="sec">
+    <div class="sec-lbl">Delivery Channels</div>
+    <div class="grid3">
+      <div class="ch-card on-web" id="ch-inapp" onclick="toggleCh('inapp')">
+        <div class="ch-icon">📱</div>
+        <div class="ch-name">In-App</div>
+        <div class="ch-desc">Alerts inside the dashboard and mobile app</div>
+        <div class="ch-badge badge-free">FREE</div>
+        <div class="ch-check">✓</div>
+      </div>
+      <div class="ch-card on-web" id="ch-push" onclick="toggleCh('push')">
+        <div class="ch-icon">🔔</div>
+        <div class="ch-name">Web Push</div>
+        <div class="ch-desc">Browser & device push even when app is closed</div>
+        <div class="ch-badge badge-free">FREE</div>
+        <div class="ch-check">✓</div>
+      </div>
+      <div class="ch-card on-tg" id="ch-tg" onclick="toggleCh('tg')">
+        <div class="ch-icon">✈️</div>
+        <div class="ch-name">Telegram Bot</div>
+        <div class="ch-desc">Instant Telegram message with full signal detail</div>
+        <div class="ch-badge badge-pro">PRO</div>
+        <div class="ch-check">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+  <div>
+    <!-- SIGNAL TYPES -->
+    <div class="sec">
+      <div class="sec-lbl">Signal Types</div>
+      <div class="sig-list">
+
+        <div class="sig-row on" id="sr-break" style="--col:var(--accent)" onclick="toggleSig(this,'break')">
+          <span class="sig-em">⚡</span>
+          <div class="sig-info"><div class="sig-name">Breaking News</div><div class="sig-sub">Market-moving events</div></div>
+          <div class="sig-vol" style="background:rgba(0,212,255,.1);color:var(--accent)">HIGH</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-break" checked onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-break"></label></div>
+        </div>
+
+        <div class="sig-row on" id="sr-bull" style="--col:var(--green)" onclick="toggleSig(this,'bull')">
+          <span class="sig-em">📈</span>
+          <div class="sig-info"><div class="sig-name">Bullish Signal</div><div class="sig-sub">Positive market sentiment</div></div>
+          <div class="sig-vol" style="background:rgba(16,217,138,.1);color:var(--green)">MED</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-bull" checked onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-bull"></label></div>
+        </div>
+
+        <div class="sig-row on" id="sr-bear" style="--col:var(--red)" onclick="toggleSig(this,'bear')">
+          <span class="sig-em">📉</span>
+          <div class="sig-info"><div class="sig-name">Bearish Signal</div><div class="sig-sub">Sell pressure, risk-off</div></div>
+          <div class="sig-vol" style="background:rgba(242,64,96,.1);color:var(--red)">MED</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-bear" checked onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-bear"></label></div>
+        </div>
+
+        <div class="sig-row on" id="sr-whale" style="--col:var(--violet)" onclick="toggleSig(this,'whale')">
+          <span class="sig-em">🐋</span>
+          <div class="sig-info"><div class="sig-name">Whale Moves</div><div class="sig-sub">On-chain large transfers</div></div>
+          <div class="sig-vol" style="background:rgba(139,92,246,.1);color:#a78bfa">LOW</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-whale" checked onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-whale"></label></div>
+        </div>
+
+        <div class="sig-row on" id="sr-reg" style="--col:var(--amber)" onclick="toggleSig(this,'reg')">
+          <span class="sig-em">⚖️</span>
+          <div class="sig-info"><div class="sig-name">Regulation</div><div class="sig-sub">SEC, legal, policy news</div></div>
+          <div class="sig-vol" style="background:rgba(251,191,36,.1);color:var(--amber)">LOW</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-reg" checked onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-reg"></label></div>
+        </div>
+
+        <div class="sig-row off" id="sr-rumor" style="--col:var(--orange)" onclick="toggleSig(this,'rumor')">
+          <span class="sig-em">👀</span>
+          <div class="sig-info"><div class="sig-name">Rumours</div><div class="sig-sub">Unverified, speculative</div></div>
+          <div class="sig-vol" style="background:rgba(255,255,255,.04);color:var(--muted)">HIGH</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-rumor" onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-rumor"></label></div>
+        </div>
+
+        <div class="sig-row off" id="sr-macro" style="--col:var(--muted2)" onclick="toggleSig(this,'macro')">
+          <span class="sig-em">🌍</span>
+          <div class="sig-info"><div class="sig-name">Macro / TradFi</div><div class="sig-sub">Fed, inflation, equities</div></div>
+          <div class="sig-vol" style="background:rgba(255,255,255,.04);color:var(--muted)">MED</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-macro" onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-macro"></label></div>
+        </div>
+
+        <div class="sig-row off" id="sr-listing" style="--col:var(--green)" onclick="toggleSig(this,'listing')">
+          <span class="sig-em">🪙</span>
+          <div class="sig-info"><div class="sig-name">Exchange Listings</div><div class="sig-sub">New coins on CEXs</div></div>
+          <div class="sig-vol" style="background:rgba(255,255,255,.04);color:var(--muted)">LOW</div>
+          <div class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="t-listing" onchange="markUnsaved()"><div class="tog-track"></div><div class="tog-thumb"></div><label for="t-listing"></label></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COIN WATCHLIST -->
+    <div class="sec">
+      <div class="sec-lbl">Coin Watchlist</div>
+      <div class="card">
+        <div class="card-sub">Only alert for selected coins. Leave all off to receive all coins.</div>
+        <div class="coin-chips" id="coinChips">
+          <div class="cc on" style="background:#f7931a;" onclick="toggleCC(this)">BTC</div>
+          <div class="cc on" style="background:#627eea;" onclick="toggleCC(this)">ETH</div>
+          <div class="cc on" style="background:#9945ff;" onclick="toggleCC(this)">SOL</div>
+          <div class="cc" onclick="toggleCC(this)">BNB</div>
+          <div class="cc" onclick="toggleCC(this)">XRP</div>
+          <div class="cc" onclick="toggleCC(this)">AVAX</div>
+          <div class="cc" onclick="toggleCC(this)">LINK</div>
+          <div class="cc" onclick="toggleCC(this)">MATIC</div>
+          <div class="cc" onclick="toggleCC(this)">ARB</div>
+          <div class="cc" onclick="toggleCC(this)">OP</div>
+          <div class="cc" onclick="toggleCC(this)">DOGE</div>
+          <div class="cc" onclick="toggleCC(this)">ADA</div>
+          <div class="cc" onclick="toggleCC(this)">DOT</div>
+          <div class="cc" onclick="toggleCC(this)">SUI</div>
+          <div class="cc" onclick="toggleCC(this)">TON</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THRESHOLDS -->
+    <div class="sec">
+      <div class="sec-lbl">Impact Thresholds</div>
+      <div class="card">
+        <div class="card-sub">Only alert above these minimums. Higher = fewer but more critical alerts.</div>
+        <div class="slider-row">
+          <div class="slider-lbl">Min impact score</div>
+          <input type="range" min="0" max="100" value="60" id="sImpact" oninput="updateSlider(this,'vImpact',0)">
+          <div class="slider-val" id="vImpact">60</div>
+        </div>
+        <div class="slider-row">
+          <div class="slider-lbl">Min trust score</div>
+          <input type="range" min="1" max="10" value="6" step=".1" id="sTrust" oninput="updateSlider(this,'vTrust',1)">
+          <div class="slider-val" id="vTrust">6.0</div>
+        </div>
+        <div class="slider-row">
+          <div class="slider-lbl">Max alerts / hour</div>
+          <input type="range" min="1" max="30" value="5" id="sFreq" oninput="updateSlider(this,'vFreq',0)">
+          <div class="slider-val" id="vFreq">5</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMING -->
+    <div class="sec">
+      <div class="sec-lbl">Alert Timing</div>
+      <div class="card">
+        <div class="card-title">Delivery frequency</div>
+        <div class="card-sub">How quickly after detection do you want the alert?</div>
+        <div class="time-tabs">
+          <div class="tt" onclick="setTT(this)">Real-time</div>
+          <div class="tt on" onclick="setTT(this)">Instant (&lt;30s)</div>
+          <div class="tt" onclick="setTT(this)">Hourly digest</div>
+          <div class="tt" onclick="setTT(this)">Daily (9 AM)</div>
+        </div>
+        <div style="height:14px"></div>
+        <div class="card-title">🌙 Quiet hours <span style="font-size:11px;font-weight:400;color:var(--muted2)">— no alerts during this window</span></div>
+        <div class="card-sub">All channels silenced. Breaking news with impact &gt;90 still gets through.</div>
+        <div class="quiet-row">
+          <span style="font-size:12px;color:var(--muted2)">From</span>
+          <input type="time" class="t-input" value="23:00" onchange="markUnsaved()">
+          <span style="font-size:12px;color:var(--muted2)">to</span>
+          <input type="time" class="t-input" value="07:00" onchange="markUnsaved()">
+          <div class="tog" style="margin-left:auto">
+            <input type="checkbox" id="t-quiet" checked onchange="markUnsaved()">
+            <div class="tog-track"></div><div class="tog-thumb"></div><label for="t-quiet"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COL -->
+  <div>
+    <!-- TELEGRAM CONNECT -->
+    <div class="sec">
+      <div class="sec-lbl">Telegram Setup</div>
+      <div class="tg-card">
+        <div class="tg-title">✈️ Connect Telegram Bot</div>
+        <div class="tg-sub">Get formatted signals directly in Telegram — with impact score, source trust, coin tags, and a direct link to the full article.</div>
+        <div class="tg-steps">
+          <div class="tg-step"><div class="step-n">1</div><div class="step-t">Open Telegram, search <b>@CryptoSignalIDBot</b> and press Start</div></div>
+          <div class="tg-step"><div class="step-n">2</div><div class="step-t">Send the bot your unique code below to link your account:</div></div>
+        </div>
+        <div class="tg-code-box" onclick="copyCode()" id="tgCode">CS-8X4K-2026</div>
+        <div class="tg-expire" id="tgExpire">expires in 15:00 · click to copy</div>
+        <a class="tg-open-btn" href="https://t.me/CryptoSignalIDBot" target="_blank">✈️ Open @CryptoSignalIDBot</a>
+      </div>
+    </div>
+
+    <!-- LIVE PREVIEW -->
+    <div class="sec">
+      <div class="sec-lbl">Alert Preview</div>
+      <div class="preview-wrap">
+        <div class="preview-lbl">Push notification</div>
+        <div class="push-notif">
+          <div class="notif-icon">⚡</div>
+          <div class="notif-body">
+            <div class="notif-row"><span class="notif-app">CRYPTOSIGNAL</span><span class="notif-ts">now</span></div>
+            <div class="notif-badge" style="background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);">⚡ BREAKING · 96/100</div>
+            <div class="notif-title" id="previewTitle">BlackRock IBIT crosses $32B AUM</div>
+            <div class="notif-sub" id="previewSub">Fastest ETF milestone in history · BTC</div>
+          </div>
+        </div>
+        <div class="preview-lbl">Telegram message</div>
+        <div class="tg-preview">
+          <div class="tgp-header">
+            <div class="tgp-av">⚡</div>
+            <div class="tgp-name">CryptoSignalIDBot</div>
+            <div class="tgp-ts">just now</div>
+          </div>
+          <div class="tgp-msg">
+            <b>⚡ BREAKING</b> · Impact <b>96/100</b> · Trust <b>9.4/10</b><br><br>
+            <b>BlackRock IBIT Bitcoin ETF crosses $32B AUM</b> — fastest ETF milestone in Wall Street history.<br><br>
+            🟢 Sentiment: <b>88</b> · 🪙 <span>#BTC</span><br>
+            📡 Bloomberg Intelligence<br><br>
+            <span class="tg-link">→ Read full article</span>
+          </div>
+        </div>
+        <div class="test-row">
+          <button class="test-btn" onclick="sendTestPush()">🔔 Test Push</button>
+          <button class="test-btn" onclick="sendTestTelegram()">✈️ Test Telegram</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERT LOG -->
+    <div class="sec">
+      <div class="sec-lbl">Recent Alert Log</div>
+      <div id="logList">
+        <div class="log-item"><div class="log-dot" style="background:var(--muted)"></div><div class="log-txt">Loading alert history…</div><div class="log-t">—</div></div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div><!-- page -->
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+const TG_TOKEN   = '8655654640:AAEAWBWG9u52gNZi1Me60yOiFh9oZ0csQtc';
+const TG_CHAT_ID = '211783030';
+
+// Prefs from localStorage
+const PREF_KEY = 'cs_alert_prefs';
+let prefs = loadPrefs();
+
+function loadPrefs() {
+  try { return JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); } catch(e){return {};}
+}
+function savePrefs() {
+  const p = {
+    channels: {
+      inapp: document.getElementById('ch-inapp').classList.contains('on-web'),
+      push:   document.getElementById('ch-push').classList.contains('on-web'),
+      tg:     document.getElementById('ch-tg').classList.contains('on-tg'),
+    },
+    signals: ['break','bull','bear','whale','reg','rumor','macro','listing'].reduce((o,k)=>({...o,[k]:document.getElementById('t-'+k).checked}),{}),
+    impact: document.getElementById('sImpact').value,
+    trust:  document.getElementById('sTrust').value,
+    freq:   document.getElementById('sFreq').value,
+    coins:  [...document.querySelectorAll('.cc.on')].map(e=>e.textContent),
+    quietOn: document.getElementById('t-quiet').checked,
+    quietFrom: document.querySelector('.t-input').value,
+    quietTo:   document.querySelectorAll('.t-input')[1].value,
+  };
+  localStorage.setItem(PREF_KEY, JSON.stringify(p));
+  document.getElementById('unsavedPill').classList.remove('show');
+  toast('✅ Preferences saved!');
+  addLog('⚙️','Settings saved','—','rgba(0,212,255,.08)','var(--accent)','SYSTEM');
+}
+function markUnsaved() { document.getElementById('unsavedPill').classList.add('show'); }
+
+// Channel toggles
+function toggleCh(id) {
+  const el = document.getElementById('ch-'+id);
+  const cls = id==='tg'?'on-tg':'on-web';
+  el.classList.toggle(cls);
+  markUnsaved();
+  const on = el.classList.contains(cls);
+  toast(on ? `✅ ${id==='tg'?'Telegram':'Channel'} alerts enabled` : `🔕 ${id==='tg'?'Telegram':'Channel'} alerts disabled`);
+}
+
+// Signal row toggles
+function toggleSig(el, key) {
+  const cb = el.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  el.classList.toggle('on',cb.checked);
+  el.classList.toggle('off',!cb.checked);
+  markUnsaved();
+}
+
+// Coin chips
+const coinColors={BTC:'#f7931a',ETH:'#627eea',SOL:'#9945ff'};
+function toggleCC(el) {
+  const on=el.classList.toggle('on');
+  if(on && coinColors[el.textContent]){el.style.background=coinColors[el.textContent];el.style.borderColor=coinColors[el.textContent];el.style.color='';}
+  else{el.style.background='';el.style.borderColor='';el.style.color='';}
+  markUnsaved();
+}
+
+// Sliders
+function updateSlider(el,outId,dec) {
+  const pct=((el.value-el.min)/(el.max-el.min)*100).toFixed(0);
+  el.style.setProperty('--p',pct+'%');
+  document.getElementById(outId).textContent=parseFloat(el.value).toFixed(dec);
+  markUnsaved();
+}
+// Init slider positions
+['sImpact','sTrust','sFreq'].forEach(id=>{
+  const el=document.getElementById(id);
+  const pct=((el.value-el.min)/(el.max-el.min)*100).toFixed(0);
+  el.style.setProperty('--p',pct+'%');
+});
+
+// Time tabs
+function setTT(el){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('on'));el.classList.add('on');markUnsaved();}
+
+// Code copy
+let countdown=900;
+function copyCode(){
+  navigator.clipboard.writeText(document.getElementById('tgCode').textContent).catch(()=>{});
+  toast('📋 Code copied to clipboard!');
+}
+setInterval(()=>{
+  countdown--;
+  const m=String(Math.floor(countdown/60)).padStart(2,'0');
+  const s=String(countdown%60).padStart(2,'0');
+  document.getElementById('tgExpire').textContent=`expires in ${m}:${s} · click to copy`;
+  if(countdown<=0)countdown=900;
+},1000);
+
+// Test push
+function sendTestPush() {
+  if(Notification.permission==='granted'){
+    new Notification('⚡ CryptoSignal Test', {body:'Breaking: Bitcoin test alert — Impact 96/100', icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚡</text></svg>'});
+    toast('🔔 Test push notification sent!');
+  } else if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted'){sendTestPush();}
+      else{toast('⚠️ Please allow browser notifications first');}
+    });
+  } else {
+    toast('⚠️ Browser notifications blocked — enable in browser settings');
+  }
+  addLog('🔔','Test push sent','now','rgba(0,212,255,.08)','var(--accent)','PUSH');
+}
+
+// Test Telegram
+async function sendTestTelegram() {
+  const msg=`⚡ *TEST ALERT — CryptoSignal.id*
+
+This is a test message from your Alert Center.
+
+✅ Your Telegram bot is connected and working!
+📡 News source: GNews API (live production)
+📊 Impact threshold: ${document.getElementById('sImpact').value}/100
+🔐 Trust threshold: ${document.getElementById('sTrust').value}/10
+
+You will receive *Breaking, Bullish, Bearish, Whale & Regulation* alerts here automatically when market-moving news is detected.
+
+🌐 cryptosignal.id
+
+_CryptoSignal.id — AI Market Intelligence_`;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:TG_CHAT_ID, text:msg, parse_mode:'Markdown'})
+    });
+    const d = await res.json();
+    if(d.ok){
+      toast('✈️ Test Telegram message sent! Check your Telegram.');
+      addLog('✈️','Test Telegram sent','now','rgba(42,171,238,.08)','var(--tg)','TG');
+      document.getElementById('tgStatus').innerHTML='<div class="tg-dot"></div>Telegram ✓ connected';
+    } else {
+      toast('❌ Telegram error: '+d.description);
+    }
+  } catch(e) {
+    toast('❌ Network error — check console');
+  }
+}
+
+// Alert log
+const logData=[
+  {icon:'⚡',text:'<b>Breaking:</b> BlackRock IBIT $32B AUM',time:'4m ago',bg:'rgba(0,212,255,.08)',col:'var(--accent)',ch:'TG+WEB'},
+  {icon:'📈',text:'<b>Bullish:</b> MicroStrategy $1.5B BTC buy',time:'11m ago',bg:'rgba(16,217,138,.08)',col:'var(--green)',ch:'WEB'},
+  {icon:'🐋',text:'<b>Whale:</b> 12,400 BTC moved ($1.28B)',time:'22m ago',bg:'rgba(139,92,246,.08)',col:'var(--violet)',ch:'TG'},
+  {icon:'📉',text:'<b>Bearish:</b> SEC delays ETH ETF 60 days',time:'35m ago',bg:'rgba(242,64,96,.08)',col:'var(--red)',ch:'WEB'},
+];
+function renderLog() {
+  document.getElementById('logList').innerHTML=logData.map(l=>`
+    <div class="log-item">
+      <div class="log-dot" style="background:${l.col}"></div>
+      <div class="log-txt">${l.icon} ${l.text}</div>
+      <div class="log-ch" style="background:${l.bg};color:${l.col}">${l.ch}</div>
+      <div class="log-t">${l.time}</div>
+    </div>`).join('');
+}
+function addLog(icon,text,time,bg,col,ch) {
+  logData.unshift({icon,text:'<b>'+text+'</b>',time,bg,col,ch});
+  if(logData.length>8)logData.pop();
+  renderLog();
+}
+renderLog();
+
+function toast(msg){
+  const el=document.getElementById('toastEl');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
