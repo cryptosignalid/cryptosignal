@@ -1,6 +1,5 @@
-// api/create-payment.js
-// Vercel Serverless Function — DOKU Checkout v1
-// Fixed to match exact DOKU API spec from developers.doku.com
+// api/create-payment.js — DOKU Checkout v1
+// Signature fixed per official DOKU sample code (PHP/Python reference)
 
 import crypto from 'crypto';
 
@@ -11,19 +10,40 @@ const DOKU_BASE_URL   = process.env.DOKU_ENV === 'production'
   : 'https://api-sandbox.doku.com';
 const SITE_URL = process.env.SITE_URL || 'https://cryptosignal.id';
 
-// DOKU HMAC-SHA256 Signature — exact format per developers.doku.com
-function generateDokuSignature(secretKey, clientId, requestId, timestamp, requestTarget, bodyString) {
-  const bodyHash  = crypto.createHash('sha256').update(bodyString, 'utf8').digest('base64');
-  const digest    = 'SHA-256=' + bodyHash;
-  const component = [
+// DOKU Signature — verified against official PHP + Python sample code
+// Digest in component string = raw base64 (NO "SHA-256=" prefix)
+// Digest header = raw base64 (NO "SHA-256=" prefix either)
+// Component order: Client-Id, Request-Id, Request-Timestamp, Request-Target, Digest
+function generateDokuSignature({ secretKey, clientId, requestId, timestamp, requestTarget, bodyString }) {
+  // Step 1: SHA-256 hash of body → base64 (this IS the digestValue)
+  const digestValue = crypto
+    .createHash('sha256')
+    .update(bodyString, 'utf8')
+    .digest('base64');
+
+  // Step 2: Component string — per DOKU PHP sample:
+  // "Client-Id:" + clientId + "\n" + "Request-Id:" + requestId + "\n" +
+  // "Request-Timestamp:" + timestamp + "\n" + "Request-Target:" + target + "\n" +
+  // "Digest:" + digestValue
+  const componentSignature = [
     'Client-Id:'         + clientId,
     'Request-Id:'        + requestId,
     'Request-Timestamp:' + timestamp,
     'Request-Target:'    + requestTarget,
-    'Digest:'            + digest,
+    'Digest:'            + digestValue,
   ].join('\n');
-  const hmac      = crypto.createHmac('sha256', secretKey).update(component, 'utf8').digest('base64');
-  return { signature: 'HMACSHA256=' + hmac, digest };
+
+  // Step 3: HMAC-SHA256 of component string using secret key → base64
+  const hmacSignature = crypto
+    .createHmac('sha256', secretKey)
+    .update(componentSignature, 'utf8')
+    .digest('base64');
+
+  return {
+    signature:   'HMACSHA256=' + hmacSignature,
+    digestValue,                              // raw base64, used in Digest header
+    componentSignature,                       // for debug logging
+  };
 }
 
 export default async function handler(req, res) {
@@ -34,54 +54,76 @@ export default async function handler(req, res) {
   if (req.method !== 'POST')   return res.status(405).json({ message: 'Method not allowed' });
 
   if (!DOKU_CLIENT_ID || !DOKU_SECRET_KEY) {
-    console.error('Missing DOKU env vars');
+    console.error('❌ Missing DOKU_CLIENT_ID or DOKU_SECRET_KEY');
     return res.status(500).json({ message: 'Payment gateway not configured — missing env vars' });
   }
 
   try {
-    const { invoiceNumber, amount, planName, customer, tgChatId } = req.body;
+    const { invoiceNumber, amount, planName, customer, tgChatId } = req.body || {};
 
     if (!invoiceNumber || !amount || !customer?.name || !customer?.email) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: 'Missing: invoiceNumber, amount, customer.name, customer.email' });
     }
 
-    const requestId = crypto.randomUUID();
-    const timestamp = new Date().toISOString().split('.')[0] + 'Z'; // no ms
-    const target    = '/checkout/v1/payment';
+    const requestId     = crypto.randomUUID();
+    // DOKU timestamp: UTC, no milliseconds e.g. 2020-08-11T08:45:42Z
+    const timestamp     = new Date().toISOString().split('.')[0] + 'Z';
+    const requestTarget = '/checkout/v1/payment';
 
+    // Minimal valid DOKU body
     const body = {
       order: {
-        amount:              amount,
-        invoice_number:      invoiceNumber,
+        amount:              Number(amount),
+        invoice_number:      String(invoiceNumber).substring(0, 64),
         currency:            'IDR',
         callback_url:        `${SITE_URL}/pro.html?status=success`,
         callback_url_cancel: `${SITE_URL}/pro.html?status=failed`,
         line_items: [{
-          id: '001', name: planName || 'CryptoSignal Pro',
-          price: amount, quantity: 1,
+          id:       '001',
+          name:     String(planName || 'CryptoSignal Pro').substring(0, 50),
+          price:    Number(amount),
+          quantity: 1,
         }],
       },
-      payment: { payment_due_date: 60 },
+      payment: {
+        payment_due_date: 60,
+      },
       customer: {
-        name:  customer.name,
-        email: customer.email,
-        phone: (customer.phone || '08000000000').replace(/[^0-9]/g, ''),
+        name:  String(customer.name),
+        email: String(customer.email),
+        phone: String(customer.phone || '08000000000').replace(/[^0-9]/g, ''),
       },
       additional_info: {
         override_notification_url: `${SITE_URL}/api/payment-webhook`,
-        tg_chat_id: tgChatId || '',
-        plan: planName || 'pro',
+        tg_chat_id: String(tgChatId || ''),
+        plan:       String(planName || 'pro'),
       },
     };
 
+    // Stringify ONCE — same string used for digest + request body
     const bodyString = JSON.stringify(body);
-    const { signature, digest } = generateDokuSignature(
-      DOKU_SECRET_KEY, DOKU_CLIENT_ID, requestId, timestamp, target, bodyString
-    );
 
-    console.log('DOKU →', DOKU_BASE_URL + target, '| Invoice:', invoiceNumber, '| Amount:', amount);
+    const { signature, digestValue, componentSignature } = generateDokuSignature({
+      secretKey:     DOKU_SECRET_KEY,
+      clientId:      DOKU_CLIENT_ID,
+      requestId,
+      timestamp,
+      requestTarget,
+      bodyString,
+    });
 
-    const response = await fetch(`${DOKU_BASE_URL}${target}`, {
+    // Debug log — visible in Vercel Functions tab
+    console.log('── DOKU Request ──');
+    console.log('URL:', DOKU_BASE_URL + requestTarget);
+    console.log('Client-Id:', DOKU_CLIENT_ID);
+    console.log('Request-Id:', requestId);
+    console.log('Timestamp:', timestamp);
+    console.log('Digest:', digestValue);
+    console.log('Signature:', signature);
+    console.log('Component:\n', componentSignature);
+    console.log('Body:', bodyString);
+
+    const response = await fetch(`${DOKU_BASE_URL}${requestTarget}`, {
       method: 'POST',
       headers: {
         'Content-Type':      'application/json',
@@ -89,18 +131,23 @@ export default async function handler(req, res) {
         'Request-Id':        requestId,
         'Request-Timestamp': timestamp,
         'Signature':         signature,
-        'Digest':            digest,
+        'Digest':            digestValue,   // raw base64, no prefix in header
       },
       body: bodyString,
     });
 
-    const data = await response.json();
-    console.log('DOKU ←', response.status, JSON.stringify(data));
+    const responseText = await response.text();
+    console.log('── DOKU Response ──', response.status, responseText);
+
+    let data;
+    try { data = JSON.parse(responseText); }
+    catch { data = { raw: responseText }; }
 
     if (!response.ok) {
       return res.status(response.status).json({
-        message: data?.message || data?.error || 'DOKU API error',
-        doku: data,
+        message: data?.message || data?.error?.message || 'DOKU error ' + response.status,
+        code:    data?.error?.code || data?.code,
+        doku:    data,
       });
     }
 
@@ -111,7 +158,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('create-payment error:', err);
+    console.error('create-payment exception:', err.message, err.stack);
     return res.status(500).json({ message: err.message || 'Internal server error' });
   }
 }
