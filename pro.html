@@ -512,7 +512,7 @@ async function initiatePayment(){
   }
 }
 
-// Poll for payment status (webhook updates our API which we poll)
+// Poll for payment status via backend (webhook updates Redis, we poll)
 function startPaymentPolling(invoiceNumber){
   let attempts=0;
   const maxAttempts=120; // 10 minutes
@@ -520,11 +520,11 @@ function startPaymentPolling(invoiceNumber){
     attempts++;
     if(attempts>maxAttempts){
       clearInterval(interval);
-      showError('Payment timeout','Please refresh if you completed payment, or contact support.');
+      showError('Payment timeout','Please refresh if you completed payment, or contact us.');
       return;
     }
     try{
-      const res=await fetch('/api/payment-status?invoice='+invoiceNumber);
+      const res=await fetch('/api/payment-webhook?action=status&invoice='+encodeURIComponent(invoiceNumber));
       if(!res.ok)return;
       const data=await res.json();
       if(data.status==='SUCCESS'){
@@ -533,73 +533,86 @@ function startPaymentPolling(invoiceNumber){
         onPaymentSuccess(data);
       } else if(data.status==='FAILED'||data.status==='EXPIRED'){
         clearInterval(interval);
-        showError('Payment '+data.status.toLowerCase(),'Please try again with a different payment method.');
+        showError('Payment '+data.status.toLowerCase(),'Please try again with a different method.');
       }
-    }catch(e){}
+    }catch(e){ console.log('Polling error:', e.message); }
   }, 5000);
 }
 
 function onPaymentSuccess(data){
-  // Show success state
   document.getElementById('successCard').classList.add('show');
   document.getElementById('successCard').scrollIntoView({behavior:'smooth'});
   toast('🎉 Payment confirmed! Welcome to Pro!', 5000);
 
-  // If TG ID was provided at checkout, activate automatically
+  // Save Pro status to localStorage
   const pending=JSON.parse(localStorage.getItem('cs_pending_order')||'{}');
-  if(pending.tgId){
-    document.getElementById('chatIdInput').value=pending.tgId;
-    activateTelegram();
-  }
+  const proData={
+    active:true, email:data.email||pending.email,
+    tgChatId:data.tgChatId||pending.tgId||'',
+    plan:data.plan||pending.plan||'pro',
+    expiresAt:new Date(Date.now()+30*24*60*60*1000).toISOString(),
+  };
+  localStorage.setItem('cs_pro', JSON.stringify(proData));
   localStorage.removeItem('cs_pending_order');
+
+  // Auto-activate Telegram if chat ID was provided at checkout
+  if(proData.tgChatId){
+    document.getElementById('chatIdInput').value=proData.tgChatId;
+    activateTelegram(proData.email, proData.tgChatId);
+  }
 }
 
-// ── TELEGRAM ACTIVATION ──
-async function activateTelegram(){
-  const chatId=document.getElementById('chatIdInput').value.trim();
+// ── TELEGRAM ACTIVATION — saves chatId to backend Redis ──
+async function activateTelegram(emailOverride, chatIdOverride){
+  const chatId=(chatIdOverride||document.getElementById('chatIdInput').value).trim();
+  const cached=JSON.parse(localStorage.getItem('cs_pro')||'{}');
+  const email=emailOverride||cached.email||'';
+
   if(!chatId||isNaN(chatId)){
     toast('⚠️ Please enter a valid Telegram Chat ID (numbers only)');
     return;
   }
+  if(!email){
+    toast('⚠️ Email not found. Please verify your Pro status first.');
+    return;
+  }
 
   try{
-    // Send welcome message directly via Telegram Bot API
-    const welcomeMsg=`🎉 *Welcome to CryptoSignal Pro!*
-
-Your personal alert bot is now active. Here's what you'll get:
-
-⚡ *Breaking signals* — impact >80
-🇺🇸 *POTUS posts* — instant push
-😱 *Fear & Greed extremes* — <20 or >80
-🐋 *Whale mempool spikes* — BTC fees >80 sat/vB
-📰 *Top daily digest* — best signals summary
-
-_You can adjust alert sensitivity at cryptosignal.id/settings_
-
-Welcome aboard. 🚀`;
-
-    const res=await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        chat_id:chatId,
-        text:welcomeMsg,
-        parse_mode:'Markdown'
-      })
-    });
+    // Update chatId in backend Redis + sends TG confirmation message
+    const res=await fetch(
+      `/api/payment-webhook?action=update-chatid&email=${encodeURIComponent(email)}&chatId=${encodeURIComponent(chatId)}`
+    );
     const d=await res.json();
     if(d.ok){
       toast('✅ Telegram activated! Check your messages.', 4000);
       document.getElementById('chatIdInput').disabled=true;
       document.getElementById('chatIdInput').value='✅ Activated — '+chatId;
-      // Save to localStorage for the main feed to use
-      localStorage.setItem('cs_pro_tg_chat_id', chatId);
-      localStorage.setItem('cs_pro_active', '1');
+      // Update localStorage
+      const pro=JSON.parse(localStorage.getItem('cs_pro')||'{}');
+      pro.tgChatId=chatId;
+      localStorage.setItem('cs_pro', JSON.stringify(pro));
     } else {
-      toast('⚠️ Could not reach that Chat ID. Make sure you messaged the bot first.');
+      toast('⚠️ '+(d.message||'Could not activate. Contact support.'));
     }
   }catch(e){
-    toast('⚠️ Network error. Try again in a moment.');
+    toast('⚠️ Network error: '+e.message);
+  }
+}
+
+// ── PRO STATUS CHECK on page load ──
+async function checkExistingProStatus(){
+  const params=new URLSearchParams(window.location.search);
+  const emailParam=params.get('email');
+  if(emailParam){
+    try{
+      const r=await fetch(`/api/payment-webhook?action=verify&email=${encodeURIComponent(emailParam)}`);
+      const d=await r.json();
+      if(d.pro){
+        const proData={active:true,email:d.email,tgChatId:d.tgChatId,plan:d.plan,expiresAt:d.expiresAt};
+        localStorage.setItem('cs_pro',JSON.stringify(proData));
+        onPaymentSuccess(d);
+      }
+    }catch(e){}
   }
 }
 
