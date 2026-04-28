@@ -200,7 +200,8 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
   <div class="h-right">
     <div class="h-src" id="srcBadge">📡 Loading…</div>
     <a class="btn-sm" href="/alerts.html">🔔 Alerts<span class="badge" id="alertBadge">0</span></a>
-    <a class="btn-pro" href="/pro.html">Go Pro ↗</a>
+    <span id="proBadge" style="display:none;align-items:center;background:linear-gradient(135deg,#22d98a,#00d4ff);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:.3px"></span>
+    <a class="btn-pro" id="headerProBtn" href="/pro.html">Go Pro ↗</a>
   </div>
 </header>
 <div class="app">
@@ -1058,13 +1059,17 @@ function renderFeed(){
   document.getElementById('totalCount').textContent=allArticles.length;
   document.getElementById('feedSrcC').textContent='from '+Object.values(srcStat).filter(s=>s.ok).length+' sources';
   if(!f.length){document.getElementById('newsFeed').innerHTML='<div class="empty"><div style="font-size:36px;margin-bottom:8px">🔍</div><div style="font-size:13px;color:var(--muted2)">No signals — loading…</div><div style="font-size:11px;color:var(--muted);margin-top:6px">Auto-refreshes every 90s</div></div>';return;}
+
+  // Free user cap — show only first FREE_LIMIT signals
+  const isCapped = !proUser.active && f.length > FREE_LIMIT;
+  const displayF = isCapped ? f.slice(0, FREE_LIMIT) : f;
   const tC={break:'t-break',bull:'t-bull',bear:'t-bear',whale:'t-whale',reg:'t-reg',potus:'t-potus',hoax:'t-hoax',neutral:'t-neutral',trending:'t-bull'};
   const sL={break:'⚡ BREAKING',bull:'📈 BULLISH',bear:'📉 BEARISH',whale:'🐋 WHALE',reg:'⚖️ REGULATION',potus:'🇺🇸 POTUS',hoax:'🚫 AI FLAGGED',neutral:'📰 NEWS',trending:'🔥 TRENDING'};
   const sC={break:'s-break',bull:'s-bull',bear:'s-bear',whale:'s-whale',reg:'s-reg',potus:'s-potus',hoax:'s-hoax',neutral:'s-neutral',trending:'s-bull'};
   const iC={break:'var(--accent)',bull:'var(--green)',bear:'var(--red)',whale:'var(--violet)',reg:'var(--amber)',potus:'var(--potus)',hoax:'rgba(242,64,96,.35)',neutral:'var(--muted)',trending:'var(--violet)'};
   const sTB={rss:'<span class="stb st-rss">RSS</span>',telegram:'<span class="stb st-tg">TG</span>',reddit:'<span class="stb st-reddit">REDDIT</span>',truthsocial:'<span class="stb st-ts">TRUTH</span>',api:'<span class="stb st-api">API</span>',coingecko:'<span class="stb st-api">CG</span>'};
   const sSrc={telegram:'tg-src',reddit:'reddit-src',truthsocial:'potus-src'};
-  document.getElementById('newsFeed').innerHTML=f.map((a,i)=>`
+  document.getElementById('newsFeed').innerHTML=displayF.map((a,i)=>`
 <div class="ncard ${tC[a.type]||'t-neutral'}" id="nc${i}">
   ${a.type==='hoax'?'<div class="hoax-overlay">⚠️ AI FLAGGED</div>':''}
   <div class="card-top">
@@ -1096,7 +1101,19 @@ function renderFeed(){
     ${a.url&&a.url!=='#'?`<a class="exp-link" href="${esc(a.url)}" target="_blank" rel="noopener">→ Read full article ↗</a>`:''}
   </div>
 </div>`).join('');
-  f.forEach((_,i)=>{const c=document.getElementById('nc'+i);if(c)c.onclick=()=>{const e=document.getElementById('ce'+i);const w=e.classList.contains('open');document.querySelectorAll('.card-exp.open').forEach(x=>x.classList.remove('open'));if(!w)e.classList.add('open');};});
+  displayF.forEach((_,i)=>{const c=document.getElementById('nc'+i);if(c)c.onclick=()=>{const e=document.getElementById('ce'+i);const w=e.classList.contains('open');document.querySelectorAll('.card-exp.open').forEach(x=>x.classList.remove('open'));if(!w)e.classList.add('open');};});
+
+  // Paywall banner for free users
+  if(isCapped){
+    const hidden=f.length-FREE_LIMIT;
+    const pw=document.createElement('div');
+    pw.style.cssText='background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(0,212,255,.08));border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:24px;text-align:center;margin-top:8px;';
+    pw.innerHTML=`<div style="font-size:22px;margin-bottom:10px">⚡</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:6px">+${hidden} more signals</div>
+      <div style="font-size:13px;color:var(--muted2);margin-bottom:16px;line-height:1.6">Upgrade to Pro for unlimited real-time signals,<br>Telegram alerts & 30-day archive</div>
+      <a href="/pro.html" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;text-decoration:none;padding:10px 22px;border-radius:9px;font-weight:800;font-size:13px">Upgrade to Pro — Rp 449K/mo →</a>`;
+    document.getElementById('newsFeed').appendChild(pw);
+  }
 }
 
 function updateTicker(){
@@ -1170,29 +1187,45 @@ async function tgSend(a){
 }
 
 async function checkAlerts(){
-  // POTUS posts
+  // Broadcast to ALL Pro subscribers via backend API
+  // Also send to owner's chat via direct TG for monitoring
+
   const potus=allArticles.filter(a=>a.isPotus&&!sentAlerts.has(a.id));
-  for(const a of potus.slice(0,1)){sentAlerts.add(a.id);await tgSend(a);toast('🇺🇸 POTUS post — Telegram alert sent!');}
-  // Breaking high-impact
+  for(const a of potus.slice(0,1)){
+    sentAlerts.add(a.id);
+    await broadcastAlert(a);  // → all Pro subscribers
+    toast('🇺🇸 POTUS post — Telegram alert sent to all Pro users!');
+  }
+
   const brk=allArticles.filter(a=>a.type==='break'&&a.impact>=80&&!sentAlerts.has(a.id));
-  for(const a of brk.slice(0,2)){sentAlerts.add(a.id);await tgSend(a);toast(`⚡ Breaking (${a.impact}) — Telegram sent!`);}
-  // Fear & Greed extremes
+  for(const a of brk.slice(0,2)){
+    sentAlerts.add(a.id);
+    await broadcastAlert(a);
+    toast(`⚡ Breaking (${a.impact}) — Alert sent to all Pro users!`);
+  }
+
   const fngItem=allArticles.find(a=>a.srcId==='feargreed'&&a.fngScore!=null);
   if(fngItem&&!sentAlerts.has('fng-extreme')){
     const s=fngItem.fngScore;
-    if(s<=20){
+    if(s<=20||s>=80){
       sentAlerts.add('fng-extreme');
-      await tgSend({...fngItem,title:`😱 EXTREME FEAR: Fear & Greed Index at ${s}/100 — Historic buying signal`,type:'break',impact:88});
-      toast(`😱 Extreme Fear (${s}) — Telegram alert sent!`);
-    } else if(s>=80){
-      sentAlerts.add('fng-extreme');
-      await tgSend({...fngItem,title:`🤑 EXTREME GREED: Fear & Greed Index at ${s}/100 — Correction risk high`,type:'bear',impact:82});
-      toast(`🤑 Extreme Greed (${s}) — Telegram alert sent!`);
+      await broadcastAlert({
+        ...fngItem,
+        title: s<=20
+          ? `😱 EXTREME FEAR: Fear & Greed at ${s}/100 — Historic buying signal`
+          : `🤑 EXTREME GREED: Fear & Greed at ${s}/100 — Correction risk high`,
+        type: s<=20?'break':'bear', impact: s<=20?88:82,
+      });
+      toast(`${s<=20?'😱 Extreme Fear':'🤑 Extreme Greed'} (${s}) — Alert sent!`);
     }
   }
-  // Whale mempool signal
+
   const mempoolItem=allArticles.find(a=>a.srcId==='mempool'&&a.mempoolFees?.fastestFee>80&&!sentAlerts.has('mempool-whale'));
-  if(mempoolItem){sentAlerts.add('mempool-whale');await tgSend({...mempoolItem,type:'whale',impact:75});toast('⛓️ BTC mempool spike — whale activity alert sent!');}
+  if(mempoolItem){
+    sentAlerts.add('mempool-whale');
+    await broadcastAlert({...mempoolItem,type:'whale',impact:75});
+    toast('⛓️ BTC whale spike — Alert sent to all Pro users!');
+  }
 }
 
 function toggleF(t,el){el.classList.toggle('on');activeFilt.has(t)?activeFilt.delete(t):activeFilt.add(t);renderFeed();}
@@ -1208,7 +1241,7 @@ function startTimer(){
   },1000);
 }
 
-(async()=>{fetchPrices();await fetchAll();startTimer();setInterval(fetchPrices,60000);})();
+(async()=>{await checkProStatus();fetchPrices();await fetchAll();startTimer();setInterval(fetchPrices,60000);})();
 </script>
 </body>
 </html>
