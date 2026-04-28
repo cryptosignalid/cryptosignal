@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "functions": {
+    "api/create-payment.js": { "maxDuration": 30 },
+    "api/payment-webhook.js": { "maxDuration": 30 }
+  }
+}
