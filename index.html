@@ -365,6 +365,71 @@ const AO_GET    = 'https://api.allorigins.win/get?url=';
 // ── STATE ──
 let allArticles=[],activeFilt=new Set(['break','bull','bear','whale','reg','potus','neutral']),activeCoin='ALL',activeSort='latest',sentAlerts=new Set(),srcStat={},refSecs=90,refTimer=null;
 
+// ── PRO STATE ──
+const FREE_LIMIT=20;
+const BROADCAST_KEY='cs-broadcast-secret';
+let proUser={active:false,email:'',tgChatId:'',plan:'',expiresAt:null};
+
+async function checkProStatus(){
+  try{
+    const cached=localStorage.getItem('cs_pro');
+    if(cached){
+      const d=JSON.parse(cached);
+      if(d.active&&d.expiresAt&&new Date(d.expiresAt)>new Date()){
+        proUser=d;updateProUI();
+        verifyProBackend(d.email); // background verify
+        return;
+      }
+    }
+  }catch(e){}
+  proUser={active:false,email:'',tgChatId:'',plan:''};
+  updateProUI();
+}
+
+async function verifyProBackend(email){
+  if(!email)return;
+  try{
+    const r=await fetch('/api/payment-webhook?action=verify&email='+encodeURIComponent(email),{signal:AbortSignal.timeout(5000)});
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d.pro){
+      proUser={active:true,email:d.email,tgChatId:d.tgChatId,plan:d.plan,expiresAt:d.expiresAt};
+      localStorage.setItem('cs_pro',JSON.stringify(proUser));
+    }else{
+      proUser={active:false,email:'',tgChatId:'',plan:''};
+      localStorage.removeItem('cs_pro');
+    }
+    updateProUI();
+  }catch(e){}
+}
+
+function updateProUI(){
+  const badge=document.getElementById('proBadge');
+  const btn=document.getElementById('headerProBtn');
+  if(proUser.active){
+    if(badge){badge.style.display='inline-flex';badge.textContent='⚡ PRO';}
+    if(btn){btn.textContent='⚡ Pro Member';btn.style.background='linear-gradient(135deg,#22d98a,#00d4ff)';}
+  }else{
+    if(badge)badge.style.display='none';
+    if(btn){btn.textContent='Go Pro ↗';btn.style.background='linear-gradient(135deg,#00d4ff,#8b5cf6)';}
+  }
+  renderFeed();
+}
+
+async function broadcastAlert(article){
+  try{
+    await fetch('/api/broadcast',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-broadcast-key':BROADCAST_KEY},
+      body:JSON.stringify({
+        articleTitle:article.title,articleUrl:article.url,
+        signalType:article.type,impact:article.impact,
+        source:article.source,coins:article.coins,
+      }),
+    });
+  }catch(e){console.log('Broadcast error:',e.message);}
+}
+
 // ── UTILS ──
 const fmt$=n=>!n&&n!==0?'—':n>=1000?'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}):n>=1?'$'+n.toFixed(2):'$'+n.toFixed(4);
 const fmtC=n=>n==null?'—':(n>=0?'+':'')+n.toFixed(2)+'%';
