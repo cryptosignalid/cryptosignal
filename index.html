@@ -529,15 +529,11 @@ async function fetchRSSviaProxy(rssUrl){
 
 // ── SOURCE 1: GNews (PROVEN WORKING — direct API, no CORS) ──
 async function fetchGNews(){
+  // 3 queries max to avoid 429 rate limit on GNews free tier (100 req/day)
   const queries=[
-    'bitcoin cryptocurrency',
-    'ethereum solana crypto',
-    'crypto regulation SEC CFTC',
-    'DeFi blockchain NFT',
-    'crypto market bitcoin price',
-    'altcoin XRP BNB Cardano',
-    'crypto exchange Binance Coinbase',
-    'bitcoin ETF institutional',
+    'bitcoin ethereum crypto market',
+    'cryptocurrency regulation blockchain',
+    'crypto altcoin DeFi NFT',
   ];
   const results=await Promise.allSettled(queries.map(q=>
     fetchJSON(`https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&lang=en&max=10&sortby=publishedAt&apikey=${GNEWS_KEY}`)
@@ -714,16 +710,12 @@ async function fetchChainGPT(){
   const out=[], seen=new Set();
   for(const feed of feeds){
     try{
-      // ChainGPT RSS has CORS headers — try direct first, proxy fallback
+      // ChainGPT RSS — proxy only (no CORS on their end)
       let items=[];
       try{
-        const r=await fetch(feed.url,{signal:AbortSignal.timeout(10000)});
-        if(r.ok) items=parseXML(await r.text());
-      }catch(e){}
-      if(!items.length){
         const r=await fetch(AO_RAW+encodeURIComponent(feed.url),{signal:AbortSignal.timeout(10000)});
         if(r.ok) items=parseXML(await r.text());
-      }
+      }catch(e){}
       const mapped=items.filter(i=>!seen.has(i.link)).slice(0,25).map(it=>{
         seen.add(it.link);
         return{id:it.link,title:decodeHTML(it.title),description:decodeHTML(it.description),
@@ -839,30 +831,10 @@ async function fetchMempool(){
   }
 }
 
-// ── SOURCE 10: cryptocurrency.cv — Social/X sentiment ──
+// SOURCE 10: Social sentiment — cryptocurrency.cv now requires payment, skipped
 async function fetchSocialSentiment(){
-  try{
-    const r=await fetch('https://cryptocurrency.cv/api/social/x/sentiment',{signal:AbortSignal.timeout(10000)});
-    if(!r.ok) throw new Error('social '+r.status);
-    const d=await r.json();
-    const score=d.overall?.score||0; // -1 to +1
-    const posts=d.overall?.postCount||0;
-    const bullish=d.breakdown?.bullish||0;
-    const bearish=d.breakdown?.bearish||0;
-    const pct=Math.round((score+1)*50); // 0-100
-    const label=score>0.3?'Bullish':score<-0.3?'Bearish':'Neutral';
-    srcStat['social_x']={ok:true,count:1,name:'X/Twitter Sentiment',icon:'🐦'};
-    return [{
-      id:'social-x-'+Math.floor(Date.now()/600000),
-      title:`🐦 X/Twitter Crypto Sentiment: ${label} — ${posts.toLocaleString()} posts analyzed · ${bullish} bullish · ${bearish} bearish`,
-      description:`Real-time X/Twitter social sentiment analysis: Score ${score.toFixed(2)} (${label}). ${posts.toLocaleString()} crypto posts analyzed. Bullish posts: ${bullish}, Bearish posts: ${bearish}. ${score>0.5?'Strong bullish social momentum.':score<-0.5?'Heavy fear/panic across social media.':'Mixed social signals — market uncertain.'}`,
-      url:'https://cryptocurrency.cv',source:'X/Twitter Sentiment (cryptocurrency.cv)',trust:7.5,
-      publishedAt:new Date().toISOString(),srcType:'api',srcId:'social_x',
-    }];
-  }catch(e){
-    srcStat['social_x']={ok:false,count:0,name:'X/Twitter Sentiment',icon:'🐦',err:e.message};
-    return[];
-  }
+  srcStat['social_x']={ok:false,count:0,name:'X/Twitter Sentiment',icon:'🐦',err:'API requires payment'};
+  return[];
 }
 
 // ── SOURCE 11: DexScreener Trending Tokens (free, no key, CORS) ──
