@@ -144,17 +144,47 @@ export default async function handler(req, res) {
     catch { data = { raw: responseText }; }
 
     if (!response.ok) {
+      const errMsg = Array.isArray(data?.message)
+        ? data.message.join(', ')
+        : (data?.message || data?.error?.message || 'DOKU error ' + response.status);
       return res.status(response.status).json({
-        message: data?.message || data?.error?.message || 'DOKU error ' + response.status,
+        message: errMsg,
         code:    data?.error?.code || data?.code,
         doku:    data,
       });
     }
 
+    // Also check for DOKU soft errors (200 but message != SUCCESS)
+    if (Array.isArray(data?.message) && !data.message.includes('SUCCESS')) {
+      return res.status(400).json({
+        message: data.message.join(', '),
+        doku: data,
+      });
+    }
+
+    // DOKU wraps response in data.response{}
+    const resp = data.response || data;
+    const paymentUrl = resp.payment?.url || resp.payment?.token
+      ? `https://jokul.doku.com/checkout/link/${resp.payment?.token}`
+      : null;
+
+    console.log('Payment URL:', paymentUrl);
+    console.log('Full response keys:', Object.keys(data));
+
+    if (!paymentUrl && !resp.payment?.url) {
+      // Return full data so frontend can debug
+      return res.status(200).json({
+        url:     paymentUrl,
+        payment: resp.payment,
+        order:   resp.order,
+        raw:     data,
+      });
+    }
+
     return res.status(200).json({
-      url:     data.payment?.url,
-      payment: data.payment,
-      order:   data.order,
+      url:     resp.payment?.url || paymentUrl,
+      payment: resp.payment,
+      order:   resp.order,
     });
 
   } catch (err) {
