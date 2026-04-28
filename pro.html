@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoSignal Pro — Upgrade Your Edge</title>
+<meta name="description" content="Real-time Telegram alerts, unlimited signals, custom watchlists. From $29/month.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://sandbox.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js"></script>
+<style>
+:root{
+  --bg:#080e1c;--bg2:#0c1423;--bg3:#101a2e;
+  --panel:#131f33;--panel2:#192640;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --text:#f0f4ff;--muted:#5a6a8a;--muted2:#94a3c0;
+  --accent:#00d4ff;--violet:#a78bfa;--green:#22d98a;
+  --red:#f55070;--amber:#fbbf24;
+  --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;--r:12px;
+  --gold:#f59e0b;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 800px 600px at 20% -10%,rgba(0,212,255,.06) 0%,transparent 60%),
+             radial-gradient(ellipse 600px 500px at 80% 110%,rgba(167,139,250,.07) 0%,transparent 60%);}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(8,14,28,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;padding:0 24px;height:58px;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;color:var(--text);text-decoration:none;}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo span{color:var(--accent);}
+.nav-back{margin-left:auto;font-size:12px;color:var(--muted2);text-decoration:none;font-weight:600;padding:6px 12px;border:1px solid var(--border2);border-radius:8px;transition:all .15s;}
+.nav-back:hover{color:var(--text);border-color:var(--accent);}
+
+/* LAYOUT */
+.page{max-width:960px;margin:0 auto;padding:48px 24px 80px;position:relative;z-index:1;}
+
+/* HERO */
+.hero{text-align:center;margin-bottom:56px;}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--violet);margin-bottom:20px;letter-spacing:.3px;}
+.hero h1{font-size:clamp(32px,5vw,52px);font-weight:900;line-height:1.1;letter-spacing:-.03em;margin-bottom:16px;}
+.hero h1 span{background:linear-gradient(135deg,#00d4ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:17px;color:var(--muted2);line-height:1.7;max-width:520px;margin:0 auto 32px;font-weight:400;}
+
+/* PLAN CARDS */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:48px;}
+.plan{background:var(--panel);border:1px solid var(--border2);border-radius:16px;padding:28px;position:relative;transition:transform .2s;}
+.plan:hover{transform:translateY(-2px);}
+.plan.featured{border-color:var(--accent);background:linear-gradient(160deg,rgba(0,212,255,.06),var(--panel));}
+.plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;font-size:10px;font-weight:800;padding:4px 14px;border-radius:20px;letter-spacing:.5px;white-space:nowrap;}
+.plan-name{font-size:13px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.plan-price{font-size:40px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em;margin-bottom:4px;}
+.plan-price sub{font-size:16px;font-weight:600;color:var(--muted2);vertical-align:baseline;}
+.plan-period{font-size:12px;color:var(--muted);margin-bottom:24px;font-weight:500;}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.plan-features li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;font-weight:500;line-height:1.4;}
+.plan-features li::before{content:'✓';font-weight:800;font-size:12px;color:var(--green);flex-shrink:0;margin-top:1px;}
+.plan-features li.x-feat::before{content:'✗';color:var(--muted);}
+.plan-features li.x-feat{color:var(--muted);}
+.plan-btn{width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:800;transition:all .18s;letter-spacing:.2px;}
+.plan-btn.primary{background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;}
+.plan-btn.primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.3);}
+.plan-btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border2);}
+.plan-btn.secondary:hover{border-color:var(--accent);color:var(--accent);}
+.plan-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+
+/* WHAT YOU GET */
+.section-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;}
+.section-sub{font-size:14px;color:var(--muted2);margin-bottom:28px;font-weight:400;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:56px;}
+.feat-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.feat-icon{font-size:26px;margin-bottom:12px;}
+.feat-title{font-size:14px;font-weight:700;margin-bottom:6px;}
+.feat-desc{font-size:12.5px;color:var(--muted2);line-height:1.6;font-weight:400;}
+
+/* CHECKOUT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative;}
+.modal-header{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:18px;font-weight:800;}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+.modal-body{padding:20px 24px 24px;}
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.form-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;font-weight:500;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--accent);}
+.form-input::placeholder{color:var(--muted);}
+.form-hint{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5;}
+.form-hint a{color:var(--accent);text-decoration:none;}
+.order-summary{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px;}
+.order-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:4px 0;}
+.order-row.total{font-weight:800;font-size:15px;border-top:1px solid var(--border2);margin-top:8px;padding-top:12px;color:var(--accent);}
+.pay-btn{width:100%;padding:15px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;font-family:var(--sans);font-size:15px;font-weight:800;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.pay-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.35);}
+.pay-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.pay-methods{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.pay-method{background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:10px;font-weight:700;color:var(--muted2);font-family:var(--mono);}
+
+/* TG SETUP */
+.tg-setup{background:linear-gradient(135deg,rgba(42,171,238,.08),rgba(0,212,255,.05));border:1px solid rgba(42,171,238,.2);border-radius:16px;padding:28px;margin-bottom:48px;}
+.tg-setup h3{font-size:17px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.tg-setup p{font-size:13.5px;color:var(--muted2);line-height:1.65;margin-bottom:20px;}
+.tg-steps{display:flex;flex-direction:column;gap:12px;}
+.tg-step{display:flex;align-items:flex-start;gap:12px;background:var(--panel2);border-radius:10px;padding:14px;}
+.tg-step-num{width:24px;height:24px;border-radius:50%;background:rgba(42,171,238,.2);color:#2aabee;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tg-step-text{font-size:13px;line-height:1.55;font-weight:500;}
+.tg-step-text strong{color:var(--text);}
+.tg-step-text code{font-family:var(--mono);font-size:12px;background:rgba(0,212,255,.1);color:var(--accent);padding:1px 6px;border-radius:4px;}
+
+/* STATUS */
+.status-card{background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:20px;text-align:center;display:none;}
+.status-card.show{display:block;}
+.status-icon{font-size:40px;margin-bottom:12px;}
+.status-title{font-size:18px;font-weight:800;margin-bottom:6px;}
+.status-sub{font-size:13.5px;color:var(--muted2);line-height:1.6;}
+
+/* FAQ */
+.faq{margin-bottom:48px;}
+.faq-item{border-bottom:1px solid var(--border);padding:18px 0;}
+.faq-q{font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.faq-q::after{content:'＋';font-size:16px;color:var(--muted2);flex-shrink:0;transition:transform .2s;}
+.faq-item.open .faq-q::after{transform:rotate(45deg);}
+.faq-a{font-size:13.5px;color:var(--muted2);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s;}
+.faq-item.open .faq-a{max-height:200px;padding-top:10px;}
+
+/* SPINNER */
+.spin{animation:sp .8s linear infinite;display:inline-block;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel2);border:1px solid var(--border2);border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:all .28s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 12px 40px rgba(0,0,0,.6);max-width:92vw;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+@media(max-width:640px){.plans{grid-template-columns:1fr;}.features-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:420px){.features-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/"><div class="logo-icon">⚡</div>Crypto<span>Signal</span></a>
+  <a class="nav-back" href="/">← Back to Live Feed</a>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-pill">⚡ Pro Membership</div>
+    <h1>Get the signal<br><span>before the market moves</span></h1>
+    <p class="hero-sub">Instant Telegram alerts, unlimited signals from 15+ live sources, custom watchlists. Built for serious crypto traders.</p>
+  </div>
+
+  <!-- PLANS -->
+  <div class="plans">
+    <!-- PRO -->
+    <div class="plan featured">
+      <div class="plan-badge">MOST POPULAR</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">Rp 449<sub>K</sub></div>
+      <div class="plan-period">per month · ~$29 USD</div>
+      <ul class="plan-features">
+        <li>Unlimited live signals, real-time</li>
+        <li>Personal Telegram bot alerts</li>
+        <li>Breaking news instant push</li>
+        <li>POTUS signal alerts</li>
+        <li>Fear &amp; Greed extreme alerts</li>
+        <li>Custom coin watchlist</li>
+        <li>30-day signal archive</li>
+        <li>Hoax &amp; scam AI detection</li>
+        <li>Priority source health</li>
+      </ul>
+      <button class="plan-btn primary" onclick="openCheckout('pro')">Upgrade to Pro →</button>
+    </div>
+
+    <!-- BUSINESS -->
+    <div class="plan">
+      <div class="plan-name">Business</div>
+      <div class="plan-price">Rp 3<sub>Jt</sub></div>
+      <div class="plan-period">per month · ~$199 USD</div>
+      <ul class="plan-features">
+        <li>Everything in Pro</li>
+        <li>REST API access (1000 req/day)</li>
+        <li>White-label embed widget</li>
+        <li>Multi-user team access (5 seats)</li>
+        <li>Custom Telegram channel bot</li>
+        <li>90-day archive</li>
+        <li>Dedicated Slack support</li>
+        <li>Custom alert rules builder</li>
+        <li>Priority webhook callbacks</li>
+      </ul>
+      <button class="plan-btn secondary" onclick="openCheckout('business')">Upgrade to Business →</button>
+    </div>
+  </div>
+
+  <!-- WHAT YOU GET -->
+  <div class="section-title">What Pro unlocks</div>
+  <div class="section-sub">Every feature built for speed — because in crypto, seconds matter.</div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">📲</div>
+      <div class="feat-title">Telegram Instant Alerts</div>
+      <div class="feat-desc">Your personal bot sends a push the second a high-impact signal is detected — before you'd even see it on screen.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Unlimited Real-Time Feed</div>
+      <div class="feat-desc">Free tier is capped and delayed. Pro gets every signal as it hits — 200+ per day from 15 live sources.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🇺🇸</div>
+      <div class="feat-title">POTUS Signal Push</div>
+      <div class="feat-desc">Every Trump Truth Social post instantly classified and pushed to your Telegram with market impact score.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">😱</div>
+      <div class="feat-title">Fear &amp; Greed Extremes</div>
+      <div class="feat-desc">Telegram alert the moment the index hits Extreme Fear (&lt;20) or Extreme Greed (&gt;80) — historically the best entry/exit signals.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🗄️</div>
+      <div class="feat-title">30-Day Archive</div>
+      <div class="feat-desc">Search everything from the last 30 days. Filter by coin, signal type, source, or impact score. Free = current session only.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🚫</div>
+      <div class="feat-title">AI Hoax Shield</div>
+      <div class="feat-desc">Our AI flags scams, rug pulls, and fake news with confidence score before they spread. Protect your capital.</div>
+    </div>
+  </div>
+
+  <!-- TELEGRAM SETUP GUIDE -->
+  <div class="tg-setup" id="tgSetupSection">
+    <h3>✈️ Setting up your Telegram alerts</h3>
+    <p>After payment, you'll receive a confirmation. Follow these steps to activate your personal alert bot in under 2 minutes.</p>
+    <div class="tg-steps">
+      <div class="tg-step">
+        <div class="tg-step-num">1</div>
+        <div class="tg-step-text"><strong>Open Telegram</strong> and search for <code>@CryptoSignalAlertBot</code> (or your own bot username)</div>
+      </div>
+      <div class="tg-step">
+        <div class="tg-step-num">2</div>
+        <div class="tg-step-text"><strong>Send <code>/start</code></strong> to the bot — it will reply with your unique Chat ID</div>
+      </div>
+      <div class="tg-step">
+        <div class="tg-step-num">3</div>
+        <div class="tg-step-text"><strong>Enter your Chat ID below</strong> after completing payment — alerts activate instantly</div>
+      </div>
+      <div class="tg-step">
+        <div class="tg-step-num">4</div>
+        <div class="tg-step-text"><strong>You're live.</strong> Breaking signals, POTUS posts, and Fear &amp; Greed extremes will push directly to you.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST-PAYMENT STATUS -->
+  <div class="status-card" id="successCard">
+    <div class="status-icon">🎉</div>
+    <div class="status-title">Payment Confirmed — Welcome to Pro!</div>
+    <div class="status-sub">Enter your Telegram Chat ID below to activate your personal alerts. Your access is live immediately.</div>
+    <br>
+    <div style="max-width:340px;margin:0 auto">
+      <input type="text" class="form-input" id="chatIdInput" placeholder="e.g. 123456789" style="text-align:center;font-size:16px;margin-bottom:10px">
+      <button class="pay-btn" onclick="activateTelegram()" style="padding:12px">Activate Telegram Alerts</button>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <div class="section-title" style="margin-bottom:20px">Frequently asked questions</div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What payment methods are accepted?</div>
+      <div class="faq-a">Via DOKU: Virtual Account (BCA, Mandiri, BNI, BRI, CIMB), QRIS, OVO, Dana, ShopeePay, GoPay, LinkAja, Kredivo, credit/debit card. All major Indonesian payment methods supported.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Is there a free trial?</div>
+      <div class="faq-a">The free tier is always free — you get the live feed with all signal types. Pro adds Telegram alerts, unlimited signals, archive, and custom watchlists. You can upgrade anytime.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How quickly do Telegram alerts arrive?</div>
+      <div class="faq-a">Usually under 5 seconds from when a signal is detected. Breaking news, POTUS posts, and Fear & Greed extremes are prioritized and sent first.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime?</div>
+      <div class="faq-a">Yes. No contracts, no cancellation fees. Your Pro access continues until the end of your billing period. Contact us via Telegram @CryptoSignalSupport to cancel.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Do you offer refunds?</div>
+      <div class="faq-a">If you're unsatisfied within the first 7 days, contact us for a full refund. No questions asked.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What's included in Business API access?</div>
+      <div class="faq-a">REST endpoint returning JSON signal feed, 1000 requests/day, filterable by coin/type/impact/source. Webhook support for real-time push to your own systems. Documentation included.</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Upgrade to Pro</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Step 1: Form -->
+      <div id="formStep">
+        <div class="order-summary" id="orderSummary">
+          <div class="order-row"><span>CryptoSignal Pro</span><span>Rp 449.000</span></div>
+          <div class="order-row"><span>Billing</span><span>Monthly</span></div>
+          <div class="order-row total"><span>Total today</span><span id="orderTotal">Rp 449.000</span></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="buyerName" placeholder="Your full name" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="buyerEmail" placeholder="you@email.com" autocomplete="email">
+          <div class="form-hint">Payment receipt & access confirmation sent here</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone (optional)</label>
+          <input type="tel" class="form-input" id="buyerPhone" placeholder="08xxxxxxxxxx" autocomplete="tel">
+          <div class="form-hint">Needed for some payment methods (OVO, GoPay)</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telegram Chat ID <span style="color:var(--muted)">(optional — set after payment)</span></label>
+          <input type="text" class="form-input" id="buyerTgId" placeholder="e.g. 123456789">
+          <div class="form-hint">Get yours by messaging <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a> on Telegram</div>
+        </div>
+
+        <button class="pay-btn" id="payBtn" onclick="initiatePayment()">
+          <span id="payBtnText">Pay with DOKU →</span>
+        </button>
+
+        <div class="pay-methods" style="margin-top:14px">
+          <span class="pay-method">BCA VA</span>
+          <span class="pay-method">Mandiri VA</span>
+          <span class="pay-method">QRIS</span>
+          <span class="pay-method">OVO</span>
+          <span class="pay-method">Dana</span>
+          <span class="pay-method">ShopeePay</span>
+          <span class="pay-method">GoPay</span>
+          <span class="pay-method">Kredivo</span>
+          <span class="pay-method">VISA/MC</span>
+        </div>
+        <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted)">🔒 Secured by DOKU · Bank Indonesia licensed</div>
+      </div>
+
+      <!-- Step 2: Processing -->
+      <div id="processingStep" style="display:none;text-align:center;padding:32px 0">
+        <div style="font-size:36px;margin-bottom:16px"><span class="spin">↻</span></div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">Opening payment page…</div>
+        <div style="font-size:13px;color:var(--muted2)">DOKU checkout is loading. Complete payment in the popup.</div>
+      </div>
+
+      <!-- Step 3: Error -->
+      <div id="errorStep" style="display:none;text-align:center;padding:24px 0">
+        <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:8px" id="errorMsg">Something went wrong</div>
+        <div style="font-size:13px;color:var(--muted2);margin-bottom:20px" id="errorDetail">Please try again or contact support</div>
+        <button class="plan-btn secondary" onclick="resetModal()" style="max-width:200px;margin:0 auto">Try Again</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ============================================================
+// CryptoSignal Pro — Payment & Telegram Integration
+// DOKU Checkout (Jokul) — Indonesian payment gateway
+// ============================================================
+
+// ── CONFIG ──
+// IMPORTANT: Replace these with your real DOKU credentials from dashboard.doku.com
+const DOKU_CLIENT_ID = 'YOUR_DOKU_CLIENT_ID';        // MCH-xxxx-xxxxxxxxxxxxxxx
+const DOKU_SECRET_KEY = 'YOUR_DOKU_SECRET_KEY';      // From DOKU dashboard
+const DOKU_ENV = 'sandbox';                           // Change to 'production' when ready
+
+// Your Telegram bot token - UPDATE THIS
+const TG_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';      // Use your existing bot token
+
+const PLANS = {
+  pro:      { name:'CryptoSignal Pro',      amount:449000, usd:'$29' },
+  business: { name:'CryptoSignal Business', amount:3000000, usd:'$199' },
+};
+
+let currentPlan = 'pro';
+
+// ── UTILS ──
+function toast(m, dur=3200){
+  const e=document.getElementById('toastEl');
+  e.textContent=m;e.classList.add('show');
+  setTimeout(()=>e.classList.remove('show'),dur);
+}
+function fmtRp(n){return'Rp '+n.toLocaleString('id-ID');}
+function uid(){return 'INV-'+Date.now()+'-'+Math.random().toString(36).substring(2,7).toUpperCase();}
+
+// ── MODAL ──
+function openCheckout(plan){
+  currentPlan=plan;
+  const p=PLANS[plan];
+  document.getElementById('modalTitle').textContent='Upgrade to '+p.name;
+  document.getElementById('orderSummary').innerHTML=`
+    <div class="order-row"><span>${p.name}</span><span>${fmtRp(p.amount)}</span></div>
+    <div class="order-row"><span>Billing</span><span>Monthly</span></div>
+    <div class="order-row total"><span>Total today</span><span>${fmtRp(p.amount)}</span></div>`;
+  document.getElementById('checkoutModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('checkoutModal').classList.remove('open');
+  document.body.style.overflow='';
+  resetModal();
+}
+function resetModal(){
+  document.getElementById('formStep').style.display='block';
+  document.getElementById('processingStep').style.display='none';
+  document.getElementById('errorStep').style.display='none';
+  const btn=document.getElementById('payBtn');
+  btn.disabled=false;
+  document.getElementById('payBtnText').textContent='Pay with DOKU →';
+}
+function showError(msg, detail=''){
+  document.getElementById('formStep').style.display='none';
+  document.getElementById('processingStep').style.display='none';
+  document.getElementById('errorStep').style.display='block';
+  document.getElementById('errorMsg').textContent=msg;
+  document.getElementById('errorDetail').textContent=detail;
+}
+
+// Close modal on overlay click
+document.getElementById('checkoutModal').addEventListener('click', function(e){
+  if(e.target===this) closeModal();
+});
+
+// ── PAYMENT ──
+async function initiatePayment(){
+  const name=document.getElementById('buyerName').value.trim();
+  const email=document.getElementById('buyerEmail').value.trim();
+  const phone=document.getElementById('buyerPhone').value.trim();
+  const tgId=document.getElementById('buyerTgId').value.trim();
+
+  if(!name){toast('⚠️ Please enter your full name');return;}
+  if(!email||!email.includes('@')){toast('⚠️ Please enter a valid email');return;}
+
+  const btn=document.getElementById('payBtn');
+  btn.disabled=true;
+  document.getElementById('payBtnText').innerHTML='<span class="spin">↻</span> Creating order…';
+
+  const plan=PLANS[currentPlan];
+  const invoiceNumber=uid();
+
+  // Store pending order in localStorage for webhook reconciliation
+  localStorage.setItem('cs_pending_order', JSON.stringify({
+    invoiceNumber, plan:currentPlan, name, email, tgId,
+    amount:plan.amount, timestamp:Date.now()
+  }));
+
+  try {
+    // Call our Vercel serverless function to create DOKU checkout
+    const res = await fetch('/api/create-payment', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        invoiceNumber,
+        amount: plan.amount,
+        planName: plan.name,
+        customer: { name, email, phone: phone||'08000000000' },
+        tgChatId: tgId,
+      })
+    });
+
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      throw new Error(err.message||'API error '+res.status);
+    }
+
+    const data=await res.json();
+    const paymentUrl=data.payment?.url||data.url;
+
+    if(!paymentUrl) throw new Error('No payment URL returned from DOKU');
+
+    // Show processing state
+    document.getElementById('formStep').style.display='none';
+    document.getElementById('processingStep').style.display='block';
+
+    // Launch DOKU Jokul checkout popup
+    if(typeof loadJokulCheckout !== 'undefined'){
+      loadJokulCheckout(paymentUrl);
+    } else {
+      // Fallback: open in new tab
+      window.open(paymentUrl, '_blank');
+    }
+
+    // Listen for payment completion (DOKU calls our webhook, then we redirect)
+    startPaymentPolling(invoiceNumber);
+
+  } catch(e){
+    showError('Payment setup failed', e.message);
+    console.error('DOKU error:', e);
+  }
+}
+
+// Poll for payment status (webhook updates our API which we poll)
+function startPaymentPolling(invoiceNumber){
+  let attempts=0;
+  const maxAttempts=120; // 10 minutes
+  const interval=setInterval(async()=>{
+    attempts++;
+    if(attempts>maxAttempts){
+      clearInterval(interval);
+      showError('Payment timeout','Please refresh if you completed payment, or contact support.');
+      return;
+    }
+    try{
+      const res=await fetch('/api/payment-status?invoice='+invoiceNumber);
+      if(!res.ok)return;
+      const data=await res.json();
+      if(data.status==='SUCCESS'){
+        clearInterval(interval);
+        closeModal();
+        onPaymentSuccess(data);
+      } else if(data.status==='FAILED'||data.status==='EXPIRED'){
+        clearInterval(interval);
+        showError('Payment '+data.status.toLowerCase(),'Please try again with a different payment method.');
+      }
+    }catch(e){}
+  }, 5000);
+}
+
+function onPaymentSuccess(data){
+  // Show success state
+  document.getElementById('successCard').classList.add('show');
+  document.getElementById('successCard').scrollIntoView({behavior:'smooth'});
+  toast('🎉 Payment confirmed! Welcome to Pro!', 5000);
+
+  // If TG ID was provided at checkout, activate automatically
+  const pending=JSON.parse(localStorage.getItem('cs_pending_order')||'{}');
+  if(pending.tgId){
+    document.getElementById('chatIdInput').value=pending.tgId;
+    activateTelegram();
+  }
+  localStorage.removeItem('cs_pending_order');
+}
+
+// ── TELEGRAM ACTIVATION ──
+async function activateTelegram(){
+  const chatId=document.getElementById('chatIdInput').value.trim();
+  if(!chatId||isNaN(chatId)){
+    toast('⚠️ Please enter a valid Telegram Chat ID (numbers only)');
+    return;
+  }
+
+  try{
+    // Send welcome message directly via Telegram Bot API
+    const welcomeMsg=`🎉 *Welcome to CryptoSignal Pro!*
+
+Your personal alert bot is now active. Here's what you'll get:
+
+⚡ *Breaking signals* — impact >80
+🇺🇸 *POTUS posts* — instant push
+😱 *Fear & Greed extremes* — <20 or >80
+🐋 *Whale mempool spikes* — BTC fees >80 sat/vB
+📰 *Top daily digest* — best signals summary
+
+_You can adjust alert sensitivity at cryptosignal.id/settings_
+
+Welcome aboard. 🚀`;
+
+    const res=await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        chat_id:chatId,
+        text:welcomeMsg,
+        parse_mode:'Markdown'
+      })
+    });
+    const d=await res.json();
+    if(d.ok){
+      toast('✅ Telegram activated! Check your messages.', 4000);
+      document.getElementById('chatIdInput').disabled=true;
+      document.getElementById('chatIdInput').value='✅ Activated — '+chatId;
+      // Save to localStorage for the main feed to use
+      localStorage.setItem('cs_pro_tg_chat_id', chatId);
+      localStorage.setItem('cs_pro_active', '1');
+    } else {
+      toast('⚠️ Could not reach that Chat ID. Make sure you messaged the bot first.');
+    }
+  }catch(e){
+    toast('⚠️ Network error. Try again in a moment.');
+  }
+}
+
+// ── FAQ ──
+function toggleFaq(el){
+  const item=el.parentElement;
+  item.classList.toggle('open');
+}
+
+// ── CHECK URL PARAMS (payment callback) ──
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  const status=params.get('status');
+  if(status==='success'){
+    const pending=JSON.parse(localStorage.getItem('cs_pending_order')||'{}');
+    if(pending.invoiceNumber){
+      onPaymentSuccess({invoice:pending.invoiceNumber});
+    }
+  } else if(status==='failed'){
+    toast('⚠️ Payment was not completed. You can try again.', 5000);
+  }
+})();
+</script>
+</body>
+</html>
