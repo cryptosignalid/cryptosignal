@@ -41,32 +41,19 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-  console.log('ENV - DOKU_CLIENT_ID:', DOKU_CLIENT_ID ? `SET (${DOKU_CLIENT_ID.length} chars)` : 'MISSING');
-  console.log('ENV - DOKU_SECRET_KEY:', DOKU_SECRET_KEY ? `SET (${DOKU_SECRET_KEY.length} chars)` : 'MISSING');
-  console.log('ENV - DOKU_ENV:', process.env.DOKU_ENV);
-  console.log('BODY:', JSON.stringify(req.body));
-
   if (!DOKU_CLIENT_ID || !DOKU_SECRET_KEY) {
     return res.status(500).json({ message: 'Payment gateway not configured' });
   }
 
   try {
     const body = req.body || {};
-
-    // Handle BOTH payload formats:
-    // Format A (old): { invoiceNumber, amount, planName, customer: {name, email, phone}, tgChatId }
-    // Format B (new): { email, name, tgChatId, planId, planName, amount, days }
     const email    = body.email    || body.customer?.email;
     const name     = body.name     || body.customer?.name;
     const phone    = body.phone    || body.customer?.phone || '08000000000';
     const amount   = body.amount   || body.customer?.amount;
     const planName = body.planName || 'CryptoSignal Pro';
     const tgChatId = body.tgChatId || '';
-
-    // Generate invoiceNumber server-side if not provided
     const invoiceNumber = body.invoiceNumber || `CS-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-
-    console.log('Parsed - email:', email, 'name:', name, 'amount:', amount, 'invoice:', invoiceNumber);
 
     if (!amount || !email || !name) {
       return res.status(400).json({
@@ -99,7 +86,7 @@ module.exports = async function handler(req, res) {
         phone: String(phone).replace(/[^0-9]/g, '') || '08000000000',
       },
       additional_info: {
-        override_notification_url: `${SITE_URL}/api/payment-webhook`,
+        override_notification_url: 'https://www.gominers.id/api/payment-webhook',
         tg_chat_id: String(tgChatId),
         plan: String(planName),
       },
@@ -111,7 +98,6 @@ module.exports = async function handler(req, res) {
       requestId, timestamp, requestTarget, bodyString,
     });
 
-    // Save to Redis (non-fatal)
     await redisSet(`invoice:${invoiceNumber}`, { email, tgChatId, plan: planName }, 7200);
 
     console.log('Calling DOKU:', DOKU_BASE_URL + requestTarget);
@@ -147,12 +133,10 @@ module.exports = async function handler(req, res) {
     const paymentUrl = resp.payment?.url ||
       (resp.payment?.token ? `https://jokul.doku.com/checkout/link/${resp.payment.token}` : null);
 
-    console.log('Payment URL:', paymentUrl);
-
     return res.status(200).json({
-      url:     paymentUrl,
-      payment: resp.payment,
-      order:   resp.order,
+      url:          paymentUrl,
+      payment:      resp.payment,
+      order:        resp.order,
       invoiceNumber,
     });
 
