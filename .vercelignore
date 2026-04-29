@@ -2,7 +2,6 @@
 api/analytics.js
 api/email-drip.js
 api/gnews.js
-api/marketing-agent.js
 api/referral.js
 api/support-bot.js
 
