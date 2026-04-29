@@ -268,6 +268,22 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,14,28,.95);backdrop-filt
     </div>
   </div>
 
+  <!-- ALREADY PRO VERIFY SECTION -->
+  <div style="max-width:500px;margin:0 auto 48px;background:#161b22;border:1px solid #30363d;border-radius:16px;padding:28px;text-align:center;">
+    <div style="font-size:1.5rem;margin-bottom:8px;">🔑</div>
+    <h3 style="color:#e6edf3;margin:0 0 8px;font-size:1.1rem;">Already a Pro member?</h3>
+    <p style="color:#8b949e;font-size:0.875rem;margin:0 0 16px;">Enter your email to restore Pro access on this device.</p>
+    <div style="display:flex;gap:8px;">
+      <input type="email" id="verifyEmailInput" placeholder="your@email.com"
+        style="flex:1;padding:10px 14px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.875rem;outline:none;">
+      <button onclick="verifyExistingPro()"
+        style="padding:10px 20px;background:#f0b90b;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.875rem;white-space:nowrap;">
+        Verify ✓
+      </button>
+    </div>
+    <div id="verifyResult" style="margin-top:12px;font-size:0.8rem;color:#8b949e;"></div>
+  </div>
+
   <!-- FAQ -->
   <div class="faq">
     <div class="section-title" style="margin-bottom:20px">Frequently asked questions</div>
@@ -610,6 +626,36 @@ async function activateTelegram(emailOverride, chatIdOverride){
   }
 }
 
+// ── VERIFY EXISTING PRO (manual email entry) ──
+async function verifyExistingPro(){
+  const email = document.getElementById('verifyEmailInput').value.trim().toLowerCase();
+  const resultEl = document.getElementById('verifyResult');
+  if(!email || !email.includes('@')){
+    resultEl.style.color='#da3633';
+    resultEl.textContent='⚠️ Please enter a valid email address.';
+    return;
+  }
+  resultEl.style.color='#8b949e';
+  resultEl.textContent='Checking...';
+  try{
+    const r = await fetch(`/api/payment-webhook?action=verify&email=${encodeURIComponent(email)}`);
+    const d = await r.json();
+    if(d.pro){
+      const proData={active:true,email:d.email,tgChatId:d.tgChatId,plan:d.plan,expiresAt:d.expiresAt};
+      localStorage.setItem('cs_pro',JSON.stringify(proData));
+      resultEl.style.color='#26a641';
+      resultEl.textContent=`✅ Pro verified! Expires: ${new Date(d.expiresAt).toLocaleDateString()}`;
+      setTimeout(()=>{ window.location.href='/'; }, 1500);
+    } else {
+      resultEl.style.color='#da3633';
+      resultEl.textContent='❌ No active Pro subscription found for this email.';
+    }
+  }catch(e){
+    resultEl.style.color='#da3633';
+    resultEl.textContent='⚠️ Network error. Please try again.';
+  }
+}
+
 // ── PRO STATUS CHECK on page load ──
 async function checkExistingProStatus(){
   const params=new URLSearchParams(window.location.search);
@@ -645,6 +691,8 @@ function toggleFaq(el){
   } else if(status==='failed'){
     toast('⚠️ Payment was not completed. You can try again.', 5000);
   }
+  // Auto-verify if email in URL
+  checkExistingProStatus();
 })();
 </script>
 </body>
