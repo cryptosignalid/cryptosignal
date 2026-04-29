@@ -23,11 +23,11 @@
   ],
   "routes": [
     { "src": "/api/(.*)",         "dest": "/api/$1" },
-    { "src": "/sitemap.xml",      "dest": "/public/sitemap.xml" },
-    { "src": "/robots.txt",       "dest": "/public/robots.txt" },
-    { "src": "/.well-known/(.*)", "dest": "/public/.well-known/$1" },
-    { "src": "/privacy",          "dest": "/public/privacy.html" },
-    { "src": "/terms",            "dest": "/public/terms.html" },
+    { "src": "/sitemap.xml",      "dest": "/sitemap.xml" },
+    { "src": "/robots.txt",       "dest": "/robots.txt" },
+    { "src": "/.well-known/(.*)", "dest": "/.well-known/$1" },
+    { "src": "/privacy",          "dest": "/privacy.html" },
+    { "src": "/terms",            "dest": "/terms.html" },
     { "src": "/pro",              "dest": "/pro.html" },
     { "src": "/alerts",           "dest": "/alerts.html" },
     { "src": "/feed",             "dest": "/index.html" },
@@ -54,13 +54,6 @@
       "source": "/sitemap.xml",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=86400" }
-      ]
-    },
-    {
-      "source": "/.well-known/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400" },
-        { "key": "Content-Type",  "value": "application/json" }
       ]
     }
   ]

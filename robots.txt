@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /pro
+Allow: /alerts
+Allow: /privacy
+Allow: /terms
+
+# Block API routes
+Disallow: /api/
+
+# Block admin/internal paths
+Disallow: /_vercel/
+
+Sitemap: https://cryptosignal.id/sitemap.xml
+
+# Crawl delay for well-behaved bots
+Crawl-delay: 5
