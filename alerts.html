@@ -561,26 +561,28 @@ function sendTestPush() {
   addLog('🔔','Test push sent','now','rgba(0,212,255,.08)','var(--accent)','PUSH');
 }
 
-// Test Telegram — uses Pro user's Chat ID via backend
+// Test Telegram — sends real test message via backend
 async function sendTestTelegram() {
   if(!isPro){
     toast('⚠️ Telegram alerts require Pro. Upgrade at cryptosignal.id/pro');
     return;
   }
   if(!TG_CHAT_ID){
-    toast('⚠️ No Telegram Chat ID found. Set it on the Pro page first.');
-    window.location.href='/pro.html';
+    toast('⚠️ No Telegram Chat ID linked. Go to Pro page → enter Chat ID → Activate.');
+    setTimeout(()=>{ window.location.href='/pro.html'; }, 2000);
     return;
   }
+  toast('✈️ Sending test message...');
   try {
-    const r = await fetch(`/api/payment-webhook?action=update-chatid&email=${encodeURIComponent(proData.email)}&chatId=${encodeURIComponent(TG_CHAT_ID)}`);
+    const r = await fetch(`/api/payment-webhook?action=test-tg&chatId=${encodeURIComponent(TG_CHAT_ID)}&email=${encodeURIComponent(proData.email)}`);
     const d = await r.json();
     if(d.ok){
-      toast('✈️ Test Telegram message sent! Check your Telegram.');
-      addLog('✈️','Test Telegram sent','now','rgba(42,171,238,.08)','var(--tg)','TG');
-      document.getElementById('tgStatus').innerHTML='<div class="tg-dot"></div>Telegram ✓ connected';
+      toast('✈️ Test sent! Check your Telegram now 📱');
+      addLog('✈️','Test Telegram sent to '+TG_CHAT_ID,'now','rgba(42,171,238,.08)','var(--tg)','TG');
+      const statusEl = document.getElementById('tgStatus');
+      if(statusEl) statusEl.innerHTML='<div class="tg-dot"></div>✅ Telegram connected · Chat ID: '+TG_CHAT_ID;
     } else {
-      toast('⚠️ Could not send — check your Chat ID on Pro page.');
+      toast('❌ '+( d.message || 'Send failed — verify Chat ID'));
     }
   } catch(e) {
     toast('❌ Network error: '+e.message);
