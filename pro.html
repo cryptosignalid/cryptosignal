@@ -644,8 +644,10 @@ async function verifyExistingPro(){
       const proData={active:true,email:d.email,tgChatId:d.tgChatId,plan:d.plan,expiresAt:d.expiresAt};
       localStorage.setItem('cs_pro',JSON.stringify(proData));
       resultEl.style.color='#26a641';
-      resultEl.textContent=`✅ Pro verified! Expires: ${new Date(d.expiresAt).toLocaleDateString()}`;
-      setTimeout(()=>{ window.location.href='/'; }, 1500);
+      resultEl.textContent=`✅ Pro verified! Redirecting to your feed...`;
+      // Small delay to ensure localStorage is written before redirect
+      await new Promise(r => setTimeout(r, 800));
+      window.location.href='/?pro=verified';
     } else {
       resultEl.style.color='#da3633';
       resultEl.textContent='❌ No active Pro subscription found for this email.';
