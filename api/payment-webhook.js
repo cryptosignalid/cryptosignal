@@ -181,26 +181,81 @@ _You'll receive alerts like this instantly when breaking crypto news hits._
   if (req.method === 'POST') {
     try {
       const body = req.body;
-      console.log('DOKU webhook:', JSON.stringify(body));
+      console.log('DOKU webhook FULL BODY:', JSON.stringify(body));
 
-      const invoiceNumber = body?.order?.invoice_number;
-      const status        = body?.transaction?.status || body?.purchase?.status;
-      const tgChatId      = body?.additional_info?.tg_chat_id || '';
-      const plan          = body?.additional_info?.plan || 'CryptoSignal Pro';
-      const email         = body?.customer?.email || '';
+      // Handle ALL possible DOKU payload formats
+      const invoiceNumber = 
+        body?.order?.invoice_number ||
+        body?.invoice_number ||
+        body?.ORDER?.INVOICE_NUMBER ||
+        body?.INVOICE_NUMBER || '';
 
-      if (!invoiceNumber) return res.status(400).json({ message: 'No invoice number' });
+      // DOKU uses different status field names per payment method
+      const status =
+        body?.transaction?.status ||
+        body?.purchase?.status ||
+        body?.TRANSACTION?.STATUS ||
+        body?.status ||
+        body?.payment_status ||
+        body?.PAYMENT_STATUS || '';
 
-      if (status === 'SUCCESS') {
+      const email =
+        body?.customer?.email ||
+        body?.CUSTOMER?.EMAIL ||
+        body?.email ||
+        body?.EMAIL || '';
+
+      const tgChatId =
+        body?.additional_info?.tg_chat_id ||
+        body?.additionalInfo?.tgChatId ||
+        body?.tg_chat_id || '';
+
+      const plan =
+        body?.additional_info?.plan ||
+        body?.plan ||
+        'CryptoSignal Pro';
+
+      console.log('DOKU parsed - invoice:', invoiceNumber, 'status:', status, 'email:', email);
+
+      // Always return 200 to DOKU immediately to prevent retries
+      // Process activation async
+      if (!invoiceNumber) {
+        console.error('No invoice number in payload');
+        return res.status(200).json({ message: 'OK' }); // still 200 to stop retries
+      }
+
+      // Check multiple SUCCESS status values DOKU might send
+      const isSuccess = ['SUCCESS', 'PAID', 'SETTLEMENT', 'CAPTURE', 'success', 'paid'].includes(status);
+      
+      console.log('isSuccess:', isSuccess, 'status value:', status);
+
+      if (isSuccess && email) {
         const sub = await activateSubscriber({ email, tgChatId, plan, invoiceNumber });
         if (tgChatId) await sendWelcomeTG(tgChatId, plan);
-        console.log('Activated:', sub.email);
+        console.log('✅ Pro activated for:', email);
+      } else if (isSuccess && !email) {
+        // Try to get email from invoice record in Redis
+        const invoiceRec = await getInvoice(invoiceNumber).catch(() => null);
+        if (invoiceRec?.email) {
+          const sub = await activateSubscriber({ 
+            email: invoiceRec.email, 
+            tgChatId: invoiceRec.tgChatId || tgChatId, 
+            plan: invoiceRec.plan || plan, 
+            invoiceNumber 
+          });
+          if (invoiceRec.tgChatId) await sendWelcomeTG(invoiceRec.tgChatId, plan);
+          console.log('✅ Pro activated from invoice record:', invoiceRec.email);
+        } else {
+          console.error('❌ SUCCESS but no email found for invoice:', invoiceNumber);
+        }
+      } else {
+        console.log('Payment not SUCCESS, status was:', status);
       }
 
       return res.status(200).json({ message: 'OK' });
     } catch (err) {
-      console.error('Webhook error:', err.message);
-      return res.status(500).json({ message: err.message });
+      console.error('Webhook error:', err.message, err.stack);
+      return res.status(200).json({ message: 'OK' }); // always 200 to DOKU
     }
   }
 
