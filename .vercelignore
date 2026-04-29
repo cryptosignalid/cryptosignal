@@ -1,8 +1,12 @@
-# Exclude old root-level JS files - use api/ folder versions instead
-create-payment.js
-payment-webhook.js
-broadcast.js
-db.js
+# Ignore Phase 2 API files - enable one by one after payment works
+api/analytics.js
+api/email-drip.js
+api/gnews.js
+api/marketing-agent.js
+api/referral.js
+api/support-bot.js
+
+# Ignore old root files
 docs/
 public/
 cryptosignal-release.jks
