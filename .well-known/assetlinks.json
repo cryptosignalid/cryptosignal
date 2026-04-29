@@ -4,7 +4,7 @@
     "namespace": "android_app",
     "package_name": "id.cryptosignal.app",
     "sha256_cert_fingerprints": [
-      "REPLACE_WITH_YOUR_KEYSTORE_SHA256_FINGERPRINT"
+      "3F:93:36:B6:7E:E9:02:9D:8C:AC:C6:31:E9:25:5A:58:EE:AE:02:45:4E:32:AE:33:93:4F:4B:BD:84:AF:A7:77"
     ]
   }
 }]
