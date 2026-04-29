@@ -2,7 +2,7 @@
 const crypto = require('crypto');
 
 const DOKU_SECRET_KEY = process.env.DOKU_SECRET_KEY;
-const TG_BOT_TOKEN    = process.env.TG_BOT_TOKEN;
+const TG_BOT_TOKEN    = process.env.TG_BOT_TOKEN || '8655654640:AAEAWBWG9u52gNZi1Me60yOiFh9oZ0csQtc';
 const SITE_URL        = process.env.SITE_URL || 'https://cryptosignal.id';
 
 // Upstash Redis helpers (inline)
