@@ -41,26 +41,36 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-  // Log env state (no secrets)
-  console.log('ENV CHECK - DOKU_CLIENT_ID:', DOKU_CLIENT_ID ? `SET (${DOKU_CLIENT_ID.length} chars)` : 'MISSING');
-  console.log('ENV CHECK - DOKU_SECRET_KEY:', DOKU_SECRET_KEY ? `SET (${DOKU_SECRET_KEY.length} chars)` : 'MISSING');
-  console.log('ENV CHECK - DOKU_ENV:', process.env.DOKU_ENV);
-  console.log('ENV CHECK - DOKU_BASE_URL:', DOKU_BASE_URL);
-  console.log('BODY received:', JSON.stringify(req.body));
+  console.log('ENV - DOKU_CLIENT_ID:', DOKU_CLIENT_ID ? `SET (${DOKU_CLIENT_ID.length} chars)` : 'MISSING');
+  console.log('ENV - DOKU_SECRET_KEY:', DOKU_SECRET_KEY ? `SET (${DOKU_SECRET_KEY.length} chars)` : 'MISSING');
+  console.log('ENV - DOKU_ENV:', process.env.DOKU_ENV);
+  console.log('BODY:', JSON.stringify(req.body));
 
   if (!DOKU_CLIENT_ID || !DOKU_SECRET_KEY) {
-    return res.status(500).json({ message: 'Payment gateway not configured — missing DOKU credentials' });
+    return res.status(500).json({ message: 'Payment gateway not configured' });
   }
 
   try {
     const body = req.body || {};
-    const { invoiceNumber, amount, planName, customer, tgChatId } = body;
 
-    console.log('Fields - invoiceNumber:', invoiceNumber, 'amount:', amount, 'customer:', JSON.stringify(customer));
+    // Handle BOTH payload formats:
+    // Format A (old): { invoiceNumber, amount, planName, customer: {name, email, phone}, tgChatId }
+    // Format B (new): { email, name, tgChatId, planId, planName, amount, days }
+    const email    = body.email    || body.customer?.email;
+    const name     = body.name     || body.customer?.name;
+    const phone    = body.phone    || body.customer?.phone || '08000000000';
+    const amount   = body.amount   || body.customer?.amount;
+    const planName = body.planName || 'CryptoSignal Pro';
+    const tgChatId = body.tgChatId || '';
 
-    if (!invoiceNumber || !amount || !customer?.name || !customer?.email) {
+    // Generate invoiceNumber server-side if not provided
+    const invoiceNumber = body.invoiceNumber || `CS-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+
+    console.log('Parsed - email:', email, 'name:', name, 'amount:', amount, 'invoice:', invoiceNumber);
+
+    if (!amount || !email || !name) {
       return res.status(400).json({
-        message: `Missing fields: ${!invoiceNumber?'invoiceNumber ':''} ${!amount?'amount ':''} ${!customer?.name?'customer.name ':''} ${!customer?.email?'customer.email':''}`.trim(),
+        message: `Missing: ${!amount?'amount ':''} ${!email?'email ':''} ${!name?'name':''}`.trim()
       });
     }
 
@@ -76,41 +86,35 @@ module.exports = async function handler(req, res) {
         callback_url:        `${SITE_URL}/pro.html?status=success`,
         callback_url_cancel: `${SITE_URL}/pro.html?status=failed`,
         line_items: [{
-          id: '001',
-          name: String(planName || 'CryptoSignal Pro').substring(0, 50),
-          price: Number(amount),
+          id:       '001',
+          name:     String(planName).substring(0, 50),
+          price:    Number(amount),
           quantity: 1,
         }],
       },
       payment: { payment_due_date: 60 },
       customer: {
-        name:  String(customer.name),
-        email: String(customer.email),
-        phone: String(customer.phone || '08000000000').replace(/[^0-9]/g, ''),
+        name:  String(name),
+        email: String(email),
+        phone: String(phone).replace(/[^0-9]/g, '') || '08000000000',
       },
       additional_info: {
         override_notification_url: `${SITE_URL}/api/payment-webhook`,
-        tg_chat_id: String(tgChatId || ''),
-        plan: String(planName || 'pro'),
+        tg_chat_id: String(tgChatId),
+        plan: String(planName),
       },
     };
 
     const bodyString = JSON.stringify(dokuBody);
     const { signature, digestValue } = generateDokuSignature({
-      secretKey: DOKU_SECRET_KEY,
-      clientId: DOKU_CLIENT_ID,
+      secretKey: DOKU_SECRET_KEY, clientId: DOKU_CLIENT_ID,
       requestId, timestamp, requestTarget, bodyString,
     });
 
     // Save to Redis (non-fatal)
-    await redisSet(`invoice:${invoiceNumber}`, {
-      email: customer.email, tgChatId: tgChatId || '', plan: planName || 'pro'
-    }, 7200);
+    await redisSet(`invoice:${invoiceNumber}`, { email, tgChatId, plan: planName }, 7200);
 
     console.log('Calling DOKU:', DOKU_BASE_URL + requestTarget);
-    console.log('Client-Id:', DOKU_CLIENT_ID);
-    console.log('Timestamp:', timestamp);
-    console.log('Signature:', signature.substring(0, 30) + '...');
 
     const dokuRes = await fetch(`${DOKU_BASE_URL}${requestTarget}`, {
       method: 'POST',
@@ -127,16 +131,14 @@ module.exports = async function handler(req, res) {
 
     const responseText = await dokuRes.text();
     console.log('DOKU status:', dokuRes.status);
-    console.log('DOKU response:', responseText);
+    console.log('DOKU response:', responseText.substring(0, 500));
 
     let data;
     try { data = JSON.parse(responseText); } catch { data = { raw: responseText }; }
 
     if (!dokuRes.ok) {
-      // Return FULL DOKU error so we can debug
       return res.status(dokuRes.status).json({
         message: data?.message || 'DOKU error ' + dokuRes.status,
-        doku_status: dokuRes.status,
         doku_response: data,
       });
     }
@@ -148,13 +150,14 @@ module.exports = async function handler(req, res) {
     console.log('Payment URL:', paymentUrl);
 
     return res.status(200).json({
-      url: paymentUrl,
+      url:     paymentUrl,
       payment: resp.payment,
-      order: resp.order,
+      order:   resp.order,
+      invoiceNumber,
     });
 
   } catch (err) {
-    console.error('create-payment exception:', err.message, err.stack);
+    console.error('create-payment error:', err.message, err.stack);
     return res.status(500).json({ message: err.message || 'Internal server error' });
   }
 };
