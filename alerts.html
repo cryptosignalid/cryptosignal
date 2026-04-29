@@ -371,12 +371,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
         <div class="tg-title">✈️ Connect Telegram Bot</div>
         <div class="tg-sub">Get formatted signals directly in Telegram — with impact score, source trust, coin tags, and a direct link to the full article.</div>
         <div class="tg-steps">
-          <div class="tg-step"><div class="step-n">1</div><div class="step-t">Open Telegram, search <b>@cryptosignalalert1bot</b> and press Start</div></div>
-          <div class="tg-step"><div class="step-n">2</div><div class="step-t">Send the bot your unique code below to link your account:</div></div>
+          <div class="tg-step"><div class="step-n">1</div><div class="step-t">Click the button below → Telegram opens → press <b>Start</b></div></div>
+          <div class="tg-step"><div class="step-n">2</div><div class="step-t">Bot replies with your <b>Chat ID</b> — copy and paste it here:</div></div>
         </div>
-        <div class="tg-code-box" onclick="copyCode()" id="tgCode">CS-8X4K-2026</div>
-        <div class="tg-expire" id="tgExpire">expires in 15:00 · click to copy</div>
-        <a class="tg-open-btn" href="https://t.me/cryptosignalalert1bot" target="_blank">✈️ Open @cryptosignalalert1bot</a>
+
+        <div style="display:flex;gap:8px;margin:12px 0;">
+          <input type="text" id="manualChatId" placeholder="Paste Chat ID from bot here"
+            style="flex:1;padding:10px 14px;background:#0d1117;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#f0f4ff;font-size:14px;outline:none;font-family:inherit;">
+          <button onclick="saveChatId()" 
+            style="padding:10px 16px;background:rgba(42,171,238,.2);border:1px solid rgba(42,171,238,.4);color:#2aabee;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap;">
+            ✓ Save
+          </button>
+        </div>
+        <div id="chatIdStatus" style="font-size:12px;color:#5a6a8a;margin-bottom:12px;min-height:16px;"></div>
+
+        <a class="tg-open-btn" href="https://t.me/cryptosignalalert1bot?start=connect" target="_blank" 
+           style="display:block;text-align:center;padding:12px;background:linear-gradient(135deg,rgba(42,171,238,.2),rgba(0,212,255,.1));border:1px solid rgba(42,171,238,.3);border-radius:10px;color:#2aabee;text-decoration:none;font-weight:700;font-size:14px;">
+          ✈️ Step 1: Open @cryptosignalalert1bot → Press Start
+        </a>
       </div>
     </div>
 
@@ -411,7 +423,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
         </div>
         <div class="test-row">
           <button class="test-btn" onclick="sendTestPush()">🔔 Test Push</button>
-          <button class="test-btn" onclick="sendTestTelegram()">✈️ Test Telegram</button>
+          <button class="test-btn" onclick="handleTestTelegram()">✈️ Test Telegram</button>
         </div>
       </div>
     </div>
@@ -435,7 +447,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 </div>
 
 <!-- PRO GATE OVERLAY — shown to non-Pro users over Telegram section -->
-<div id="proGateOverlay" style="display:none;position:absolute;inset:0;background:rgba(4,6,15,0.85);backdrop-filter:blur(4px);border-radius:var(--radius);z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px;text-align:center;">
+<div id="proGateOverlay" style="display:none;position:absolute;inset:0;background:rgba(4,6,15,0.85);backdrop-filter:blur(4px);border-radius:var(--radius);z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px;text-align:center;">
   <div style="font-size:2rem;">🔒</div>
   <div style="font-weight:800;font-size:1rem;color:#f0f4ff;">Telegram Alerts — Pro Feature</div>
   <div style="font-size:0.8rem;color:#94a3c0;max-width:220px;line-height:1.5;">Get instant Telegram alerts for every breaking signal, whale move and POTUS post.</div>
@@ -455,6 +467,8 @@ const isPro = !!proData;
 // Use Pro user's actual Telegram Chat ID, not hardcoded one
 const TG_TOKEN   = ''; // Calls backend API instead
 const TG_CHAT_ID = isPro ? (proData.tgChatId || '') : '';
+// Allow runtime override when user saves new Chat ID
+Object.defineProperty(window, '_tgChatIdOverride', { writable: true, value: TG_CHAT_ID });
 
 // Prefs from localStorage
 const PREF_KEY = 'cs_alert_prefs';
@@ -534,14 +548,16 @@ function setTT(el){document.querySelectorAll('.tt').forEach(t=>t.classList.remov
 // Code copy
 let countdown=900;
 function copyCode(){
-  navigator.clipboard.writeText(document.getElementById('tgCode').textContent).catch(()=>{});
+  const codeEl = document.getElementById('tgCode');
+  if(codeEl) navigator.clipboard.writeText(codeEl.textContent).catch(()=>{});
   toast('📋 Code copied to clipboard!');
 }
 setInterval(()=>{
   countdown--;
   const m=String(Math.floor(countdown/60)).padStart(2,'0');
   const s=String(countdown%60).padStart(2,'0');
-  document.getElementById('tgExpire').textContent=`expires in ${m}:${s} · click to copy`;
+  const expEl = document.getElementById('tgExpire');
+  if(expEl) expEl.textContent=`expires in ${m}:${s} · click to copy`;
   if(countdown<=0)countdown=900;
 },1000);
 
@@ -564,6 +580,50 @@ function sendTestPush() {
 // Test Telegram — calls Telegram API directly from browser
 const TG_BOT = '8731034518:AAHTpe89-toSMtlV5N_gYu__Zy5-EVUU8tA';
 
+async function saveChatId() {
+  const chatId = document.getElementById('manualChatId').value.trim();
+  const statusEl = document.getElementById('chatIdStatus');
+  if(!chatId || isNaN(chatId)) {
+    statusEl.style.color='#f55070';
+    statusEl.textContent='⚠️ Please enter a valid numeric Chat ID';
+    return;
+  }
+  if(!isPro || !proData?.email) {
+    statusEl.style.color='#f55070';
+    statusEl.textContent='⚠️ Pro account required. Verify your Pro status first.';
+    return;
+  }
+  statusEl.style.color='#94a3c0';
+  statusEl.textContent='Saving...';
+  try {
+    const r = await fetch(`/api/payment-webhook?action=update-chatid&email=${encodeURIComponent(proData.email)}&chatId=${encodeURIComponent(chatId)}`);
+    const d = await r.json();
+    // Update local proData regardless of backend result
+    proData.tgChatId = chatId;
+    localStorage.setItem('cs_pro', JSON.stringify(proData));
+    statusEl.style.color='#22d98a';
+    statusEl.textContent=`✅ Chat ID ${chatId} saved! Now click Test Telegram below.`;
+    // Update the TG_CHAT_ID variable used by sendTestTelegram
+    window._tgChatId = chatId;
+  } catch(e) {
+    // Save locally even if backend fails
+    proData.tgChatId = chatId;
+    localStorage.setItem('cs_pro', JSON.stringify(proData));
+    window._tgChatId = chatId;
+    statusEl.style.color='#22d98a';
+    statusEl.textContent=`✅ Chat ID ${chatId} saved locally. Click Test Telegram below.`;
+  }
+}
+
+async function handleTestTelegram() {
+  // Open bot first, then test after 3 seconds
+  window.open('https://t.me/cryptosignalalert1bot?start=connect', '_blank');
+  toast('✈️ Press START in Telegram, then click Test again in 5 seconds...');
+  setTimeout(() => {
+    sendTestTelegram();
+  }, 5000);
+}
+
 async function sendTestTelegram() {
   if(!isPro){
     toast('⚠️ Telegram alerts require Pro. Upgrade at cryptosignal.id/pro');
@@ -576,6 +636,13 @@ async function sendTestTelegram() {
   }
   toast('✈️ Sending test message...');
   
+  // Use most recently saved Chat ID
+  const activeChatId = window._tgChatId || TG_CHAT_ID;
+  if(!activeChatId){
+    toast('⚠️ No Chat ID found. Complete Step 1 and Step 2 above first.');
+    return;
+  }
+
   const msg = `⚡ *CryptoSignal Pro — Test Alert*
 
 ✅ Your Telegram is connected and working!
@@ -594,12 +661,12 @@ _You'll receive alerts like this instantly when breaking crypto news hits._
     const r = await fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({chat_id: TG_CHAT_ID, text: msg, parse_mode: 'Markdown'})
+      body: JSON.stringify({chat_id: activeChatId, text: msg, parse_mode: 'Markdown'})
     });
     const d = await r.json();
     if(d.ok){
       toast('✈️ Test sent! Check your Telegram now 📱');
-      addLog('✈️','Test Telegram sent to '+TG_CHAT_ID,'now','rgba(42,171,238,.08)','var(--tg)','TG');
+      addLog('✈️','Test Telegram sent to '+activeChatId,'now','rgba(42,171,238,.08)','var(--tg)','TG');
       const statusEl = document.getElementById('tgStatus');
       if(statusEl) statusEl.innerHTML='<div class="tg-dot"></div>✅ Telegram connected · Chat ID: '+TG_CHAT_ID;
     } else {
@@ -657,8 +724,13 @@ function initProUI() {
       if(TG_CHAT_ID) {
         const statusEl = document.getElementById('tgStatus');
         if(statusEl) statusEl.innerHTML = '<div class="tg-dot"></div>Telegram ✓ connected — Chat ID: ' + TG_CHAT_ID;
-        document.getElementById('tgCode').textContent = 'Chat ID: ' + TG_CHAT_ID;
-        document.getElementById('tgExpire').textContent = `✅ Connected as ${proData.email} · expires ${new Date(proData.expiresAt).toLocaleDateString('id-ID')}`;
+        const tgCodeEl = document.getElementById('tgCode');
+        if(tgCodeEl) tgCodeEl.textContent = 'Chat ID: ' + TG_CHAT_ID;
+        const tgExpireEl = document.getElementById('tgExpire');
+        if(tgExpireEl) tgExpireEl.textContent = `✅ Connected as ${proData.email} · expires ${new Date(proData.expiresAt).toLocaleDateString('id-ID')}`;
+        // Pre-fill the manual chat ID input
+        const chatInput = document.getElementById('manualChatId');
+        if(chatInput) chatInput.value = TG_CHAT_ID;
       }
     }
 
