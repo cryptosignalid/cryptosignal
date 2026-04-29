@@ -13,7 +13,7 @@ async function getMarketData() {
     // Try CoinGecko first
     const [fgRes, cgRes] = await Promise.all([
       fetch('https://api.alternative.me/fng/?limit=1', { headers: { 'Accept': 'application/json' } }),
-      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&sparkline=false', { headers: { 'Accept': 'application/json' } }),
+      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,binancecoin,ripple&order=market_cap_desc&sparkline=false', { headers: { 'Accept': 'application/json' } }),
     ]);
 
     if (!fgRes.ok || !cgRes.ok) {
