@@ -10,21 +10,36 @@ const SITE_URL      = process.env.SITE_URL || 'https://cryptosignal.id';
 
 async function getMarketData() {
   try {
+    // Try CoinGecko first
     const [fgRes, cgRes] = await Promise.all([
-      fetch('https://api.alternative.me/fng/?limit=1'),
-      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&sparkline=false'),
+      fetch('https://api.alternative.me/fng/?limit=1', { headers: { 'Accept': 'application/json' } }),
+      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&sparkline=false', { headers: { 'Accept': 'application/json' } }),
     ]);
-    const fg = await fgRes.json();
-    const cg = await cgRes.json();
+
+    if (!fgRes.ok || !cgRes.ok) {
+      console.error('API error - FG:', fgRes.status, 'CG:', cgRes.status);
+    }
+
+    const fg = fgRes.ok ? await fgRes.json() : null;
+    const cg = cgRes.ok ? await cgRes.json() : null;
+
+    if (!cg || !Array.isArray(cg) || cg.length === 0) {
+      console.error('CoinGecko returned no data');
+      return null;
+    }
+
     return {
-      fearGreed: fg.data?.[0],
+      fearGreed: fg?.data?.[0] || { value: '50', value_classification: 'Neutral' },
       coins: cg.map(c => ({
         symbol: c.symbol.toUpperCase(),
         price: c.current_price,
         change24h: (+c.price_change_percentage_24h).toFixed(2),
       })),
     };
-  } catch(e) { return null; }
+  } catch(e) {
+    console.error('getMarketData error:', e.message);
+    return null;
+  }
 }
 
 async function generateContent(market) {
@@ -301,10 +316,28 @@ async function tgSend(chatId, text, extra = {}) {
 module.exports = async function handler(req, res) {
   // Serve IG card as HTML page
   if (req.method === 'GET' && req.query.action === 'ig-card') {
-    const market = await getMarketData();
-    const content = await generateContent(market);
+    let market = await getMarketData();
+    // Fallback data if API fails
+    if (!market || !market.coins?.length) {
+      market = {
+        fearGreed: { value: '–', value_classification: 'Loading...' },
+        coins: [
+          { symbol: 'BTC', price: 0, change24h: '0.00' },
+          { symbol: 'ETH', price: 0, change24h: '0.00' },
+          { symbol: 'SOL', price: 0, change24h: '0.00' },
+        ],
+      };
+    }
+    let content = await generateContent(market);
+    if (!content) {
+      content = {
+        headline: 'LIVE CRYPTO SIGNALS',
+        subheadline: 'Pantau sinyal real-time di cryptosignal.id',
+      };
+    }
     const html = buildIGCard(content, market);
     res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).send(html);
   }
 
