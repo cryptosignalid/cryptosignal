@@ -561,7 +561,9 @@ function sendTestPush() {
   addLog('🔔','Test push sent','now','rgba(0,212,255,.08)','var(--accent)','PUSH');
 }
 
-// Test Telegram — sends real test message via backend
+// Test Telegram — calls Telegram API directly from browser
+const TG_BOT = '8655654640:AAEAWBWG9u52gNZi1Me60yOiFh9oZ0csQtc';
+
 async function sendTestTelegram() {
   if(!isPro){
     toast('⚠️ Telegram alerts require Pro. Upgrade at cryptosignal.id/pro');
@@ -573,8 +575,27 @@ async function sendTestTelegram() {
     return;
   }
   toast('✈️ Sending test message...');
+  
+  const msg = `⚡ *CryptoSignal Pro — Test Alert*
+
+✅ Your Telegram is connected and working!
+
+📈 *BULLISH* · Impact *87/100* · Trust *9.2/10*
+*BlackRock IBIT Bitcoin ETF crosses $32B AUM*
+Fastest ETF milestone in Wall Street history.
+
+🪙 #BTC · 📡 Bloomberg Intelligence
+
+_You'll receive alerts like this instantly when breaking crypto news hits._
+
+🌐 cryptosignal.id`;
+
   try {
-    const r = await fetch(`/api/payment-webhook?action=test-tg&chatId=${encodeURIComponent(TG_CHAT_ID)}&email=${encodeURIComponent(proData.email)}`);
+    const r = await fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({chat_id: TG_CHAT_ID, text: msg, parse_mode: 'Markdown'})
+    });
     const d = await r.json();
     if(d.ok){
       toast('✈️ Test sent! Check your Telegram now 📱');
@@ -582,7 +603,8 @@ async function sendTestTelegram() {
       const statusEl = document.getElementById('tgStatus');
       if(statusEl) statusEl.innerHTML='<div class="tg-dot"></div>✅ Telegram connected · Chat ID: '+TG_CHAT_ID;
     } else {
-      toast('❌ '+( d.message || 'Send failed — verify Chat ID'));
+      toast('❌ Telegram error: '+(d.description||'Check Chat ID'));
+      console.error('TG error:', d);
     }
   } catch(e) {
     toast('❌ Network error: '+e.message);
