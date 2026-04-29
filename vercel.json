@@ -1,13 +1,11 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/create-payment",  "destination": "/create-payment.js" },
-    { "source": "/api/payment-webhook", "destination": "/payment-webhook.js" },
-    { "source": "/pro",                 "destination": "/pro.html" },
-    { "source": "/alerts",              "destination": "/alerts.html" },
-    { "source": "/privacy",             "destination": "/privacy.html" },
-    { "source": "/terms",               "destination": "/terms.html" },
-    { "source": "/feed",                "destination": "/index.html" }
+    { "source": "/pro",     "destination": "/pro.html" },
+    { "source": "/alerts",  "destination": "/alerts.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms",   "destination": "/terms.html" },
+    { "source": "/feed",    "destination": "/index.html" }
   ],
   "headers": [
     {
