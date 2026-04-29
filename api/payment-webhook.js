@@ -131,6 +131,34 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // Send test Telegram message directly to chatId
+    if (action === 'test-tg' && req.query.chatId) {
+      const chatId = req.query.chatId;
+      const userEmail = req.query.email || 'Pro Member';
+      const msg = `⚡ *CryptoSignal Pro — Test Alert*
+
+✅ Your Telegram is connected and working!
+
+Here's what your real alerts look like:
+
+📈 *BULLISH* · Impact *87/100* · Trust *9.2/10*
+*BlackRock IBIT Bitcoin ETF crosses $32B AUM*
+Fastest ETF milestone in Wall Street history.
+
+🪙 #BTC · 📡 Bloomberg Intelligence
+
+_You'll receive alerts like this instantly when breaking crypto news hits._
+
+🌐 cryptosignal.id`;
+
+      const sent = await tgSend(chatId, msg);
+      if (sent) {
+        return res.json({ ok: true, message: 'Test message sent!' });
+      } else {
+        return res.status(400).json({ ok: false, message: 'Failed to send — check Chat ID and bot setup' });
+      }
+    }
+
     return res.status(400).json({ message: 'Missing action param' });
   }
 
