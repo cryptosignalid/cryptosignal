@@ -2,7 +2,7 @@
 const crypto = require('crypto');
 
 const DOKU_SECRET_KEY = process.env.DOKU_SECRET_KEY;
-const TG_BOT_TOKEN    = process.env.TG_BOT_TOKEN || '8655654640:AAEAWBWG9u52gNZi1Me60yOiFh9oZ0csQtc';
+const TG_BOT_TOKEN    = process.env.TG_BOT_TOKEN || '8731034518:AAHTpe89-toSMtlV5N_gYu__Zy5-EVUU8tA';
 const SITE_URL        = process.env.SITE_URL || 'https://cryptosignal.id';
 
 // Upstash Redis helpers (inline)
@@ -76,15 +76,22 @@ async function isProActive(email) {
 
 // Telegram helper
 async function tgSend(chatId, text) {
-  if (!chatId || !TG_BOT_TOKEN) return false;
+  if (!chatId) { console.error('tgSend: no chatId'); return { ok: false, error: 'no_chatid' }; }
+  if (!TG_BOT_TOKEN) { console.error('tgSend: no TG_BOT_TOKEN'); return { ok: false, error: 'no_token' }; }
   try {
+    console.log('tgSend: chatId=', chatId, 'token=', TG_BOT_TOKEN.substring(0,10)+'...');
     const r = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
     });
-    return (await r.json()).ok;
-  } catch { return false; }
+    const data = await r.json();
+    console.log('tgSend response:', JSON.stringify(data));
+    return data;
+  } catch(e) { 
+    console.error('tgSend error:', e.message);
+    return { ok: false, error: e.message }; 
+  }
 }
 
 async function sendWelcomeTG(chatId, plan) {
@@ -152,10 +159,18 @@ _You'll receive alerts like this instantly when breaking crypto news hits._
 🌐 cryptosignal.id`;
 
       const sent = await tgSend(chatId, msg);
-      if (sent) {
+      console.log('test-tg result:', JSON.stringify(sent));
+      if (sent && sent.ok) {
         return res.json({ ok: true, message: 'Test message sent!' });
       } else {
-        return res.status(400).json({ ok: false, message: 'Failed to send — check Chat ID and bot setup' });
+        return res.status(400).json({ 
+          ok: false, 
+          message: 'Failed to send',
+          tg_error: sent,
+          chatId: chatId,
+          token_set: !!TG_BOT_TOKEN,
+          token_prefix: TG_BOT_TOKEN ? TG_BOT_TOKEN.substring(0,10) : 'MISSING'
+        });
       }
     }
 
