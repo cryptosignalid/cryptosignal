@@ -1,4 +1,8 @@
+# Exclude old root-level JS files - use api/ folder versions instead
+create-payment.js
+payment-webhook.js
 broadcast.js
 db.js
 docs/
 public/
+cryptosignal-release.jks
