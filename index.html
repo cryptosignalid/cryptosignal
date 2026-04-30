@@ -6,6 +6,13 @@
 <title>CryptoSignal — Live AI Market Intelligence</title>
 <meta name="description" content="Real-time crypto signals from 100+ sources. AI-ranked, hoax-detected, market-impact scored.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-512.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CryptoSignal">
+  <meta name="theme-color" content="#040610">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -408,14 +415,7 @@ function updateProUI(){
   const btn=document.getElementById('headerProBtn');
   if(proUser.active){
     if(badge){badge.style.display='inline-flex';badge.textContent='⚡ PRO';}
-    if(btn){
-      btn.textContent='⚡ PRO';
-      btn.style.background='linear-gradient(135deg,#22d98a,#00d4ff)';
-      btn.style.color='#000';
-      btn.style.fontWeight='900';
-      btn.title='Pro Member — Click to manage';
-      btn.href='/pro.html';
-    }
+    if(btn){btn.textContent='⚡ Pro Member';btn.style.background='linear-gradient(135deg,#22d98a,#00d4ff)';}
   }else{
     if(badge)badge.style.display='none';
     if(btn){btn.textContent='Go Pro ↗';btn.style.background='linear-gradient(135deg,#00d4ff,#8b5cf6)';}
@@ -1285,22 +1285,15 @@ function startTimer(){
   },1000);
 }
 
-(async()=>{
-  await checkProStatus();
-  fetchPrices();
-  await fetchAll();
-  startTimer();
-  setInterval(fetchPrices,60000);
-  // Show welcome toast if coming from pro verify
-  const urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.get('pro')==='verified' && proUser.active){
-    setTimeout(()=>{
-      toast(`🎉 Welcome to Pro, ${proUser.email}! Unlimited signals unlocked.`, 5000);
-      // Clean URL
-      window.history.replaceState({}, '', '/');
-    }, 500);
-  }
-})();
+(async()=>{await checkProStatus();fetchPrices();await fetchAll();startTimer();setInterval(fetchPrices,60000);})();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
