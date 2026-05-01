@@ -427,8 +427,8 @@ ${fngEmoji} *Fear & Greed: ${fngScore}/100 — ${fngLabel}*
 📊 Market Cap: *${fmtCap(global.total_market_cap?.usd||0)}* (${capChg>=0?'+':''}${capChg.toFixed(1)}%)
 🔥 Trending: ${trending.slice(0,3).map(t=>`$${t.symbol?.toUpperCase()}`).join(' · ')}
 
-🔗 Signal live: cryptosignal.id
-⚡ Pro alerts: cryptosignal.id/pro.html`;
+🔗 Signal live: [cryptosignal.id](https://cryptosignal.id)
+⚡ Pro alerts: [Upgrade Rp 449K/mo](https://cryptosignal.id/pro.html)`;
 
     // Send to channel
     if (TG_CHANNEL_ID) {
