@@ -1,21 +1,25 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/pro",     "destination": "/pro.html" },
-    { "source": "/alerts",  "destination": "/alerts.html" },
-    { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/terms",   "destination": "/terms.html" },
-    { "source": "/feed",    "destination": "/index.html" }
-  ],
-  "headers": [
+  "functions": {
+    "api/create-payment.js":  { "maxDuration": 30 },
+    "api/payment-webhook.js": { "maxDuration": 30 },
+    "api/broadcast.js":       { "maxDuration": 60 },
+    "api/daily-digest.js":    { "maxDuration": 60 },
+    "api/generate-media.js":  { "maxDuration": 60 }
+  },
+  "crons": [
     {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options",        "value": "DENY" },
-        { "key": "X-XSS-Protection",       "value": "1; mode=block" },
-        { "key": "Referrer-Policy",        "value": "strict-origin-when-cross-origin" }
-      ]
+      "path": "/api/daily-digest",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/generate-media",
+      "schedule": "30 1 * * *"
     }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/pro",      "dest": "/pro.html" },
+    { "src": "/",         "dest": "/index.html" }
   ]
 }
