@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delete Account — CryptoSignal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080e1c; --panel: #131f33; --border: rgba(255,255,255,0.08);
+    --text: #f0f4ff; --muted: #94a3c0; --accent: #00d4ff; --red: #f55070;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.7; }
+  header { background: rgba(8,14,28,0.96); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#00d4ff,#8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .logo-text { font-weight: 700; font-size: 16px; color: var(--text); text-decoration: none; }
+  .logo-text span { color: var(--accent); }
+  .container { max-width: 700px; margin: 0 auto; padding: 48px 24px; }
+  h1 { font-size: 26px; font-weight: 800; color: var(--red); margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  .warning-box { background: rgba(245,80,112,0.08); border: 1px solid rgba(245,80,112,0.25); border-radius: 10px; padding: 20px; margin-bottom: 32px; font-size: 14px; color: var(--muted); }
+  .warning-box strong { color: var(--red); }
+  h2 { font-size: 15px; font-weight: 700; color: var(--text); margin: 28px 0 10px; }
+  p { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+  ol { color: var(--muted); font-size: 14px; padding-left: 20px; margin-bottom: 12px; }
+  ol li { margin-bottom: 8px; }
+  .step { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .step-num { display: inline-block; background: linear-gradient(135deg,#00d4ff,#8b5cf6); color: #fff; font-weight: 700; font-size: 12px; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; margin-right: 8px; }
+  .email-box { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 32px; font-size: 14px; }
+  .email-box a { color: var(--accent); text-decoration: none; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 24px; border-top: 1px solid var(--border); margin-top: 48px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-icon">⚡</div>
+  <a href="/" class="logo-text">Crypto<span>Signal</span></a>
+</header>
+
+<div class="container">
+  <h1>Delete Your Account</h1>
+  <p class="subtitle">We respect your right to remove your data from our platform at any time.</p>
+
+  <div class="warning-box">
+    <strong>Important:</strong> Deleting your account is permanent and irreversible. All your data — including alert preferences, subscription history, and saved signals — will be permanently removed from our systems within 30 days.
+  </div>
+
+  <h2>What Will Be Deleted</h2>
+  <ol>
+    <li>Your account credentials and email address</li>
+    <li>Saved alert configurations and notification preferences</li>
+    <li>Signal history and watchlist settings</li>
+    <li>Pro subscription records (cancellation will be processed first)</li>
+  </ol>
+
+  <h2>How to Delete Your Account</h2>
+
+  <div class="step">
+    <span class="step-num">1</span>
+    <strong>Cancel Active Subscription</strong>
+    <p style="margin-top:8px;">If you have an active Pro subscription, please cancel it first. Go to <strong>Settings &rarr; Subscription &rarr; Cancel Plan</strong> within the app, or contact us to cancel on your behalf.</p>
+  </div>
+
+  <div class="step">
+    <span class="step-num">2</span>
+    <strong>Send Deletion Request</strong>
+    <p style="margin-top:8px;">Send an email to <a href="mailto:privacy@cryptosignal.id" style="color:#00d4ff;">privacy@cryptosignal.id</a> with the subject line: <strong>"Account Deletion Request"</strong>. Include the email address associated with your account.</p>
+  </div>
+
+  <div class="step">
+    <span class="step-num">3</span>
+    <strong>Confirmation</strong>
+    <p style="margin-top:8px;">We will send a confirmation email within 3 business days. Your data will be fully purged from all our systems within <strong>30 days</strong> of the confirmed request.</p>
+  </div>
+
+  <div class="email-box">
+    <strong>Contact for Account Deletion</strong><br><br>
+    Email: <a href="mailto:privacy@cryptosignal.id">privacy@cryptosignal.id</a><br>
+    Subject: Account Deletion Request<br>
+    Response time: Within 3 business days<br>
+    Full data removal: Within 30 days of confirmation<br><br>
+    For other privacy concerns, visit our <a href="/privacy-policy.html">Privacy Policy</a>.
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 CryptoSignal &nbsp;|&nbsp;
+  <a href="/" style="color:#00d4ff;text-decoration:none;">Home</a> &nbsp;|&nbsp;
+  <a href="/privacy-policy.html" style="color:#00d4ff;text-decoration:none;">Privacy Policy</a>
+</footer>
+</body>
+</html>
