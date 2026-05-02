@@ -1,10 +1,12 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "id.cryptosignal.app",
-    "sha256_cert_fingerprints": [
-      "F7:5F:84:C4:50:26:13:C6:9D:01:87:92:EA:F4:F6:E5:A3:80:A8:9C:32:ED:BB:FE:D8:42:15:63:EC:A4:48:69"
-    ]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "id.cryptosignal.app",
+      "sha256_cert_fingerprints": [
+        "68:F7:94:78:27:EE:5A:87:4D:81:DB:3A:54:01:CD:FB:69:25:F3:49:2A:35:70:01:DD:B9:41:D1:49:27:04:9B"
+      ]
+    }
   }
-}]
+]
