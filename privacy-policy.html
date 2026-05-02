@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — CryptoSignal</title>
+<meta name="description" content="Privacy Policy for CryptoSignal — Live AI Market Intelligence">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #080e1c;
+    --bg2:    #0c1423;
+    --panel:  #131f33;
+    --border: rgba(255,255,255,0.08);
+    --border2:rgba(255,255,255,0.15);
+    --text:   #f0f4ff;
+    --muted:  #5a6a8a;
+    --muted2: #94a3c0;
+    --accent: #00d4ff;
+    --violet: #a78bfa;
+    --green:  #22d98a;
+    --red:    #f55070;
+    --sans:   'Inter', sans-serif;
+    --r:      10px;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 800px 400px at -5% 10%, rgba(0,212,255,.04) 0%, transparent 65%),
+      radial-gradient(ellipse 600px 350px at 105% 85%, rgba(139,92,246,.04) 0%, transparent 65%);
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(8,14,28,.96);
+    backdrop-filter: blur(24px) saturate(1.4);
+    border-bottom: 1px solid var(--border2);
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 24px; height: 58px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: linear-gradient(135deg, #00d4ff, #8b5cf6);
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .logo-text { font-weight: 700; font-size: 16px; letter-spacing: -.4px; color: var(--text); }
+  .logo-text span { color: var(--accent); }
+  .back-btn {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px;
+    border: 1px solid var(--border2); background: transparent;
+    color: var(--muted2); font-family: var(--sans); font-size: 12px;
+    font-weight: 600; cursor: pointer; text-decoration: none;
+    transition: all .15s;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--accent); background: rgba(0,212,255,.05); }
+
+  /* Layout */
+  .container {
+    position: relative; z-index: 1;
+    max-width: 780px; margin: 0 auto;
+    padding: 52px 24px 80px;
+  }
+  .page-badge {
+    display: inline-flex; align-items: center; gap-6px;
+    background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.2);
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    letter-spacing: .6px; margin-bottom: 20px;
+  }
+  h1 {
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 800; color: var(--text);
+    letter-spacing: -.5px; margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 13px; color: var(--muted2); margin-bottom: 48px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .subtitle span { display: flex; align-items: center; gap: 5px; }
+
+  h2 {
+    font-size: 14px; font-weight: 700; color: var(--text);
+    margin: 36px 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2::before {
+    content: '';
+    display: inline-block; width: 3px; height: 14px;
+    background: linear-gradient(180deg, var(--accent), var(--violet));
+    border-radius: 2px; flex-shrink: 0;
+  }
+  p {
+    color: var(--muted2); font-size: 14px;
+    margin-bottom: 12px; line-height: 1.75;
+  }
+  ul {
+    color: var(--muted2); font-size: 14px;
+    padding-left: 0; margin-bottom: 12px;
+    list-style: none;
+  }
+  ul li {
+    position: relative; padding-left: 18px; margin-bottom: 8px; line-height: 1.65;
+  }
+  ul li::before {
+    content: '—';
+    position: absolute; left: 0;
+    color: var(--accent); font-weight: 700; font-size: 12px;
+  }
+
+  .contact-box {
+    background: var(--panel);
+    border: 1px solid rgba(0,212,255,.15);
+    border-radius: var(--r); padding: 24px;
+    margin-top: 40px;
+  }
+  .contact-box strong { color: var(--text); display: block; margin-bottom: 12px; font-size: 14px; }
+  .contact-box a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .contact-box a:hover { text-decoration: underline; }
+  .contact-row { font-size: 13px; color: var(--muted2); margin-bottom: 6px; }
+  .contact-row span { color: var(--text); }
+
+  footer {
+    position: relative; z-index: 1;
+    text-align: center; color: var(--muted);
+    font-size: 12px; padding: 28px 24px;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--accent); text-decoration: none; margin: 0 8px; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .container { padding: 32px 16px 60px; }
+    h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <div class="logo-icon">⚡</div>
+    <span class="logo-text">Crypto<span>Signal</span></span>
+  </a>
+  <a href="/" class="back-btn">← Back to App</a>
+</header>
+
+<div class="container">
+  <div class="page-badge">LEGAL</div>
+  <h1>Privacy Policy</h1>
+  <div class="subtitle">
+    <span>📅 Last updated: May 2, 2026</span>
+    <span>🌐 Applies to cryptosignal.id and the Android app</span>
+  </div>
+
+  <h2>1. Introduction</h2>
+  <p>CryptoSignal ("we", "our", "us") operates the website <strong>cryptosignal.id</strong> and the CryptoSignal Android application (collectively, the "Service"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service.</p>
+  <p>By accessing or using the Service, you agree to this Privacy Policy. If you do not agree, please discontinue use of the Service immediately.</p>
+
+  <h2>2. Information We Collect</h2>
+  <p>We may collect the following types of information:</p>
+  <ul>
+    <li>Usage data: pages visited, features used, session duration, signal interactions</li>
+    <li>Device information: device type, operating system version, browser type</li>
+    <li>Account information (Pro subscribers): email address used for account creation and billing</li>
+    <li>Subscription data: plan type, billing cycle, payment status — payment card details are processed exclusively by our payment processor and never stored by us</li>
+    <li>Alert preferences: coin filters, signal type preferences, notification settings</li>
+  </ul>
+
+  <h2>3. How We Use Your Information</h2>
+  <ul>
+    <li>To deliver real-time crypto signal feeds and market intelligence</li>
+    <li>To process Pro subscriptions and manage account access</li>
+    <li>To personalize alert thresholds and signal filters based on your preferences</li>
+    <li>To improve Service performance, reliability, and feature development</li>
+    <li>To communicate service updates, security notices, and product announcements</li>
+    <li>To detect and prevent fraudulent or abusive activity</li>
+  </ul>
+
+  <h2>4. Data Sources and Third-Party Content</h2>
+  <p>CryptoSignal aggregates publicly available market data from third-party providers including CoinGecko, GNews, Reddit, and Telegram public channels. We do not control the content of these external sources. Signal content reflects publicly available information and does not constitute financial advice.</p>
+
+  <h2>5. Data Sharing and Disclosure</h2>
+  <p>We do not sell, rent, or trade your personal information. We may share data with:</p>
+  <ul>
+    <li>Payment processors (e.g., Stripe, DOKU) for subscription billing — under strict data processing agreements</li>
+    <li>Analytics providers to understand aggregate usage patterns — in anonymized form only</li>
+    <li>Law enforcement or regulatory authorities if required by applicable law</li>
+  </ul>
+
+  <h2>6. Data Security</h2>
+  <p>All data transmission between your device and our servers is encrypted via HTTPS (TLS 1.2+). We implement industry-standard security measures including access controls, encrypted storage, and regular security reviews. No system is completely immune to breach, and we cannot guarantee absolute security.</p>
+
+  <h2>7. Data Retention</h2>
+  <p>We retain account data for the duration of your subscription and up to 90 days thereafter. Usage logs are retained for up to 12 months for analytics and security purposes. You may request deletion of your data at any time.</p>
+
+  <h2>8. Cookies and Tracking</h2>
+  <p>We use essential cookies to maintain session state and user preferences. We do not use third-party advertising cookies. You may disable cookies in your browser settings, though some Service features may be affected.</p>
+
+  <h2>9. Your Rights</h2>
+  <ul>
+    <li>Access the personal data we hold about you</li>
+    <li>Request correction of inaccurate information</li>
+    <li>Request deletion of your account and associated data</li>
+    <li>Withdraw consent for optional data processing at any time</li>
+    <li>Lodge a complaint with the relevant data protection authority</li>
+  </ul>
+  <p>To exercise these rights, contact us at the address below. We will respond within 30 business days.</p>
+
+  <h2>10. Financial Disclaimer</h2>
+  <p>CryptoSignal provides information and market intelligence for educational and informational purposes only. Nothing on the Service constitutes financial, investment, legal, or tax advice. Cryptocurrency markets are highly volatile. Always conduct your own due diligence before making any financial decisions.</p>
+
+  <h2>11. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. Material changes will be notified via the Service or by email for registered users. Continued use of the Service after changes take effect constitutes acceptance of the revised policy.</p>
+
+  <div class="contact-box">
+    <strong>Contact Us — Privacy Inquiries</strong>
+    <div class="contact-row">Email: <span><a href="mailto:privacy@cryptosignal.id">privacy@cryptosignal.id</a></span></div>
+    <div class="contact-row">Website: <span><a href="https://cryptosignal.id">cryptosignal.id</a></span></div>
+    <div class="contact-row">Delete account: <span><a href="/delete-account.html">Request Account Deletion</a></span></div>
+    <div class="contact-row" style="margin-top:12px;font-size:12px;">Response time: within 30 business days</div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 CryptoSignal &nbsp;
+  <a href="/">Home</a>
+  <a href="/delete-account.html">Delete Account</a>
+</footer>
+
+</body>
+</html>

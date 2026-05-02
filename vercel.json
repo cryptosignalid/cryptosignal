@@ -3,23 +3,20 @@
   "functions": {
     "api/create-payment.js":  { "maxDuration": 30 },
     "api/payment-webhook.js": { "maxDuration": 30 },
-    "api/broadcast.js":       { "maxDuration": 60 },
-    "api/daily-digest.js":    { "maxDuration": 60 },
-    "api/generate-media.js":  { "maxDuration": 60 }
+    "api/broadcast.js":       { "maxDuration": 60 }
   },
-  "crons": [
-    {
-      "path": "/api/daily-digest",
-      "schedule": "0 1 * * *"
-    },
-    {
-      "path": "/api/generate-media",
-      "schedule": "30 1 * * *"
-    }
-  ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/pro",      "dest": "/pro.html" },
-    { "src": "/",         "dest": "/index.html" }
+    { "src": "/api/(.*)",                   "dest": "/api/$1" },
+    { "src": "/pro",                        "dest": "/pro.html" },
+    { "src": "/alerts",                     "dest": "/alerts.html" },
+    { "src": "/privacy-policy",             "dest": "/privacy-policy.html" },
+    { "src": "/privacy-policy.html",        "dest": "/privacy-policy.html" },
+    { "src": "/delete-account",             "dest": "/delete-account.html" },
+    { "src": "/delete-account.html",        "dest": "/delete-account.html" },
+    { "src": "/manifest.json",              "dest": "/manifest.json" },
+    { "src": "/.well-known/assetlinks.json","dest": "/assetlinks.json" },
+    { "src": "/icon-512.png",               "dest": "/icon-512.png" },
+    { "src": "/icon-192.png",               "dest": "/icon-192.png" },
+    { "src": "/",                           "dest": "/index.html" }
   ]
 }
