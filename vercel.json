@@ -1,21 +1,18 @@
 {
   "version": 2,
   "functions": {
-    "api/broadcast.js":     { "maxDuration": 60 },
-    "api/create-payment.js":{ "maxDuration": 30 },
+    "api/broadcast.js":      { "maxDuration": 60 },
+    "api/create-payment.js": { "maxDuration": 30 },
     "api/payment-webhook.js":{ "maxDuration": 30 },
-    "api/streak.js":        { "maxDuration": 10 },
-    "api/journal.js":       { "maxDuration": 10 },
-    "api/reactions.js":     { "maxDuration": 10 },
-    "api/weekly-brief.js":  { "maxDuration": 30 },
-    "api/morning-brief.js": { "maxDuration": 30 },
-    "api/analytics.js":     { "maxDuration": 10 },
-    "api/gnews.js":         { "maxDuration": 10 },
-    "api/email-drip.js":    { "maxDuration": 30 },
-    "api/marketing-agent.js":{ "maxDuration": 30 },
-    "api/referral.js":      { "maxDuration": 10 },
-    "api/support-bot.js":   { "maxDuration": 30 },
-    "api/daily-digest.js":  { "maxDuration": 30 }
+    "api/streak.js":         { "maxDuration": 10 },
+    "api/journal.js":        { "maxDuration": 10 },
+    "api/reactions.js":      { "maxDuration": 10 },
+    "api/weekly-brief.js":   { "maxDuration": 30 },
+    "api/analytics.js":      { "maxDuration": 10 },
+    "api/gnews.js":          { "maxDuration": 10 },
+    "api/email-drip.js":     { "maxDuration": 30 },
+    "api/referral.js":       { "maxDuration": 10 },
+    "api/support-bot.js":    { "maxDuration": 30 }
   },
   "routes": [
     { "src": "/api/(.*)",         "dest": "/api/$1" },
