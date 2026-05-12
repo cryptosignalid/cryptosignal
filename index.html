@@ -6,13 +6,6 @@
 <title>CryptoSignal — Live AI Market Intelligence</title>
 <meta name="description" content="Real-time crypto signals from 100+ sources. AI-ranked, hoax-detected, market-impact scored.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon-512.png">
-<meta name="theme-color" content="#040610">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CryptoSignal">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -191,6 +184,15 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
 @media(max-width:760px){aside{display:none;}}
 @media(max-width:680px){.stats-row{grid-template-columns:repeat(3,1fr)!important;}.h-prices{display:none;}}
 @media(max-width:420px){.stats-row{grid-template-columns:repeat(2,1fr)!important;}}
+/* ── PRO ENHANCEMENTS ── */
+.streak-toast{position:fixed;top:68px;right:16px;z-index:500;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.08));border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:var(--amber);opacity:0;transform:translateY(-12px);transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+.streak-toast.show{opacity:1;transform:translateY(0);}
+.xp-bar-mini{position:fixed;bottom:0;left:0;right:0;height:2px;z-index:400;pointer-events:none;}
+.xp-bar-mini-fill{height:100%;background:linear-gradient(90deg,#00d4ff,#a78bfa);transition:width 1s ease;}
+.react-row{display:flex;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.react-btn{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--sans);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.react-btn:hover{color:var(--text);background:var(--panel2);}
+.react-btn.voted{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07);}
 </style>
 </head>
 <body>
@@ -217,7 +219,23 @@ main{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap
   <a class="nav-link active" href="/"><span class="nav-icon">⚡</span>Live Feed<span class="nb2" id="totalCount">—</span></a>
   <a class="nav-link" href="/alerts.html"><span class="nav-icon">🔔</span>Alerts<span class="nb2 nb2r">3</span></a>
   <a class="nav-link" href="#" onclick="window.location.href='/pro.html'"><span class="nav-icon">📊</span>Analytics</a>
+  <a class="nav-link" href="/intelligence"><span class="nav-icon">🧠</span>Intel Hub<span class="nb2" style="background:rgba(0,212,255,.12);color:var(--accent)">NEW</span></a>
+  <a class="nav-link" href="/journal"><span class="nav-icon">📓</span>Journal<span class="nb2" style="background:rgba(251,191,36,.12);color:var(--amber)">XP</span></a>
+  <a class="nav-link" href="/leaderboard"><span class="nav-icon">🏆</span>Rankings<span class="nb2" id="sidebarRank" style="background:rgba(167,139,250,.12);color:var(--violet)">—</span></a>
+  <a class="nav-link" href="#" onclick="window.location.href='/pro.html'"><span class="nav-icon">📊</span>Analytics</a>
   <a class="nav-link" href="#" onclick="toast('🤖 B2B API access')"><span class="nav-icon">🤖</span>API<span class="nb2 nb2g">B2B</span></a>
+  <div class="divider"></div>
+  <div class="al">Your Progress</div>
+  <div style="padding:8px 10px;">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted2);margin-bottom:5px;">
+      <span>🔥 <span id="sidebarStreak">0</span> day streak</span>
+      <span id="sidebarXp" style="color:var(--accent);font-family:var(--mono);">0 XP</span>
+    </div>
+    <div style="height:4px;background:var(--panel2);border-radius:2px;overflow:hidden;">
+      <div id="sidebarXpBar" style="height:100%;background:linear-gradient(90deg,#00d4ff,#a78bfa);border-radius:2px;width:0%;transition:width .6s;"></div>
+    </div>
+    <div id="sidebarRankLabel" style="font-size:9px;color:var(--muted);margin-top:4px;font-family:var(--mono);">Signal Scout</div>
+  </div>
   <div class="divider"></div>
   <div class="al">Signal Type</div>
   <div class="fi on" id="f-break" onclick="toggleF('break',this)"><div class="fdot" style="background:var(--accent)"></div>Breaking<span class="fcount" id="fc-break">0</span></div>
@@ -1133,6 +1151,12 @@ function renderFeed(){
     <div class="imp-track"><div class="imp-fill" style="width:${a.impact}%;background:${iC[a.type]||'var(--muted)'}"></div></div>
     <span class="imp-num" style="color:${a.impact>75?'var(--green)':a.impact>50?'var(--amber)':'var(--muted2)'}">${a.impact}</span>
   </div>
+  <div class="react-row" onclick="event.stopPropagation()">
+    <button class="react-btn" onclick="doReact('${a.id}','bull',this)">📈 <span id="rc-bull-${a.id}">0</span></button>
+    <button class="react-btn" onclick="doReact('${a.id}','bear',this)">📉 <span id="rc-bear-${a.id}">0</span></button>
+    <button class="react-btn" onclick="doReact('${a.id}','noise',this)">🤷 <span id="rc-noise-${a.id}">0</span></button>
+    <span style="margin-left:auto;font-size:10px;color:var(--muted);font-family:var(--mono);">community vote</span>
+  </div>
   <div class="card-exp" id="ce${i}">
     ${a.description?`<div class="exp-lbl">Summary</div><div class="exp-text">${esc(a.description)}</div>`:''}
     <div class="exp-scores">
@@ -1145,7 +1169,17 @@ function renderFeed(){
     ${a.url&&a.url!=='#'?`<a class="exp-link" href="${esc(a.url)}" target="_blank" rel="noopener">→ Read full article ↗</a>`:''}
   </div>
 </div>`).join('');
-  displayF.forEach((_,i)=>{const c=document.getElementById('nc'+i);if(c)c.onclick=()=>{const e=document.getElementById('ce'+i);const w=e.classList.contains('open');document.querySelectorAll('.card-exp.open').forEach(x=>x.classList.remove('open'));if(!w)e.classList.add('open');};});
+  displayF.forEach((_,i)=>{
+    const c=document.getElementById('nc'+i);
+    if(c)c.onclick=(e)=>{
+      if(e.target.closest('.react-row'))return;
+      const el=document.getElementById('ce'+i);
+      const w=el.classList.contains('open');
+      document.querySelectorAll('.card-exp.open').forEach(x=>x.classList.remove('open'));
+      if(!w)el.classList.add('open');
+    };
+    if(displayF[i]?.id)loadReactions(displayF[i].id);
+  });
 
   // Paywall banner for free users
   if(isCapped){
@@ -1285,14 +1319,93 @@ function startTimer(){
   },1000);
 }
 
-(async()=>{await checkProStatus();fetchPrices();await fetchAll();startTimer();setInterval(fetchPrices,60000);})();
-</script>
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  });
+
+// ── STREAK + XP ──
+const XP_RANKS=[{n:'Signal Scout',xp:0},{n:'Market Watcher',xp:100},{n:'Signal Analyst',xp:300},{n:'Whale Tracker',xp:700},{n:'Signal Master',xp:1500},{n:'⚡ Legend',xp:3000}];
+function getRankName(xp){let r=XP_RANKS[0];for(const k of XP_RANKS){if(xp>=k.xp)r=k;}return r.n;}
+
+function updateStreakUI(){
+  const streak=parseInt(localStorage.getItem('cs_streak')||'0');
+  const xp=parseInt(localStorage.getItem('cs_xp')||'0');
+  const rank=getRankName(xp);
+  const nextRank=XP_RANKS.find(r=>r.xp>xp);
+  const curRankXp=XP_RANKS.filter(r=>r.xp<=xp).pop()?.xp||0;
+  const pct=nextRank?Math.min(100,((xp-curRankXp)/(nextRank.xp-curRankXp))*100):100;
+  const ss=document.getElementById('sidebarStreak');if(ss)ss.textContent=streak;
+  const sx=document.getElementById('sidebarXp');if(sx)sx.textContent=xp+' XP';
+  const sb=document.getElementById('sidebarXpBar');if(sb)sb.style.width=pct+'%';
+  const sl=document.getElementById('sidebarRankLabel');if(sl)sl.textContent=rank;
+  const sr=document.getElementById('sidebarRank');if(sr)sr.textContent=rank.split(' ').pop();
+  // Bottom XP bar
+  let bar=document.getElementById('xpMiniBar');
+  if(!bar){bar=document.createElement('div');bar.className='xp-bar-mini';bar.id='xpMiniBar';bar.innerHTML='<div class="xp-bar-mini-fill" id="xpMiniFill"></div>';document.body.appendChild(bar);}
+  const f=document.getElementById('xpMiniFill');if(f)f.style.width=pct+'%';
 }
+
+async function recordStreak(){
+  if(!proUser.active||!proUser.email)return;
+  try{
+    const r=await fetch('/api/streak',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:proUser.email}),signal:AbortSignal.timeout(5000)});
+    const d=await r.json();
+    if(!d.xpGain)return;
+    localStorage.setItem('cs_streak',d.streak);
+    localStorage.setItem('cs_xp',d.xp);
+    localStorage.setItem('cs_rank',d.rank);
+    updateStreakUI();
+    let t=document.getElementById('streakToastEl');
+    if(!t){t=document.createElement('div');t.id='streakToastEl';t.className='streak-toast';document.body.appendChild(t);}
+    t.innerHTML=`🔥 Day ${d.streak} streak! &nbsp;+${d.xpGain} XP &nbsp;<span style="opacity:.6;font-size:10px;font-weight:400">${d.rank}</span>`;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),4000);
+  }catch(e){}
+}
+
+// ── SIGNAL REACTIONS ──
+const votedSignals=new Set(JSON.parse(localStorage.getItem('cs_votes')||'[]'));
+
+async function doReact(signalId,reaction,btn){
+  if(votedSignals.has(signalId)){toast('Already voted on this signal');return;}
+  votedSignals.add(signalId);
+  localStorage.setItem('cs_votes',JSON.stringify([...votedSignals].slice(-200)));
+  btn.classList.add('voted');
+  try{
+    const r=await fetch('/api/reactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({signalId,reaction}),signal:AbortSignal.timeout(5000)});
+    const d=await r.json();
+    if(d.reactions){
+      ['bull','bear','noise'].forEach(k=>{
+        const el=document.getElementById('rc-'+k+'-'+signalId);
+        if(el)el.textContent=d.reactions[k]||0;
+      });
+    }
+    if(proUser.active){
+      const xp=parseInt(localStorage.getItem('cs_xp')||'0')+2;
+      localStorage.setItem('cs_xp',xp);
+      updateStreakUI();
+    }
+  }catch(e){}
+}
+
+async function loadReactions(signalId){
+  try{
+    const r=await fetch(`/api/reactions?signalId=${encodeURIComponent(signalId)}`,{signal:AbortSignal.timeout(4000)});
+    const d=await r.json();
+    ['bull','bear','noise'].forEach(k=>{
+      const el=document.getElementById('rc-'+k+'-'+signalId);
+      if(el)el.textContent=d[k]||0;
+    });
+  }catch(e){}
+}
+
+// ── INIT ──
+(async()=>{
+  await checkProStatus();
+  fetchPrices();
+  await fetchAll();
+  startTimer();
+  setInterval(fetchPrices,60000);
+  updateStreakUI();
+  if(proUser.active)recordStreak();
+})();
 </script>
 </body>
 </html>

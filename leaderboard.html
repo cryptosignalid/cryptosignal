@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoSignal — Trader Rankings</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060b18;--panel:#0f1626;--panel2:#151e30;--panel3:#1a2540;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#e8eeff;--muted:#4a5a7a;--muted2:#7a8faf;--accent:#00d4ff;--violet:#a78bfa;--green:#10d98a;--red:#f24060;--amber:#f59e0b;--gold:#ffd700;--mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 700px 500px at 50% -10%,rgba(167,139,250,.04) 0%,transparent 60%);}
+nav{position:sticky;top:0;z-index:200;height:56px;background:rgba(6,11,24,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;padding:0 20px;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--text);text-decoration:none;}
+.logo-icon{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.logo span{color:var(--accent);}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.nb{font-size:11px;font-weight:600;color:var(--muted2);text-decoration:none;padding:5px 10px;border-radius:7px;border:1px solid var(--border2);transition:all .15s;}
+.nb:hover{color:var(--text);border-color:var(--accent);}
+.page{max-width:900px;margin:0 auto;padding:24px 16px 60px;position:relative;z-index:1;}
+
+/* HERO */
+.lb-hero{text-align:center;margin-bottom:32px;padding:32px 20px;}
+.lb-hero h1{font-size:32px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px;}
+.lb-hero h1 span{background:linear-gradient(135deg,#ffd700,#ffa500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.lb-hero p{font-size:13px;color:var(--muted2);}
+
+/* RANK CARDS */
+.rank-system{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:28px;}
+.rank-card{background:var(--panel);border:1px solid var(--border2);border-radius:10px;padding:12px;text-align:center;}
+.rank-icon{font-size:24px;margin-bottom:6px;}
+.rank-name{font-size:12px;font-weight:700;margin-bottom:2px;}
+.rank-xp{font-size:10px;color:var(--muted2);font-family:var(--mono);}
+.rank-active{border-color:var(--accent);background:rgba(0,212,255,.05);}
+
+/* YOUR CARD */
+.your-card{background:var(--panel);border:1px solid rgba(0,212,255,.3);border-radius:14px;padding:20px;margin-bottom:24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+.your-avatar{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#00d4ff,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.your-info{flex:1;}
+.your-rank{font-size:18px;font-weight:700;color:var(--accent);}
+.your-xp{font-size:13px;color:var(--muted2);font-family:var(--mono);}
+.your-streak{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--amber);font-weight:600;margin-top:6px;}
+.xp-bar-wrap{flex:1;min-width:160px;}
+.xp-track{height:6px;background:var(--panel3);border-radius:3px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,#00d4ff,#a78bfa);border-radius:3px;transition:width .6s;}
+.xp-txt{font-size:10px;color:var(--muted2);margin-top:4px;font-family:var(--mono);}
+
+/* TABS */
+.tab-row{display:flex;gap:4px;background:var(--panel2);border-radius:10px;padding:3px;margin-bottom:16px;}
+.tab-btn{flex:1;padding:8px;border-radius:7px;border:none;background:transparent;color:var(--muted2);font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.tab-btn.on{background:var(--panel3);color:var(--text);}
+
+/* LEADERBOARD */
+.lb-entry{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--panel);border:1px solid var(--border2);border-radius:10px;margin-bottom:8px;transition:all .15s;}
+.lb-entry:hover{border-color:var(--border2);transform:translateY(-1px);}
+.lb-entry.top1{border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.04);}
+.lb-entry.top2{border-color:rgba(192,192,192,.3);}
+.lb-entry.top3{border-color:rgba(205,127,50,.3);}
+.lb-pos{font-size:18px;font-weight:700;font-family:var(--mono);width:36px;text-align:center;flex-shrink:0;}
+.pos-1{color:var(--gold);}
+.pos-2{color:#c0c0c0;}
+.pos-3{color:#cd7f32;}
+.lb-avatar{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--panel2);}
+.lb-info{flex:1;}
+.lb-email{font-size:13px;font-weight:600;}
+.lb-rank-badge{font-size:10px;color:var(--muted2);}
+.lb-right{text-align:right;flex-shrink:0;}
+.lb-xp{font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent);}
+.lb-streak{font-size:11px;color:var(--amber);font-family:var(--mono);}
+
+/* WEEKLY WINNER */
+.winner-banner{background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,165,0,.05));border:1px solid rgba(255,215,0,.25);border-radius:14px;padding:20px;margin-bottom:24px;text-align:center;}
+.winner-title{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.winner-name{font-size:22px;font-weight:700;}
+.winner-sub{font-size:12px;color:var(--muted2);margin-top:4px;}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/"><div class="logo-icon">⚡</div>Crypto<span>Signal</span></a>
+  <div class="nav-r">
+    <a class="nb" href="/">← Live Feed</a>
+    <a class="nb" href="/journal">📓 Journal</a>
+    <a class="nb" href="/portfolio">💼 Portfolio</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="lb-hero">
+    <h1>Trader <span>Rankings</span></h1>
+    <p>Weekly XP leaderboard · Earn XP by logging trades, daily visits, and reacting to signals</p>
+  </div>
+
+  <!-- RANK SYSTEM -->
+  <div class="rank-system" id="rankSystem">
+    <div class="rank-card"><div class="rank-icon">🔭</div><div class="rank-name">Signal Scout</div><div class="rank-xp">0 XP</div></div>
+    <div class="rank-card"><div class="rank-icon">👁️</div><div class="rank-name">Market Watcher</div><div class="rank-xp">100 XP</div></div>
+    <div class="rank-card"><div class="rank-icon">📊</div><div class="rank-name">Signal Analyst</div><div class="rank-xp">300 XP</div></div>
+    <div class="rank-card"><div class="rank-icon">🐋</div><div class="rank-name">Whale Tracker</div><div class="rank-xp">700 XP</div></div>
+    <div class="rank-card"><div class="rank-icon">🏅</div><div class="rank-name">Signal Master</div><div class="rank-xp">1500 XP</div></div>
+    <div class="rank-card"><div class="rank-icon">⚡</div><div class="rank-name">Legend</div><div class="rank-xp">3000 XP</div></div>
+  </div>
+
+  <!-- YOUR CARD -->
+  <div class="your-card" id="yourCard" style="display:none;">
+    <div class="your-avatar">⚡</div>
+    <div class="your-info">
+      <div class="your-rank" id="yourRank">Signal Scout</div>
+      <div class="your-xp" id="yourXp">0 XP total</div>
+      <div class="your-streak">🔥 <span id="yourStreak">0</span> day streak</div>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-track"><div class="xp-fill" id="yourFill" style="width:0%"></div></div>
+      <div class="xp-txt" id="yourXpTxt">0 XP to next rank</div>
+    </div>
+  </div>
+
+  <!-- WEEKLY WINNER -->
+  <div class="winner-banner">
+    <div class="winner-title">🏆 This Week's Top Signal Trader</div>
+    <div class="winner-name" id="weekWinner">Loading…</div>
+    <div class="winner-sub">Highest XP earned this week · announced every Friday via Telegram</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-row">
+    <button class="tab-btn on" data-t="xp" onclick="setTab(this)">⚡ XP Rankings</button>
+    <button class="tab-btn" data-t="streak" onclick="setTab(this)">🔥 Streak Board</button>
+    <button class="tab-btn" data-t="earn" onclick="setTab(this)">📖 How to Earn XP</button>
+  </div>
+
+  <div id="lbContent"></div>
+</div>
+
+<script>
+const RANKS=[{n:'Signal Scout',icon:'🔭',xp:0},{n:'Market Watcher',icon:'👁️',xp:100},{n:'Signal Analyst',icon:'📊',xp:300},{n:'Whale Tracker',icon:'🐋',xp:700},{n:'Signal Master',icon:'🏅',xp:1500},{n:'⚡ Legend',icon:'⚡',xp:3000}];
+const MOCK_LB=[
+  {email:'wh***@gmail.com',xp:2840,rank:'Signal Master',streak:47},
+  {email:'cr***@outlook.com',xp:2105,rank:'Signal Master',streak:31},
+  {email:'bt***@yahoo.com',xp:1780,rank:'Signal Master',streak:22},
+  {email:'de***@gmail.com',xp:1340,rank:'Whale Tracker',streak:18},
+  {email:'so***@proton.me',xp:1120,rank:'Whale Tracker',streak:14},
+  {email:'ma***@gmail.com',xp:890,rank:'Whale Tracker',streak:9},
+  {email:'al***@hotmail.com',xp:640,rank:'Signal Analyst',streak:7},
+  {email:'ji***@gmail.com',xp:420,rank:'Signal Analyst',streak:5},
+  {email:'ra***@gmail.com',xp:280,rank:'Market Watcher',streak:3},
+  {email:'ka***@gmail.com',xp:110,rank:'Market Watcher',streak:2},
+];
+const MOCK_STREAK=[...MOCK_LB].sort((a,b)=>b.streak-a.streak);
+
+let activeTab='xp';
+
+function setTab(btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  activeTab=btn.dataset.t;
+  renderContent();
+}
+
+function renderContent(){
+  const el=document.getElementById('lbContent');
+  if(activeTab==='earn'){
+    el.innerHTML=`<div style="background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:20px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr><th style="text-align:left;font-size:11px;color:var(--muted2);padding:8px 0;border-bottom:1px solid var(--border);">ACTION</th><th style="text-align:right;font-size:11px;color:var(--muted2);padding:8px 0;border-bottom:1px solid var(--border);">XP</th></tr></thead>
+        <tbody>
+          ${[
+            ['Daily login visit','10 XP'],['7-day streak bonus','50 XP'],['30-day streak bonus','200 XP'],
+            ['Log a trade in journal','15 XP'],['React to a signal','2 XP'],['Complete watchlist setup','25 XP'],
+            ['Refer a friend who subscribes','100 XP'],['Monthly subscriber renewal','50 XP'],
+            ['Signal Master achievement','200 XP bonus'],
+          ].map(([a,x])=>`<tr><td style="padding:10px 0;font-size:13px;border-bottom:1px solid var(--border);">${a}</td><td style="text-align:right;font-size:13px;font-weight:700;font-family:var(--mono);color:var(--accent);border-bottom:1px solid var(--border);">${x}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:16px;padding:12px;background:rgba(0,212,255,.05);border-radius:8px;font-size:12px;color:var(--muted2);">
+        💡 XP is tracked server-side for Pro subscribers. Free users can see rankings but don't earn XP.
+      </div>
+    </div>`;
+    return;
+  }
+  const data=activeTab==='streak'?MOCK_STREAK:MOCK_LB;
+  const pos1=['🥇','🥈','🥉'];
+  el.innerHTML=data.map((u,i)=>{
+    const topCls=i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const posCls=i<3?`pos-${i+1}`:'';
+    const icon=RANKS.find(r=>r.n===u.rank)?.icon||'🔭';
+    const val=activeTab==='streak'?`${u.streak} days`:`${u.xp.toLocaleString()} XP`;
+    const sub=activeTab==='streak'?`${u.xp.toLocaleString()} XP`:`🔥 ${u.streak} day streak`;
+    return `<div class="lb-entry ${topCls}">
+      <div class="lb-pos ${posCls}">${i<3?pos1[i]:i+1}</div>
+      <div class="lb-avatar">${icon}</div>
+      <div class="lb-info">
+        <div class="lb-email">${u.email}</div>
+        <div class="lb-rank-badge">${u.rank}</div>
+      </div>
+      <div class="lb-right">
+        <div class="lb-xp">${val}</div>
+        <div class="lb-streak">${sub}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('weekWinner').textContent=MOCK_LB[0].email+' — '+MOCK_LB[0].xp.toLocaleString()+' XP';
+}
+
+// Load user state
+function loadUser(){
+  try{
+    const j=localStorage.getItem('cs_pro');
+    if(!j)return;
+    const xp=parseInt(localStorage.getItem('cs_xp')||'0');
+    const streak=parseInt(localStorage.getItem('cs_streak')||'0');
+    const rank=localStorage.getItem('cs_rank')||'Signal Scout';
+    document.getElementById('yourCard').style.display='flex';
+    document.getElementById('yourRank').textContent=rank;
+    document.getElementById('yourXp').textContent=xp.toLocaleString()+' XP total';
+    document.getElementById('yourStreak').textContent=streak;
+    const curR=RANKS.filter(r=>r.xp<=xp).pop()||RANKS[0];
+    const nextR=RANKS.find(r=>r.xp>xp);
+    const pct=nextR?Math.min(100,((xp-curR.xp)/(nextR.xp-curR.xp))*100):100;
+    document.getElementById('yourFill').style.width=pct+'%';
+    document.getElementById('yourXpTxt').textContent=nextR?(nextR.xp-xp)+' XP to '+nextR.n:'MAX RANK ACHIEVED ⚡';
+    // Highlight user's rank in system
+    document.querySelectorAll('.rank-card').forEach((card,i)=>{
+      if(RANKS[i]?.n===curR.n)card.classList.add('rank-active');
+    });
+  }catch(e){}
+}
+
+loadUser();
+renderContent();
+</script>
+</body>
+</html>

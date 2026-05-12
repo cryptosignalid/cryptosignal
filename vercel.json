@@ -3,20 +3,26 @@
   "functions": {
     "api/create-payment.js":  { "maxDuration": 30 },
     "api/payment-webhook.js": { "maxDuration": 30 },
-    "api/broadcast.js":       { "maxDuration": 60 }
+    "api/broadcast.js":       { "maxDuration": 60 },
+    "api/streak.js":          { "maxDuration": 10 },
+    "api/journal.js":         { "maxDuration": 10 },
+    "api/xp.js":              { "maxDuration": 10 },
+    "api/reactions.js":       { "maxDuration": 10 },
+    "api/weekly-brief.js":    { "maxDuration": 30 }
   },
   "routes": [
-    { "src": "/api/(.*)",                   "dest": "/api/$1" },
-    { "src": "/pro",                        "dest": "/pro.html" },
-    { "src": "/alerts",                     "dest": "/alerts.html" },
-    { "src": "/privacy-policy",             "dest": "/privacy-policy.html" },
-    { "src": "/privacy-policy.html",        "dest": "/privacy-policy.html" },
-    { "src": "/delete-account",             "dest": "/delete-account.html" },
-    { "src": "/delete-account.html",        "dest": "/delete-account.html" },
-    { "src": "/manifest.json",              "dest": "/manifest.json" },
-    { "src": "/.well-known/assetlinks.json","dest": "/assetlinks.json" },
-    { "src": "/icon-512.png",               "dest": "/icon-512.png" },
-    { "src": "/icon-192.png",               "dest": "/icon-192.png" },
-    { "src": "/",                           "dest": "/index.html" }
+    { "src": "/api/(.*)",          "dest": "/api/$1" },
+    { "src": "/pro",               "dest": "/pro.html" },
+    { "src": "/alerts",            "dest": "/alerts.html" },
+    { "src": "/intelligence",      "dest": "/intelligence.html" },
+    { "src": "/journal",           "dest": "/journal.html" },
+    { "src": "/leaderboard",       "dest": "/leaderboard.html" },
+    { "src": "/portfolio",         "dest": "/portfolio.html" },
+    { "src": "/privacy-policy",    "dest": "/privacy-policy.html" },
+    { "src": "/delete-account",    "dest": "/delete-account.html" },
+    { "src": "/(.*\\.html)",       "dest": "/$1" },
+    { "src": "/manifest.json",     "dest": "/manifest.json" },
+    { "src": "/.well-known/(.*)",  "dest": "/.well-known/$1" },
+    { "src": "/",                  "dest": "/index.html" }
   ]
 }

@@ -239,7 +239,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,14,28,.95);backdrop-filt
     <div class="tg-steps">
       <div class="tg-step">
         <div class="tg-step-num">1</div>
-        <div class="tg-step-text"><strong>Open Telegram</strong> and search for <code>@cryptosignalalert1bot</code> (or your own bot username)</div>
+        <div class="tg-step-text"><strong>Open Telegram</strong> and search for <code>@CryptoSignalAlertBot</code> (or your own bot username)</div>
       </div>
       <div class="tg-step">
         <div class="tg-step-num">2</div>
@@ -268,20 +268,35 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,14,28,.95);backdrop-filt
     </div>
   </div>
 
-  <!-- ALREADY PRO VERIFY SECTION -->
-  <div style="max-width:560px;margin:0 auto 48px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:16px;padding:28px;text-align:center;">
-    <div style="font-size:1.5rem;margin-bottom:8px;">🔑</div>
-    <h3 style="color:#f0f4ff;margin:0 0 8px;font-size:1.1rem;font-weight:800;">Already a Pro member?</h3>
-    <p style="color:#94a3c0;font-size:0.875rem;margin:0 0 16px;line-height:1.6;">Restore your Pro access on this device by verifying your email.</p>
-    <div style="display:flex;gap:8px;max-width:380px;margin:0 auto;">
-      <input type="email" id="verifyEmailInput" placeholder="your@email.com"
-        style="flex:1;padding:11px 14px;background:#0c1423;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#f0f4ff;font-size:0.875rem;outline:none;font-family:inherit;">
-      <button onclick="verifyExistingPro()"
-        style="padding:11px 20px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.875rem;white-space:nowrap;font-family:inherit;">
-        Verify ✓
-      </button>
+  <!-- ALREADY PRO — VERIFY ACCESS (shows on page load if Pro detected or manually) -->
+  <div style="background:var(--panel);border:1px solid var(--border2);border-radius:16px;padding:28px;margin-bottom:48px" id="alreadyProSection">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span style="font-size:22px">⚡</span>
+      <div style="font-size:17px;font-weight:800">Already a Pro member?</div>
     </div>
-    <div id="verifyResult" style="margin-top:12px;font-size:0.8rem;color:#5a6a8a;min-height:18px;"></div>
+    <div style="font-size:13.5px;color:var(--muted2);margin-bottom:20px;line-height:1.6">Enter your email to restore access on this device — works on iOS app, new browser, or after clearing cache.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;max-width:460px">
+      <input type="email" class="form-input" id="verifyEmail" placeholder="your@email.com" style="flex:1;min-width:200px" autocomplete="email">
+      <button class="plan-btn primary" onclick="verifyExistingPro()" id="verifyBtn" style="max-width:160px;padding:11px 20px;font-size:13px">Verify Access →</button>
+    </div>
+    <div id="verifyResult" style="margin-top:12px;font-size:13px;display:none"></div>
+
+    <!-- Active Pro status display -->
+    <div id="proStatusCard" style="display:none;margin-top:16px;background:rgba(34,217,138,.06);border:1px solid rgba(34,217,138,.2);border-radius:10px;padding:14px 16px">
+      <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:6px">✅ Pro Access Active</div>
+      <div style="font-size:12px;color:var(--muted2);line-height:1.7" id="proStatusDetail">—</div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <a href="/" class="plan-btn secondary" style="font-size:12px;padding:7px 14px;text-decoration:none;display:inline-flex;align-items:center">← Go to Live Feed</a>
+        <button onclick="updateChatId()" class="plan-btn secondary" style="font-size:12px;padding:7px 14px" id="updateTgBtn">📲 Update Telegram ID</button>
+      </div>
+      <div id="updateChatIdSection" style="display:none;margin-top:12px">
+        <div style="font-size:12px;color:var(--muted2);margin-bottom:8px">Enter new Telegram Chat ID (get from <a href="https://t.me/userinfobot" target="_blank" style="color:var(--accent)">@userinfobot</a>):</div>
+        <div style="display:flex;gap:8px">
+          <input type="text" class="form-input" id="newChatId" placeholder="e.g. 123456789" style="flex:1;font-size:13px">
+          <button onclick="saveChatId()" class="plan-btn primary" style="font-size:12px;padding:8px 14px">Save</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- FAQ -->
@@ -393,41 +408,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,14,28,.95);backdrop-filt
 
 <script>
 // ============================================================
-// ── VERIFY EXISTING PRO ──
-async function verifyExistingPro(){
-  const email = (document.getElementById('verifyEmailInput').value||'').trim().toLowerCase();
-  const resultEl = document.getElementById('verifyResult');
-  if(!email||!email.includes('@')){
-    resultEl.style.color='#f55070';
-    resultEl.textContent='⚠️ Please enter a valid email.';
-    return;
-  }
-  resultEl.style.color='#94a3c0';
-  resultEl.textContent='Checking...';
-  try{
-    const r = await fetch(`/api/payment-webhook?action=verify&email=${encodeURIComponent(email)}`);
-    const d = await r.json();
-    if(d.pro){
-      const proData={active:true,email:d.email,tgChatId:d.tgChatId,plan:d.plan,expiresAt:d.expiresAt};
-      localStorage.setItem('cs_pro',JSON.stringify(proData));
-      resultEl.style.color='#22d98a';
-      resultEl.textContent=`✅ Pro verified! Valid until ${new Date(d.expiresAt).toLocaleDateString('id-ID')}`;
-      // Show success card for Telegram activation
-      setTimeout(()=>{
-        document.getElementById('successCard').classList.add('show');
-        document.getElementById('successCard').scrollIntoView({behavior:'smooth'});
-        if(d.tgChatId) document.getElementById('chatIdInput').value = d.tgChatId;
-      }, 800);
-    } else {
-      resultEl.style.color='#f55070';
-      resultEl.textContent='❌ No active Pro subscription found for this email.';
-    }
-  }catch(e){
-    resultEl.style.color='#f55070';
-    resultEl.textContent='⚠️ Error: '+e.message;
-  }
-}
-
 // CryptoSignal Pro — Payment & Telegram Integration
 // DOKU Checkout (Jokul) — Indonesian payment gateway
 // ============================================================
@@ -439,7 +419,7 @@ const DOKU_SECRET_KEY = 'YOUR_DOKU_SECRET_KEY';      // From DOKU dashboard
 const DOKU_ENV = 'sandbox';                           // Change to 'production' when ready
 
 // Your Telegram bot token - UPDATE THIS
-const TG_BOT_TOKEN = '8731034518:AAHTpe89-toSMtlV5N_gYu__Zy5-EVUU8tA';
+const TG_BOT_TOKEN = '8655654640:AAEAWBWG9u52gNZi1Me60yOiFh9oZ0csQtc';
 
 const PLANS = {
   pro:      { name:'CryptoSignal Pro',      amount:449000, usd:'$29' },
@@ -546,18 +526,16 @@ async function initiatePayment(){
     document.getElementById('formStep').style.display='none';
     document.getElementById('processingStep').style.display='block';
 
-    // Direct redirect to DOKU — most reliable, no popup blocker issues
+    // Launch DOKU Jokul checkout popup
     if(typeof loadJokulCheckout !== 'undefined'){
-      try {
-        loadJokulCheckout(paymentUrl);
-        startPaymentPolling(invoiceNumber);
-      } catch(sdkErr) {
-        console.warn('Jokul SDK error, redirecting:', sdkErr);
-        window.location.href = paymentUrl;
-      }
+      loadJokulCheckout(paymentUrl);
     } else {
-      window.location.href = paymentUrl;
+      // Fallback: open in new tab
+      window.open(paymentUrl, '_blank');
     }
+
+    // Listen for payment completion (DOKU calls our webhook, then we redirect)
+    startPaymentPolling(invoiceNumber);
 
   } catch(e){
     showError('Payment setup failed', e.message);
@@ -652,22 +630,128 @@ async function activateTelegram(emailOverride, chatIdOverride){
   }
 }
 
-// ── PRO STATUS CHECK on page load ──
-async function checkExistingProStatus(){
-  const params=new URLSearchParams(window.location.search);
-  const emailParam=params.get('email');
-  if(emailParam){
-    try{
-      const r=await fetch(`/api/payment-webhook?action=verify&email=${encodeURIComponent(emailParam)}`);
-      const d=await r.json();
-      if(d.pro){
-        const proData={active:true,email:d.email,tgChatId:d.tgChatId,plan:d.plan,expiresAt:d.expiresAt};
-        localStorage.setItem('cs_pro',JSON.stringify(proData));
-        onPaymentSuccess(d);
-      }
-    }catch(e){}
+// ── VERIFY EXISTING PRO (returning user on new device) ──
+async function verifyExistingPro(){
+  const email = document.getElementById('verifyEmail').value.trim();
+  if(!email || !email.includes('@')){
+    toast('⚠️ Please enter a valid email address');
+    return;
   }
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  const resultEl = document.getElementById('verifyResult');
+  resultEl.style.display = 'block';
+  resultEl.style.color = 'var(--muted2)';
+  resultEl.textContent = 'Checking your account…';
+
+  try{
+    const r = await fetch(`/api/payment-webhook?action=verify&email=${encodeURIComponent(email)}`);
+    const d = await r.json();
+
+    if(d.pro){
+      // Save to localStorage — unlocks feed on this device
+      const proData = {active:true, email:d.email, tgChatId:d.tgChatId, plan:d.plan, expiresAt:d.expiresAt};
+      localStorage.setItem('cs_pro', JSON.stringify(proData));
+
+      // Show Pro status card
+      resultEl.style.display = 'none';
+      document.getElementById('proStatusCard').style.display = 'block';
+
+      const exp = d.expiresAt ? new Date(d.expiresAt).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}) : '—';
+      document.getElementById('proStatusDetail').innerHTML =
+        `Plan: <strong>${d.plan || 'Pro'}</strong> &nbsp;·&nbsp; ` +
+        `Email: <strong>${d.email}</strong> &nbsp;·&nbsp; ` +
+        `Expires: <strong>${exp}</strong><br>` +
+        `Telegram: <strong>${d.tgChatId || 'Not set — update below'}</strong>`;
+
+      // Pre-fill chat ID if set
+      if(d.tgChatId) document.getElementById('newChatId').value = d.tgChatId;
+
+      toast('✅ Pro access verified and activated on this device!', 4000);
+    } else {
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = '❌ No Pro account found for this email. Check spelling or contact support on Telegram @CryptoSignalSupport';
+    }
+  } catch(e){
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = '⚠️ Network error — try again in a moment';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Verify Access →';
 }
+
+function updateChatId(){
+  document.getElementById('updateChatIdSection').style.display = 'block';
+  document.getElementById('updateTgBtn').style.display = 'none';
+}
+
+async function saveChatId(){
+  const chatId = document.getElementById('newChatId').value.trim();
+  const cached = JSON.parse(localStorage.getItem('cs_pro') || '{}');
+  const email = cached.email || document.getElementById('verifyEmail').value.trim();
+
+  if(!chatId || isNaN(chatId)){ toast('⚠️ Enter a valid Telegram Chat ID (numbers only)'); return; }
+  if(!email){ toast('⚠️ Verify your email first'); return; }
+
+  try{
+    const r = await fetch(`/api/payment-webhook?action=update-chatid&email=${encodeURIComponent(email)}&chatId=${encodeURIComponent(chatId)}`);
+    const d = await r.json();
+    if(d.ok){
+      const pro = JSON.parse(localStorage.getItem('cs_pro') || '{}');
+      pro.tgChatId = chatId;
+      localStorage.setItem('cs_pro', JSON.stringify(pro));
+      toast('✅ Telegram ID updated! Check your Telegram for confirmation.', 4000);
+      document.getElementById('updateChatIdSection').style.display = 'none';
+      document.getElementById('updateTgBtn').style.display = 'inline-flex';
+      // Update display
+      const detail = document.getElementById('proStatusDetail');
+      if(detail) detail.innerHTML = detail.innerHTML.replace(/Telegram: <strong>.*?<\/strong>/, `Telegram: <strong>${chatId}</strong>`);
+    } else {
+      toast('⚠️ ' + (d.message || 'Failed to update. Try again.'));
+    }
+  } catch(e){ toast('⚠️ Network error: ' + e.message); }
+}
+
+// ── PAGE LOAD — auto-check status ──
+(function checkPageLoad(){
+  // Check URL params first (redirect from payment)
+  const params = new URLSearchParams(window.location.search);
+  const statusParam = params.get('status');
+  const emailParam  = params.get('email');
+
+  if(statusParam === 'success'){
+    // Came back from successful DOKU payment
+    const pending = JSON.parse(localStorage.getItem('cs_pending_order') || '{}');
+    if(pending.email){
+      document.getElementById('verifyEmail').value = pending.email;
+      // Auto-verify after short delay
+      setTimeout(verifyExistingPro, 1000);
+    }
+  }
+
+  if(emailParam){
+    document.getElementById('verifyEmail').value = emailParam;
+    setTimeout(verifyExistingPro, 500);
+  }
+
+  // Check localStorage — show status if already active
+  try{
+    const cached = JSON.parse(localStorage.getItem('cs_pro') || '{}');
+    if(cached.active && cached.email && new Date(cached.expiresAt) > new Date()){
+      document.getElementById('verifyEmail').value = cached.email;
+      // Show active status immediately from cache
+      document.getElementById('proStatusCard').style.display = 'block';
+      const exp = cached.expiresAt ? new Date(cached.expiresAt).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}) : '—';
+      document.getElementById('proStatusDetail').innerHTML =
+        `Plan: <strong>${cached.plan || 'Pro'}</strong> &nbsp;·&nbsp; ` +
+        `Email: <strong>${cached.email}</strong> &nbsp;·&nbsp; ` +
+        `Expires: <strong>${exp}</strong><br>` +
+        `Telegram: <strong>${cached.tgChatId || 'Not set'}</strong>`;
+      if(cached.tgChatId) document.getElementById('newChatId').value = cached.tgChatId;
+    }
+  } catch(e){}
+})();
 
 // ── FAQ ──
 function toggleFaq(el){
@@ -687,8 +771,6 @@ function toggleFaq(el){
   } else if(status==='failed'){
     toast('⚠️ Payment was not completed. You can try again.', 5000);
   }
-  // Auto-verify if email passed in URL
-  checkExistingProStatus();
 })();
 </script>
 </body>

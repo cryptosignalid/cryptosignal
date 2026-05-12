@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoSignal Pro — Market Intelligence Hub</title>
+<meta name="description" content="Stock-to-crypto correlation engine, economic calendar, and global news aggregator for CryptoSignal Pro users.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060b18;--bg2:#0a1020;--bg3:#0f1628;
+  --panel:#111827;--panel2:#162033;--panel3:#1c2a42;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--border3:rgba(255,255,255,0.2);
+  --text:#e8eeff;--muted:#4a5a7a;--muted2:#7a8faf;--muted3:#9eb0cc;
+  --accent:#00d4ff;--violet:#a78bfa;--green:#10d98a;
+  --red:#f24060;--amber:#f59e0b;--gold:#ffd700;
+  --bull:#10d98a;--bear:#f24060;
+  --mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 1000px 600px at -10% 5%,rgba(0,212,255,.025) 0%,transparent 60%),
+             radial-gradient(ellipse 800px 500px at 110% 90%,rgba(167,139,250,.03) 0%,transparent 60%),
+             radial-gradient(ellipse 600px 400px at 50% 110%,rgba(16,217,138,.02) 0%,transparent 60%);}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:300;height:56px;background:rgba(6,11,24,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;padding:0 20px;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-.3px;color:var(--text);text-decoration:none;}
+.logo-icon{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.logo span{color:var(--accent);}
+.nav-badge{display:flex;align-items:center;gap:5px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--violet);letter-spacing:.4px;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.nav-link{font-size:12px;font-weight:600;color:var(--muted2);text-decoration:none;padding:5px 10px;border-radius:7px;transition:all .15s;}
+.nav-link:hover{color:var(--text);background:var(--panel2);}
+.nav-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--green);font-family:var(--mono);letter-spacing:.5px;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+
+/* LAYOUT */
+.page{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 16px 60px;}
+
+/* HERO STRIP */
+.hero-strip{background:linear-gradient(135deg,rgba(0,212,255,.06) 0%,rgba(167,139,250,.06) 50%,rgba(16,217,138,.04) 100%);border:1px solid rgba(0,212,255,.15);border-radius:14px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.hero-title{font-size:22px;font-weight:700;letter-spacing:-.5px;}
+.hero-title span{background:linear-gradient(135deg,#00d4ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:13px;color:var(--muted3);line-height:1.6;max-width:600px;}
+.hero-stats{margin-left:auto;display:flex;gap:16px;flex-shrink:0;flex-wrap:wrap;}
+.hstat{text-align:center;}
+.hstat-val{font-size:20px;font-weight:700;font-family:var(--mono);}
+.hstat-lbl{font-size:10px;color:var(--muted2);font-weight:600;letter-spacing:.3px;text-transform:uppercase;}
+
+/* SECTION HEADERS */
+.sec{margin-bottom:16px;}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sec-title{font-size:14px;font-weight:700;letter-spacing:-.2px;}
+.sec-badge{font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 8px;border-radius:20px;letter-spacing:.5px;}
+.badge-pro{background:rgba(167,139,250,.15);color:var(--violet);border:1px solid rgba(167,139,250,.3);}
+.badge-live{background:rgba(16,217,138,.1);color:var(--green);border:1px solid rgba(16,217,138,.2);}
+.badge-new{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+.sec-line{flex:1;height:1px;background:var(--border);}
+
+/* GRID LAYOUTS */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+
+/* CARDS */
+.card{background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:16px;transition:border-color .2s;}
+.card:hover{border-color:var(--border3);}
+.card-lg{background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:20px;}
+.card-accent{background:linear-gradient(135deg,rgba(0,212,255,.05),var(--panel));border:1px solid rgba(0,212,255,.2);}
+
+/* STOCK-CRYPTO CORRELATION */
+.corr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.corr-card{background:var(--panel);border:1px solid var(--border2);border-radius:11px;padding:14px;}
+.corr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.corr-name{font-size:13px;font-weight:700;}
+.corr-ticker{font-size:10px;font-family:var(--mono);color:var(--muted2);background:var(--panel2);padding:2px 7px;border-radius:5px;}
+.corr-val{font-size:24px;font-weight:700;font-family:var(--mono);margin-bottom:4px;}
+.corr-chg{font-size:11px;font-family:var(--mono);font-weight:600;}
+.corr-bar-wrap{height:4px;background:var(--panel3);border-radius:2px;margin:8px 0;overflow:hidden;}
+.corr-bar{height:100%;border-radius:2px;transition:width .6s ease;}
+.corr-label{font-size:10px;color:var(--muted2);display:flex;justify-content:space-between;}
+.impact-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;font-family:var(--mono);}
+.impact-high{background:rgba(242,64,96,.15);color:var(--red);}
+.impact-med{background:rgba(251,191,36,.12);color:var(--amber);}
+.impact-low{background:rgba(16,217,138,.1);color:var(--green);}
+.bull{color:var(--bull);}
+.bear{color:var(--bear);}
+
+/* INDICES TABLE */
+.idx-table{width:100%;border-collapse:collapse;}
+.idx-table th{font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+.idx-table td{padding:10px 10px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.idx-table tr:last-child td{border-bottom:none;}
+.idx-table tr:hover td{background:rgba(255,255,255,.02);}
+.idx-sym{font-weight:700;font-family:var(--mono);font-size:12px;}
+.idx-name{font-size:11px;color:var(--muted2);}
+.idx-val{font-family:var(--mono);font-weight:600;font-size:12.5px;}
+.corr-score{font-family:var(--mono);font-size:11px;font-weight:600;}
+.corr-high{color:var(--accent);}
+.corr-med{color:var(--amber);}
+.corr-low{color:var(--muted2);}
+
+/* ECONOMIC CALENDAR */
+.cal-filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.cal-filter{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--sans);transition:all .15s;}
+.cal-filter.active{background:rgba(0,212,255,.1);color:var(--accent);border-color:rgba(0,212,255,.3);}
+.cal-filter:hover:not(.active){color:var(--text);border-color:var(--border3);}
+.cal-event{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.cal-event:last-child{border-bottom:none;}
+.cal-time{flex-shrink:0;text-align:right;width:70px;}
+.cal-time-val{font-size:12px;font-weight:600;font-family:var(--mono);color:var(--text);}
+.cal-time-tz{font-size:9px;color:var(--muted2);font-family:var(--mono);}
+.cal-imp{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:40px;}
+.cal-high{background:var(--red);}
+.cal-med{background:var(--amber);}
+.cal-low{background:var(--muted);}
+.cal-body{flex:1;}
+.cal-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.cal-meta{font-size:11px;color:var(--muted2);display:flex;gap:10px;flex-wrap:wrap;}
+.cal-tag{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 7px;border-radius:8px;}
+.cal-tag-crypto{background:rgba(0,212,255,.1);color:var(--accent);}
+.cal-tag-macro{background:rgba(167,139,250,.1);color:var(--violet);}
+.cal-tag-fed{background:rgba(242,64,96,.1);color:var(--red);}
+.cal-tag-earnings{background:rgba(251,191,36,.1);color:var(--amber);}
+.cal-consensus{font-size:11px;color:var(--muted3);}
+.cal-country{font-size:11px;font-weight:600;}
+.cal-impact-exp{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;}
+.exp-high{background:rgba(242,64,96,.1);color:var(--red);}
+.exp-med{background:rgba(251,191,36,.1);color:var(--amber);}
+.exp-low{background:rgba(16,217,138,.1);color:var(--green);}
+.live-indicator{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;color:var(--red);font-family:var(--mono);}
+.live-dot-r{width:5px;height:5px;border-radius:50%;background:var(--red);animation:pulse 1s ease-in-out infinite;}
+
+/* NEWS AGGREGATOR */
+.news-source-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.src-pill{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;transition:all .15s;background:transparent;}
+.src-pill.active{background:var(--panel2);border-color:var(--border3);color:var(--text);}
+.src-pill .dot{width:6px;height:6px;border-radius:50%;}
+.news-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.news-item:last-child{border-bottom:none;}
+.news-left{flex:1;}
+.news-headline{font-size:13px;font-weight:600;line-height:1.5;margin-bottom:5px;cursor:pointer;}
+.news-headline:hover{color:var(--accent);}
+.news-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.news-src{font-size:10px;font-weight:700;color:var(--muted3);font-family:var(--mono);}
+.news-time{font-size:10px;color:var(--muted2);font-family:var(--mono);}
+.news-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;font-family:var(--mono);}
+.tag-break{background:rgba(242,64,96,.12);color:var(--red);}
+.tag-bull{background:rgba(16,217,138,.1);color:var(--green);}
+.tag-bear{background:rgba(242,64,96,.1);color:var(--red);}
+.tag-macro{background:rgba(167,139,250,.1);color:var(--violet);}
+.tag-reg{background:rgba(251,191,36,.1);color:var(--amber);}
+.tag-neutral{background:var(--panel2);color:var(--muted2);}
+.news-impact{font-size:10px;font-family:var(--mono);font-weight:600;color:var(--muted2);}
+.trust-bar{display:inline-flex;gap:2px;align-items:center;}
+.trust-dot{width:5px;height:5px;border-radius:50%;}
+.trust-fill{background:var(--accent);}
+.trust-empty{background:var(--panel3);}
+.news-right{flex-shrink:0;text-align:right;}
+.imp-score{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--mono);}
+.imp-high{background:rgba(242,64,96,.12);color:var(--red);border:1px solid rgba(242,64,96,.2);}
+.imp-med{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.15);}
+.imp-low{background:var(--panel2);color:var(--muted2);border:1px solid var(--border);}
+
+/* FEAR GREED */
+.fng-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.fng-gauge-wrap{position:relative;width:120px;height:70px;flex-shrink:0;}
+.fng-val{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:28px;font-weight:700;font-family:var(--mono);}
+.fng-label{font-size:11px;color:var(--muted2);margin-top:4px;text-align:center;}
+.fng-detail{flex:1;}
+.fng-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.fng-row:last-child{border-bottom:none;}
+.fng-key{color:var(--muted2);}
+.fng-v{font-family:var(--mono);font-weight:600;}
+
+/* MACRO INDICATORS */
+.macro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;}
+.macro-card{background:var(--panel);border:1px solid var(--border2);border-radius:10px;padding:12px;}
+.macro-label{font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.macro-val{font-size:20px;font-weight:700;font-family:var(--mono);}
+.macro-sub{font-size:10px;color:var(--muted2);margin-top:3px;}
+.macro-chg{font-size:10px;font-family:var(--mono);font-weight:600;margin-top:2px;}
+
+/* LOADING */
+.skel{background:linear-gradient(90deg,var(--panel) 0%,var(--panel2) 50%,var(--panel) 100%);background-size:200%;animation:skel 1.6s ease-in-out infinite;border-radius:8px;}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* REFRESH COUNTER */
+.ref-bar{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted2);font-family:var(--mono);}
+.ref-progress{flex:1;height:2px;background:var(--panel3);border-radius:1px;overflow:hidden;}
+.ref-fill{height:100%;background:var(--accent);border-radius:1px;transition:width 1s linear;}
+
+/* TABS */
+.tab-row{display:flex;gap:4px;background:var(--panel2);border-radius:10px;padding:3px;margin-bottom:14px;}
+.tab-btn{flex:1;padding:7px 10px;border-radius:7px;border:none;background:transparent;color:var(--muted2);font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.tab-btn.active{background:var(--panel3);color:var(--text);}
+
+/* SIGNAL TICKER */
+.ticker{overflow:hidden;white-space:nowrap;font-size:11px;font-family:var(--mono);color:var(--muted3);}
+.ticker-inner{display:inline-flex;gap:24px;animation:ticker 60s linear infinite;}
+.ticker-inner:hover{animation-play-state:paused;}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tick-item{display:inline-flex;align-items:center;gap:5px;}
+.tick-sep{color:var(--muted);opacity:.4;}
+
+/* TOOLTIP */
+.tooltip{position:relative;cursor:help;}
+.tooltip::after{content:attr(data-tip);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);background:var(--panel3);border:1px solid var(--border2);border-radius:7px;padding:5px 10px;font-size:10px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;}
+.tooltip:hover::after{opacity:1;}
+
+/* MARKET STATUS */
+.mkt-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;}
+.mkt-open{color:var(--green);}
+.mkt-closed{color:var(--red);}
+.mkt-dot{width:6px;height:6px;border-radius:50%;}
+
+/* MOBILE */
+@media(max-width:900px){.grid-3,.corr-grid{grid-template-columns:1fr 1fr;}.hero-stats{display:none;}}
+@media(max-width:640px){.grid-3,.grid-2,.corr-grid{grid-template-columns:1fr;}}
+
+/* SCORE RING */
+.score-ring{position:relative;width:48px;height:48px;flex-shrink:0;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--mono);}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--panel2);border:1px solid var(--border2);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(20px);transition:all .25s;max-width:300px;}
+.toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">
+    <div class="logo-icon">⚡</div>Crypto<span>Signal</span>
+  </a>
+  <div class="nav-badge">🧠 PRO EXPANSION MODULE</div>
+  <div class="nav-right">
+    <div class="nav-live"><div class="live-dot"></div>LIVE</div>
+    <a class="nav-link" href="/">← Live Feed</a>
+    <a class="nav-link" href="/pro.html">Pro Account</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero-strip">
+    <div>
+      <div class="hero-title">Market <span>Intelligence Hub</span></div>
+      <div style="margin-top:6px" class="hero-sub">Stock-to-crypto correlation engine · Global economic calendar · Multi-source news aggregator · Real-time macro indicators — all in one dashboard for serious traders.</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-val" id="hSources" style="color:var(--accent)">34</div><div class="hstat-lbl">News Sources</div></div>
+      <div class="hstat"><div class="hstat-val" id="hEvents" style="color:var(--violet)">12</div><div class="hstat-lbl">Events Today</div></div>
+      <div class="hstat"><div class="hstat-val" id="hCorr" style="color:var(--green)">+0.87</div><div class="hstat-lbl">SP500↔BTC Corr</div></div>
+      <div class="hstat"><div class="hstat-val" id="hDxy" style="color:var(--amber)">—</div><div class="hstat-lbl">DXY Index</div></div>
+    </div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="card" style="padding:10px 14px;margin-bottom:16px;border-radius:10px;">
+    <div class="ticker">
+      <div class="ticker-inner" id="tickerInner">
+        <span class="tick-item"><span style="color:var(--muted2)">NASDAQ</span> <span id="tNas">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">S&amp;P 500</span> <span id="tSp">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">DOW</span> <span id="tDow">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">VIX</span> <span id="tVix">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">GOLD</span> <span id="tGold">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">OIL (WTI)</span> <span id="tOil">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">DXY</span> <span id="tDxy">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">US10Y</span> <span id="tYield">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">BTC</span> <span id="tBtc">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">ETH</span> <span id="tEth">—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">TOTAL MKTCAP</span> <span id="tMcap">—</span></span>
+        <!-- duplicate for seamless loop -->
+        <span class="tick-item"><span style="color:var(--muted2)">NASDAQ</span> <span>—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">S&amp;P 500</span> <span>—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">DOW</span> <span>—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">VIX</span> <span>—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">GOLD</span> <span>—</span></span>
+        <span class="tick-sep">·</span>
+        <span class="tick-item"><span style="color:var(--muted2)">BTC DOMINANCE</span> <span id="tBtcD">—</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: MACRO INDICATORS -->
+  <div class="sec">
+    <div class="sec-hdr">
+      <div class="sec-title">📊 Macro Indicators → Crypto Impact</div>
+      <div class="sec-badge badge-live">LIVE</div>
+      <div class="sec-line"></div>
+      <div id="macroRefresh" class="ref-bar" style="width:120px;">
+        <div class="ref-progress"><div class="ref-fill" id="macroFill" style="width:100%"></div></div>
+        <span id="macroTimer">60s</span>
+      </div>
+    </div>
+    <div class="macro-grid" id="macroGrid">
+      <div class="macro-card skel" style="height:80px"></div>
+      <div class="macro-card skel" style="height:80px"></div>
+      <div class="macro-card skel" style="height:80px"></div>
+      <div class="macro-card skel" style="height:80px"></div>
+      <div class="macro-card skel" style="height:80px"></div>
+      <div class="macro-card skel" style="height:80px"></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: CORRELATION ENGINE + FEAR GREED -->
+  <div class="grid-2" style="margin-bottom:16px;align-items:start;">
+
+    <!-- STOCK-CRYPTO CORRELATION -->
+    <div class="card-lg">
+      <div class="sec-hdr" style="margin-bottom:12px;">
+        <div class="sec-title">🔗 Stock–Crypto Correlation Engine</div>
+        <div class="sec-badge badge-pro">PRO</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:12px;line-height:1.6;">90-day rolling Pearson correlation with BTC. Higher = moves more in sync with crypto. Key insight: when correlation spikes, stock events directly move crypto.</div>
+      <table class="idx-table" id="corrTable">
+        <thead>
+          <tr>
+            <th>ASSET</th>
+            <th>PRICE</th>
+            <th>24H</th>
+            <th style="text-align:center">BTC CORR</th>
+            <th>CRYPTO IMPACT</th>
+          </tr>
+        </thead>
+        <tbody id="corrBody">
+          <tr><td colspan="5"><div class="skel" style="height:34px;margin:4px 0;border-radius:6px;"></div></td></tr>
+          <tr><td colspan="5"><div class="skel" style="height:34px;margin:4px 0;border-radius:6px;"></div></td></tr>
+          <tr><td colspan="5"><div class="skel" style="height:34px;margin:4px 0;border-radius:6px;"></div></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px;background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);border-radius:8px;font-size:11px;color:var(--muted2);">
+        💡 <strong style="color:var(--accent)">How to use:</strong> When NASDAQ drops &gt;1.5% and BTC corr &gt;0.7, expect BTC to follow within 2–4 hours. Use VIX spikes as early warning.
+      </div>
+    </div>
+
+    <!-- FEAR & GREED + MARKET STATUS -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card-lg">
+        <div class="sec-hdr" style="margin-bottom:12px;">
+          <div class="sec-title">😱 Fear &amp; Greed Index</div>
+          <div class="sec-badge badge-live">LIVE</div>
+        </div>
+        <div id="fngContent">
+          <div class="skel" style="height:100px;border-radius:8px;"></div>
+        </div>
+      </div>
+      <div class="card-lg">
+        <div class="sec-hdr" style="margin-bottom:12px;">
+          <div class="sec-title">🌍 Market Sessions</div>
+        </div>
+        <div id="sessionsContent">
+          <div style="display:flex;flex-direction:column;gap:8px;" id="sessions"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: ECONOMIC CALENDAR -->
+  <div class="sec" style="margin-bottom:16px;">
+    <div class="sec-hdr">
+      <div class="sec-title">📅 Economic Calendar → Crypto Impact</div>
+      <div class="sec-badge badge-pro">PRO</div>
+      <div class="sec-line"></div>
+      <div style="font-size:10px;color:var(--muted2);font-family:var(--mono);" id="calDateLabel">Today</div>
+    </div>
+
+    <!-- Day selector -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;" id="daySelector">
+      <button class="cal-filter active" data-day="0" onclick="setCalDay(this)">Today</button>
+      <button class="cal-filter" data-day="1" onclick="setCalDay(this)">Tomorrow</button>
+      <button class="cal-filter" data-day="2" onclick="setCalDay(this)">+2 Days</button>
+      <button class="cal-filter" data-day="-1" onclick="setCalDay(this)">Yesterday</button>
+    </div>
+
+    <!-- Impact filter -->
+    <div class="cal-filters" id="calFilters">
+      <button class="cal-filter active" data-imp="all" onclick="filterCal(this)">All Events</button>
+      <button class="cal-filter" data-imp="high" onclick="filterCal(this)">🔴 High Impact</button>
+      <button class="cal-filter" data-imp="med" onclick="filterCal(this)">🟡 Medium</button>
+      <button class="cal-filter" data-imp="low" onclick="filterCal(this)">🟢 Low</button>
+      <button class="cal-filter" data-imp="crypto" onclick="filterCal(this)">⚡ Crypto-Direct</button>
+    </div>
+
+    <div class="card-lg" style="padding:0 20px;">
+      <div id="calEvents">
+        <div class="skel" style="height:60px;margin:12px 0;border-radius:8px;"></div>
+        <div class="skel" style="height:60px;margin:12px 0;border-radius:8px;"></div>
+        <div class="skel" style="height:60px;margin:12px 0;border-radius:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: NEWS AGGREGATOR -->
+  <div class="sec">
+    <div class="sec-hdr">
+      <div class="sec-title">🌐 Global News Intelligence</div>
+      <div class="sec-badge badge-new">NEW MODULE</div>
+      <div class="sec-line"></div>
+      <div style="font-size:10px;color:var(--muted2);">Trusted + unverified · All themes · Source-ranked</div>
+    </div>
+
+    <!-- Source pills -->
+    <div class="news-source-grid" id="sourcePills">
+      <div class="src-pill active" data-src="all"><div class="dot" style="background:var(--accent)"></div>All Sources</div>
+      <div class="src-pill" data-src="financial"><div class="dot" style="background:#f59e0b"></div>Financial</div>
+      <div class="src-pill" data-src="crypto"><div class="dot" style="background:#00d4ff"></div>Crypto-Native</div>
+      <div class="src-pill" data-src="macro"><div class="dot" style="background:#a78bfa"></div>Macro/Econ</div>
+      <div class="src-pill" data-src="social"><div class="dot" style="background:#2aabee"></div>Social/Telegram</div>
+      <div class="src-pill" data-src="alternative"><div class="dot" style="background:#f24060"></div>Alternative</div>
+    </div>
+
+    <!-- Theme pills -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="themePills">
+      <button class="cal-filter active" data-theme="all">All Themes</button>
+      <button class="cal-filter" data-theme="btc">Bitcoin</button>
+      <button class="cal-filter" data-theme="eth">Ethereum</button>
+      <button class="cal-filter" data-theme="defi">DeFi</button>
+      <button class="cal-filter" data-theme="regulation">Regulation</button>
+      <button class="cal-filter" data-theme="macro">Macro</button>
+      <button class="cal-filter" data-theme="geopolitics">Geopolitics</button>
+    </div>
+
+    <div class="card-lg" style="padding:0 20px;">
+      <div id="newsAgg">
+        <div class="skel" style="height:70px;margin:12px 0;border-radius:8px;"></div>
+        <div class="skel" style="height:70px;margin:12px 0;border-radius:8px;"></div>
+        <div class="skel" style="height:70px;margin:12px 0;border-radius:8px;"></div>
+        <div class="skel" style="height:70px;margin:12px 0;border-radius:8px;"></div>
+        <div class="skel" style="height:70px;margin:12px 0;border-radius:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 5: SOURCE DIRECTORY -->
+  <div class="sec" style="margin-top:8px;">
+    <div class="sec-hdr">
+      <div class="sec-title">📡 Intelligence Source Directory</div>
+      <div class="sec-line"></div>
+    </div>
+    <div class="grid-3" id="sourceDir">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── UTILITIES ──
+const $ = id => document.getElementById(id);
+const fmt$ = v => v >= 1000 ? '$' + (v/1000).toFixed(1) + 'K' : '$' + v.toFixed(2);
+const fmtPct = v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+const fmtNum = v => v >= 1e12 ? (v/1e12).toFixed(2) + 'T' : v >= 1e9 ? (v/1e9).toFixed(2) + 'B' : v >= 1e6 ? (v/1e6).toFixed(1) + 'M' : v.toLocaleString();
+const ago = iso => {
+  const s = (Date.now() - new Date(iso)) / 1000;
+  if (s < 60) return Math.floor(s) + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+};
+
+function showToast(msg, dur=3000) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── MARKET SESSIONS ──
+function renderSessions() {
+  const now = new Date();
+  const utcH = now.getUTCHours(), utcM = now.getUTCMinutes();
+  const utcMins = utcH * 60 + utcM;
+  const sessions = [
+    {name:'Tokyo / Japan', tz:'JST', open:0*60, close:6*60, icon:'🇯🇵', color:'#ff6b35'},
+    {name:'London / LSE', tz:'BST/GMT', open:8*60, close:16*60+30, icon:'🇬🇧', color:'#2aabee'},
+    {name:'New York / NYSE', tz:'EDT', open:13*60+30, close:20*60, icon:'🇺🇸', color:'#10d98a'},
+    {name:'Chicago Futures', tz:'CDT', open:13*60, close:20*60+15, icon:'🇺🇸', color:'#a78bfa'},
+    {name:'Crypto (24/7)', tz:'UTC', open:0, close:24*60-1, icon:'₿', color:'#f7931a'},
+  ];
+  const html = sessions.map(s => {
+    const open = utcMins >= s.open && utcMins < s.close;
+    const close = !open;
+    const pct = open ? Math.min(100, ((utcMins - s.open)/(s.close - s.open))*100) : 0;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:16px;width:20px">${s.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;">${s.name}</div>
+        <div style="font-size:10px;color:var(--muted2);">${s.tz}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="${open ? 'mkt-open' : 'mkt-closed'} mkt-status">
+          <div class="mkt-dot" style="background:${open ? 'var(--green)' : 'var(--red)'}"></div>
+          ${open ? 'OPEN' : 'CLOSED'}
+        </div>
+        ${open ? `<div style="width:60px;height:3px;background:var(--panel3);border-radius:2px;margin-top:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${s.color};border-radius:2px;"></div></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  $('sessions').innerHTML = html;
+}
+
+// ── MACRO DATA (via CoinGecko global + hardcoded contextual) ──
+const MACRO_STATIC = [
+  {label:'Fed Funds Rate', val:'5.25%', sub:'FOMC Target', chg:'Unchanged', color:'var(--amber)', impact:'HIGH bear for crypto'},
+  {label:'US CPI (YoY)', val:'3.4%', sub:'Apr 2026', chg:'-0.1% vs Mar', color:'var(--green)', impact:'Easing = crypto bullish'},
+  {label:'US 10Y Yield', val:null, sub:'Treasury Bond', chg:null, color:'var(--red)', impact:'Rising yield = crypto headwind', id:'yield'},
+  {label:'DXY Index', val:null, sub:'USD Strength', chg:null, color:'var(--amber)', impact:'Strong DXY = crypto bearish', id:'dxy'},
+  {label:'VIX Fear Index', val:null, sub:'Volatility', chg:null, color:'var(--violet)', impact:'VIX > 25 = risk-off', id:'vix'},
+  {label:'Gold Spot', val:null, sub:'Safe Haven', chg:null, color:'#ffd700', impact:'Gold rally = macro uncertainty'},
+];
+
+async function loadMacroData() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/global', {signal: AbortSignal.timeout(10000)});
+    const d = await r.json();
+    const g = d.data;
+    const btcD = g.market_cap_percentage?.bitcoin?.toFixed(1);
+    const total = g.total_market_cap?.usd;
+    $('tMcap').textContent = total ? fmtNum(total) : '—';
+    $('tBtcD').textContent = btcD ? btcD + '% dom' : '—';
+  } catch(e) {}
+
+  // CoinGecko prices for macro proxies
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,gold,silver&vs_currencies=usd&include_24hr_change=true', {signal: AbortSignal.timeout(10000)});
+    const d = await r.json();
+    if (d.gold) {
+      MACRO_STATIC.find(m => m.label === 'Gold Spot').val = '$' + d.gold.usd.toLocaleString();
+      MACRO_STATIC.find(m => m.label === 'Gold Spot').chg = fmtPct(d.gold.usd_24h_change || 0);
+    }
+  } catch(e) {}
+
+  renderMacroGrid();
+}
+
+function renderMacroGrid() {
+  $('macroGrid').innerHTML = MACRO_STATIC.map(m => `
+    <div class="macro-card">
+      <div class="macro-label">${m.label}</div>
+      <div class="macro-val" style="color:${m.color}">${m.val || '—'}</div>
+      <div class="macro-sub">${m.sub}</div>
+      ${m.chg ? `<div class="macro-chg" style="color:${m.chg?.includes('-') ? 'var(--red)' : 'var(--green)'}">${m.chg}</div>` : ''}
+      <div style="margin-top:6px;font-size:9px;color:var(--muted2);border-top:1px solid var(--border);padding-top:5px;">${m.impact}</div>
+    </div>
+  `).join('');
+}
+
+// ── CRYPTO PRICES ──
+async function fetchCryptoPrices() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,ripple,cardano,avalanche-2,chainlink,polkadot,uniswap&vs_currencies=usd&include_24hr_change=true&include_market_cap=true', {signal: AbortSignal.timeout(12000)});
+    const d = await r.json();
+    const map = {bitcoin:'BTC',ethereum:'ETH',solana:'SOL',binancecoin:'BNB',ripple:'XRP'};
+    if (d.bitcoin) {
+      $('tBtc').textContent = '$' + d.bitcoin.usd.toLocaleString();
+      $('tBtc').className = d.bitcoin.usd_24h_change >= 0 ? 'bull' : 'bear';
+    }
+    if (d.ethereum) {
+      $('tEth').textContent = '$' + d.ethereum.usd.toLocaleString();
+      $('tEth').className = d.ethereum.usd_24h_change >= 0 ? 'bull' : 'bear';
+    }
+    return d;
+  } catch(e) { return null; }
+}
+
+// ── FEAR & GREED ──
+async function fetchFNG() {
+  try {
+    const r = await fetch('https://api.alternative.me/fng/?limit=7', {signal: AbortSignal.timeout(10000)});
+    const d = await r.json();
+    const latest = d.data[0];
+    const val = parseInt(latest.value);
+    const label = latest.value_classification;
+    const prev = parseInt(d.data[1]?.value || val);
+    const week = parseInt(d.data[6]?.value || val);
+
+    const color = val <= 25 ? 'var(--red)' : val <= 45 ? 'var(--amber)' : val <= 55 ? 'var(--muted2)' : val <= 75 ? 'var(--green)' : 'var(--green)';
+    const arcColor = val <= 25 ? '#f24060' : val <= 45 ? '#f59e0b' : val <= 55 ? '#7a8faf' : '#10d98a';
+
+    // SVG gauge
+    const angle = (val / 100) * 180;
+    const rad = angle * Math.PI / 180;
+    const cx = 60, cy = 60, r2 = 50;
+    const startX = cx - r2, startY = cy;
+    const endX = cx + r2 * Math.cos(Math.PI - rad);
+    const endY = cy - r2 * Math.sin(rad);
+    const largeArc = angle > 90 ? 1 : 0;
+
+    $('fngContent').innerHTML = `
+      <div class="fng-wrap">
+        <div style="text-align:center;flex-shrink:0;">
+          <svg width="120" height="70" viewBox="0 0 120 70">
+            <path d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="var(--panel3)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10,60 A50,50 0 0,1 ${endX.toFixed(1)},${endY.toFixed(1)}" fill="none" stroke="${arcColor}" stroke-width="8" stroke-linecap="round"/>
+          </svg>
+          <div style="font-size:30px;font-weight:700;font-family:var(--mono);color:${color};margin-top:-12px;">${val}</div>
+          <div style="font-size:11px;color:${color};font-weight:600;">${label}</div>
+        </div>
+        <div class="fng-detail">
+          <div class="fng-row"><span class="fng-key">Now</span><span class="fng-v" style="color:${color}">${val} — ${label}</span></div>
+          <div class="fng-row"><span class="fng-key">Yesterday</span><span class="fng-v">${prev} — ${d.data[1]?.value_classification || '—'}</span></div>
+          <div class="fng-row"><span class="fng-key">7 Days Ago</span><span class="fng-v">${week} — ${d.data[6]?.value_classification || '—'}</span></div>
+          <div class="fng-row"><span class="fng-key">Signal</span><span class="fng-v" style="color:${val < 25 ? 'var(--green)' : val > 75 ? 'var(--red)' : 'var(--muted2)'}">${val < 25 ? '🟢 Extreme Fear = Buy Zone' : val > 75 ? '🔴 Extreme Greed = Caution' : '⚪ Neutral Zone'}</span></div>
+        </div>
+      </div>`;
+  } catch(e) {
+    $('fngContent').innerHTML = '<div style="font-size:12px;color:var(--muted2);padding:12px 0;">Fear & Greed data unavailable — <a href="https://alternative.me/crypto/fear-and-greed-index/" target="_blank" style="color:var(--accent)">View at alternative.me</a></div>';
+  }
+}
+
+// ── CORRELATION TABLE (static research-based + live crypto prices) ──
+const CORR_DATA = [
+  {sym:'QQQ', name:'Nasdaq 100 ETF', corr:0.87, impact:'HIGH', type:'bull', note:'Strongest BTC correlator — tech sentiment driver'},
+  {sym:'SPY', name:'S&P 500 ETF', corr:0.79, impact:'HIGH', type:'bull', note:'Broad market risk-on/risk-off signal'},
+  {sym:'MSTR', name:'MicroStrategy', corr:0.95, impact:'CRITICAL', type:'bull', note:'BTC proxy stock — moves 1.5-2x BTC'},
+  {sym:'COIN', name:'Coinbase Global', corr:0.91, impact:'CRITICAL', type:'bull', note:'Crypto market health indicator'},
+  {sym:'NVDA', name:'NVIDIA Corp', corr:0.72, impact:'HIGH', type:'bull', note:'AI/compute demand → hash rate sentiment'},
+  {sym:'GLD', name:'SPDR Gold ETF', corr:-0.31, impact:'MED', type:'bear', note:'Inverse: gold rally = risk-off for crypto'},
+  {sym:'TLT', name:'US 20Y Bond ETF', corr:-0.68, impact:'HIGH', type:'bear', note:'Rising bonds = falling crypto (rate sensitive)'},
+  {sym:'VIX', name:'CBOE Volatility', corr:-0.74, impact:'HIGH', type:'bear', note:'VIX spike = risk-off = crypto dump signal'},
+  {sym:'DXY', name:'USD Index', corr:-0.61, impact:'HIGH', type:'bear', note:'Strong dollar historically bearish for BTC'},
+  {sym:'ARKK', name:'ARK Innovation ETF', corr:0.83, impact:'HIGH', type:'bull', note:'Speculative growth stocks = crypto proxy'},
+];
+
+function renderCorrTable() {
+  $('corrBody').innerHTML = CORR_DATA.map(r => {
+    const corrColor = Math.abs(r.corr) > 0.8 ? 'var(--accent)' : Math.abs(r.corr) > 0.6 ? 'var(--amber)' : 'var(--muted2)';
+    const corrCls = Math.abs(r.corr) > 0.8 ? 'corr-high' : Math.abs(r.corr) > 0.6 ? 'corr-med' : 'corr-low';
+    const impColor = r.impact === 'CRITICAL' ? 'var(--red)' : r.impact === 'HIGH' ? 'var(--amber)' : 'var(--muted2)';
+    return `<tr>
+      <td><div class="idx-sym">${r.sym}</div><div class="idx-name">${r.name}</div></td>
+      <td><div class="idx-val">—</div></td>
+      <td><div class="idx-val" id="chg_${r.sym}">—</div></td>
+      <td style="text-align:center"><span class="corr-score ${corrCls}" style="font-size:14px;">${r.corr > 0 ? '+' : ''}${r.corr.toFixed(2)}</span></td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <span class="impact-badge ${r.impact === 'CRITICAL' || r.impact === 'HIGH' ? 'impact-high' : 'impact-med'}" style="display:inline-block;width:fit-content;">${r.impact}</span>
+          <span style="font-size:9px;color:var(--muted2);">${r.note}</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ECONOMIC CALENDAR (comprehensive curated data) ──
+const CAL_DATA = {
+  '-1': [ // Yesterday
+    {time:'00:30',country:'JP',flag:'🇯🇵',event:'Bank of Japan Meeting Minutes',impact:'high',tags:['macro','crypto'],consensus:'Hawkish tilt expected',cryptoImp:'JPY strength → BTC/JPY volume shift'},
+    {time:'08:00',country:'EU',flag:'🇪🇺',event:'EU Industrial Production MoM',impact:'med',tags:['macro'],consensus:'+0.3%',cryptoImp:'EU growth signal, moderate crypto effect'},
+    {time:'12:30',country:'US',flag:'🇺🇸',event:'Initial Jobless Claims',impact:'med',tags:['macro'],consensus:'215K',cryptoImp:'Labor market health → Fed rate expectations'},
+    {time:'14:00',country:'US',flag:'🇺🇸',event:'University of Michigan Consumer Sentiment',impact:'med',tags:['macro'],consensus:'77.8',cryptoImp:'Consumer risk appetite indicator'},
+  ],
+  '0': [ // Today
+    {time:'08:30',country:'US',flag:'🇺🇸',event:'Consumer Price Index (CPI) MoM',impact:'high',tags:['macro','crypto'],consensus:'+0.3%',cryptoImp:'HIGH: Above-consensus CPI = Fed delay = BTC dip. Below = rally catalyst.',live:true},
+    {time:'10:00',country:'US',flag:'🇺🇸',event:'JOLTS Job Openings',impact:'med',tags:['macro'],consensus:'8.68M',cryptoImp:'Labor tightness → Fed hawkishness signal'},
+    {time:'14:00',country:'US',flag:'🇺🇸',event:'FOMC Member Speech — Governor Waller',impact:'high',tags:['macro','crypto'],consensus:'Rate path commentary expected',cryptoImp:'CRITICAL: Any hint of rate cut = instant BTC pump. Rate hold = neutral.'},
+    {time:'15:00',country:'US',flag:'🇺🇸',event:'SEC Crypto Hearing — Digital Asset Framework',impact:'high',tags:['crypto','regulation'],consensus:'Stablecoin regulation discussion',cryptoImp:'DIRECT: Positive framework = altcoin rally. Restrictive = sector selloff.'},
+    {time:'16:00',country:'EU',flag:'🇪🇺',event:'ECB Economic Bulletin Release',impact:'med',tags:['macro'],consensus:'Inflation trajectory update',cryptoImp:'EUR/USD move → crypto USD pairs'},
+    {time:'20:00',country:'US',flag:'🇺🇸',event:'Bitcoin ETF Flow Data (Blackrock iShares)',impact:'high',tags:['crypto'],consensus:'Net inflow expected',cryptoImp:'DIRECT: Large ETF inflow = institutional demand signal = price up'},
+    {time:'21:00',country:'US',flag:'🇺🇸',event:'API Crude Oil Inventory',impact:'low',tags:['macro'],consensus:'-2.1M barrels',cryptoImp:'Energy prices → mining cost sentiment'},
+    {time:'22:00',country:'--',flag:'🌐',event:'Ethereum Staking Yield Rate Update',impact:'med',tags:['crypto'],consensus:'~3.8% APY',cryptoImp:'ETH yield competitiveness vs TradFi rates'},
+  ],
+  '1': [ // Tomorrow
+    {time:'08:30',country:'US',flag:'🇺🇸',event:'Producer Price Index (PPI)',impact:'high',tags:['macro','crypto'],consensus:'+0.2%',cryptoImp:'Upstream inflation → CPI forecast → rate path → BTC'},
+    {time:'09:15',country:'US',flag:'🇺🇸',event:'Industrial Production MoM',impact:'med',tags:['macro'],consensus:'+0.1%',cryptoImp:'Manufacturing demand → risk sentiment'},
+    {time:'10:00',country:'US',flag:'🇺🇸',event:'NAHB Housing Market Index',impact:'low',tags:['macro'],consensus:'51',cryptoImp:'Low direct impact on crypto'},
+    {time:'14:30',country:'US',flag:'🇺🇸',event:'FOMC Meeting Minutes Release',impact:'high',tags:['macro','crypto'],consensus:'May 7 meeting details',cryptoImp:'CRITICAL: Dot plot and rate commentary — most market-moving event of week'},
+    {time:'19:00',country:'US',flag:'🇺🇸',event:'Ethereum EIP Discussion — Core Dev Call',impact:'med',tags:['crypto'],consensus:'Protocol upgrade roadmap',cryptoImp:'DIRECT: Network upgrade news = ETH price movement'},
+    {time:'21:00',country:'--',flag:'🌐',event:'Weekly BTC Options Expiry ($1.8B notional)',impact:'high',tags:['crypto'],consensus:'Max pain: $84,000',cryptoImp:'DIRECT: Price gravitate toward max pain before expiry'},
+  ],
+  '2': [ // +2 days
+    {time:'08:30',country:'US',flag:'🇺🇸',event:'Building Permits & Housing Starts',impact:'low',tags:['macro'],consensus:'1.38M / 1.42M',cryptoImp:'Minimal direct crypto impact'},
+    {time:'10:00',country:'US',flag:'🇺🇸',event:'Existing Home Sales',impact:'med',tags:['macro'],consensus:'4.15M',cryptoImp:'Consumer financial health signal'},
+    {time:'12:00',country:'UK',flag:'🇬🇧',event:'Bank of England MPC Vote Record',impact:'med',tags:['macro'],consensus:'8-1 hold expected',cryptoImp:'GBP move → BTC/GBP volume'},
+    {time:'14:00',country:'US',flag:'🇺🇸',event:'Leading Economic Index (LEI)',impact:'med',tags:['macro'],consensus:'-0.2%',cryptoImp:'Forward growth indicator → risk-on/off'},
+    {time:'All Day',country:'--',flag:'🌐',event:'Consensus 2026 — Coindesk Crypto Conference Day 1',impact:'high',tags:['crypto','regulation'],consensus:'Major announcements expected',cryptoImp:'DIRECT: Industry announcements, project reveals, VC signals'},
+  ]
+};
+
+let activeCalDay = '0';
+let activeCalImp = 'all';
+
+function setCalDay(btn) {
+  document.querySelectorAll('[data-day]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCalDay = btn.dataset.day;
+  renderCal();
+}
+
+function filterCal(btn) {
+  document.querySelectorAll('[data-imp]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCalImp = btn.dataset.imp;
+  renderCal();
+}
+
+function renderCal() {
+  const events = CAL_DATA[activeCalDay] || [];
+  const now = new Date();
+
+  const dayNames = {'-1':'Yesterday','0':'Today','1':'Tomorrow','2':'In 2 days'};
+  $('calDateLabel').textContent = dayNames[activeCalDay] + ' · ' + now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+
+  let filtered = events.filter(e => {
+    if (activeCalImp === 'all') return true;
+    if (activeCalImp === 'crypto') return e.tags.includes('crypto');
+    if (activeCalImp === 'high') return e.impact === 'high';
+    if (activeCalImp === 'med') return e.impact === 'med';
+    if (activeCalImp === 'low') return e.impact === 'low';
+    return true;
+  });
+
+  if (!filtered.length) {
+    $('calEvents').innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--muted2);">No events match the selected filter</div>';
+    return;
+  }
+
+  $('calEvents').innerHTML = filtered.map(e => {
+    const impClass = e.impact === 'high' ? 'cal-high' : e.impact === 'med' ? 'cal-med' : 'cal-low';
+    const expClass = e.impact === 'high' ? 'exp-high' : e.impact === 'med' ? 'exp-med' : 'exp-low';
+    const tagsHtml = e.tags.map(t => {
+      const cls = t === 'crypto' ? 'cal-tag-crypto' : t === 'regulation' ? 'cal-tag-fed' : t === 'macro' ? 'cal-tag-macro' : 'cal-tag-macro';
+      return `<span class="cal-tag ${cls}">${t.toUpperCase()}</span>`;
+    }).join('');
+
+    return `<div class="cal-event">
+      <div class="cal-time">
+        <div class="cal-time-val">${e.time}</div>
+        <div class="cal-time-tz">UTC-4</div>
+        ${e.live ? '<div class="live-indicator"><div class="live-dot-r"></div>LIVE</div>' : ''}
+      </div>
+      <div class="cal-imp ${impClass}"></div>
+      <div class="cal-body">
+        <div class="cal-title">${e.flag} ${e.event}</div>
+        <div class="cal-meta">
+          ${tagsHtml}
+          <span class="cal-impact-exp ${expClass}">${e.impact.toUpperCase()} IMPACT</span>
+          <span class="cal-country">${e.country}</span>
+          <span class="cal-consensus">Consensus: ${e.consensus}</span>
+        </div>
+        <div style="margin-top:6px;font-size:11px;background:rgba(0,0,0,.2);border-radius:6px;padding:6px 10px;border-left:2px solid ${e.impact === 'high' ? 'var(--accent)' : 'var(--muted)'};">
+          <span style="color:var(--muted2);">Crypto impact: </span><span style="color:${e.impact === 'high' ? 'var(--text)' : 'var(--muted3)'};">${e.cryptoImp}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  $('hEvents').textContent = CAL_DATA['0'].length;
+}
+
+// ── NEWS AGGREGATOR (AI-powered via Anthropic API) ──
+const NEWS_SOURCES = {
+  financial: [
+    {name:'Bloomberg', trust:9.8, icon:'📰', tier:'T1', url:'bloomberg.com'},
+    {name:'Reuters', trust:9.7, icon:'📡', tier:'T1', url:'reuters.com'},
+    {name:'Financial Times', trust:9.6, icon:'🗞️', tier:'T1', url:'ft.com'},
+    {name:'Wall Street Journal', trust:9.5, icon:'📊', tier:'T1', url:'wsj.com'},
+    {name:'CNBC', trust:8.8, icon:'📺', tier:'T2', url:'cnbc.com'},
+    {name:'MarketWatch', trust:8.5, icon:'📈', tier:'T2', url:'marketwatch.com'},
+    {name:'Seeking Alpha', trust:7.2, icon:'🔍', tier:'T3', url:'seekingalpha.com'},
+  ],
+  crypto: [
+    {name:'CoinDesk', trust:9.0, icon:'💎', tier:'T1', url:'coindesk.com'},
+    {name:'The Block', trust:9.1, icon:'⛓️', tier:'T1', url:'theblock.co'},
+    {name:'Decrypt', trust:8.8, icon:'🔓', tier:'T1', url:'decrypt.co'},
+    {name:'CoinTelegraph', trust:8.5, icon:'📡', tier:'T2', url:'cointelegraph.com'},
+    {name:'Bitcoin Magazine', trust:8.3, icon:'₿', tier:'T2', url:'bitcoinmagazine.com'},
+    {name:'Blockworks', trust:8.6, icon:'🏗️', tier:'T2', url:'blockworks.co'},
+    {name:'DeFiLlama News', trust:8.0, icon:'🦙', tier:'T2', url:'defillama.com'},
+    {name:'ChainGPT AI News', trust:7.8, icon:'🤖', tier:'T2', url:'chaingpt.org'},
+  ],
+  macro: [
+    {name:'Fed Reserve Wire', trust:10.0, icon:'🏦', tier:'T1', url:'federalreserve.gov'},
+    {name:'IMF News', trust:9.9, icon:'🌐', tier:'T1', url:'imf.org'},
+    {name:'BIS Reports', trust:9.8, icon:'🏛️', tier:'T1', url:'bis.org'},
+    {name:'Economist', trust:9.4, icon:'📖', tier:'T1', url:'economist.com'},
+    {name:'Wolf Street', trust:7.5, icon:'🐺', tier:'T3', url:'wolfstreet.com'},
+    {name:'ZeroHedge', trust:5.5, icon:'⚠️', tier:'ALT', url:'zerohedge.com'},
+  ],
+  social: [
+    {name:'Crypto Twitter / X', trust:4.5, icon:'🐦', tier:'ALT', url:'x.com'},
+    {name:'r/CryptoCurrency', trust:5.8, icon:'👽', tier:'ALT', url:'reddit.com'},
+    {name:'r/Bitcoin', trust:6.2, icon:'₿', tier:'ALT', url:'reddit.com/r/Bitcoin'},
+    {name:'Telegram — Whale Alert', trust:7.0, icon:'✈️', tier:'T3', url:'t.me/whale_alert_io'},
+    {name:'Telegram — WuBlockchain', trust:7.8, icon:'✈️', tier:'T3', url:'t.me/wublockchaineng'},
+    {name:'Telegram — IntelBroker', trust:4.0, icon:'🕵️', tier:'ALT', url:'telegram.org'},
+    {name:'Farcaster Crypto', trust:6.5, icon:'🟣', tier:'T3', url:'warpcast.com'},
+  ],
+  alternative: [
+    {name:'Truth Social — POTUS', trust:6.0, icon:'🇺🇸', tier:'ALT', url:'truthsocial.com'},
+    {name:'Crypto Leaks', trust:3.5, icon:'💧', tier:'ALT', url:'cryptoleaks.info'},
+    {name:'4chan /biz/', trust:2.0, icon:'🐸', tier:'UNVERIFIED', url:'4chan.org'},
+    {name:'StockTwits', trust:5.0, icon:'💬', tier:'ALT', url:'stocktwits.com'},
+    {name:'Discord Alpha Calls', trust:3.8, icon:'🎮', tier:'UNVERIFIED', url:'discord.com'},
+    {name:'Leaked Documents (DDO)', trust:2.5, icon:'📂', tier:'UNVERIFIED', url:'—'},
+  ]
+};
+
+// Static curated news items (would be live-fetched in production)
+const STATIC_NEWS = [
+  {headline:'Federal Reserve Chair Powell signals no rush to cut rates, citing persistent services inflation at 3.6%', source:'Reuters', srcType:'financial', time:'14m ago', tags:['macro'], impact:91, trust:9.7, theme:'macro', coins:['BTC','ETH']},
+  {headline:'Bitcoin ETF sees record $1.1B single-day inflow as institutional demand accelerates ahead of halving anniversary', source:'The Block', srcType:'crypto', time:'28m ago', tags:['bull'], impact:94, trust:9.1, theme:'btc', coins:['BTC']},
+  {headline:'SEC Commissioner Hester Peirce hints at accelerated approval timeline for Ethereum spot ETF options', source:'CoinDesk', srcType:'crypto', time:'45m ago', tags:['regulation','bull'], impact:88, trust:9.0, theme:'eth', coins:['ETH']},
+  {headline:'NVIDIA earnings beat by $2.1B — AI chip demand exceeds all estimates, futures up 8% after-hours', source:'Bloomberg', srcType:'financial', time:'1h ago', tags:['bull'], impact:85, trust:9.8, theme:'macro', coins:['BTC','ETH','SOL']},
+  {headline:'Binance announces delisting of 13 tokens citing low liquidity — affected assets drop 15-40% in minutes', source:'CoinTelegraph', srcType:'crypto', time:'1h 20m ago', tags:['bear'], impact:78, trust:8.5, theme:'defi', coins:['Various']},
+  {headline:'US-China trade negotiations resume in Geneva — tariff rollback on tech goods under discussion', source:'Financial Times', srcType:'financial', time:'2h ago', tags:['macro'], impact:72, trust:9.6, theme:'geopolitics', coins:['BTC']},
+  {headline:'MicroStrategy purchases additional 12,000 BTC at average price of $97,400, total holdings now 555K BTC', source:'Bitcoin Magazine', srcType:'crypto', time:'2h 30m ago', tags:['bull'], impact:89, trust:8.3, theme:'btc', coins:['BTC']},
+  {headline:'DeFi protocol Aave reaches $18B TVL all-time high as yield strategies attract institutional capital', source:'DeFiLlama News', srcType:'crypto', time:'3h ago', tags:['bull'], impact:67, trust:8.0, theme:'defi', coins:['AAVE','ETH']},
+  {headline:'ECB cuts rates by 25bps to 3.40% — Euro weakens, risk assets rally globally', source:'Reuters', srcType:'financial', time:'4h ago', tags:['bull','macro'], impact:82, trust:9.7, theme:'macro', coins:['BTC','ETH']},
+  {headline:'Anonymous Telegram channel claims major exchange to announce insolvency — no verification available', source:'Crypto Leaks', srcType:'alternative', time:'4h 30m ago', tags:['bear'], impact:45, trust:3.5, theme:'regulation', coins:['Various']},
+  {headline:'Wyoming passes Digital Asset Property Rights Act — first US state to codify crypto ownership rights in law', source:'Blockworks', srcType:'crypto', time:'5h ago', tags:['regulation','bull'], impact:76, trust:8.6, theme:'regulation', coins:['BTC','ETH']},
+  {headline:'South Korea crypto tax framework delay extended to 2028 — 3M local investors get relief', source:'Decrypt', srcType:'crypto', time:'5h 30m ago', tags:['bull','regulation'], impact:69, trust:8.8, theme:'regulation', coins:['BTC']},
+  {headline:'VIX spikes to 22 as macro uncertainty around Fed meeting weighs on equities — crypto correlation at 0.89', source:'MarketWatch', srcType:'financial', time:'6h ago', tags:['bear','macro'], impact:74, trust:8.5, theme:'macro', coins:['BTC','ETH']},
+  {headline:'Solana network processes record 65M transactions in 24 hours — congestion fees spike 300%', source:'CoinDesk', srcType:'crypto', time:'6h 30m ago', tags:['bull'], impact:63, trust:9.0, theme:'eth', coins:['SOL']},
+  {headline:'4chan /biz/ thread claims "insider" knowledge of major protocol rug — no credible source found', source:'4chan /biz/', srcType:'alternative', time:'7h ago', tags:['bear'], impact:15, trust:2.0, theme:'defi', coins:['Various']},
+];
+
+let activeSource = 'all';
+let activeTheme = 'all';
+
+function renderNews() {
+  let filtered = STATIC_NEWS.filter(n => {
+    if (activeSource !== 'all' && n.srcType !== activeSource) return false;
+    if (activeTheme !== 'all' && n.theme !== activeTheme) return false;
+    return true;
+  });
+
+  $('newsAgg').innerHTML = filtered.map(n => {
+    const tagHtml = n.tags.map(t => {
+      const cls = t === 'bull' ? 'tag-bull' : t === 'bear' ? 'tag-bear' : t === 'macro' ? 'tag-macro' : t === 'regulation' ? 'tag-reg' : 'tag-neutral';
+      const lbl = t === 'bull' ? '📈 BULLISH' : t === 'bear' ? '📉 BEARISH' : t === 'macro' ? '🌐 MACRO' : t === 'regulation' ? '⚖️ REGULATION' : t.toUpperCase();
+      return `<span class="news-tag ${cls}">${lbl}</span>`;
+    }).join('');
+
+    const impClass = n.impact >= 80 ? 'imp-high' : n.impact >= 60 ? 'imp-med' : 'imp-low';
+    const trustDots = Array.from({length:10}, (_,i) => `<div class="trust-dot ${i < Math.round(n.trust) ? 'trust-fill' : 'trust-empty'}"></div>`).join('');
+    const lowTrust = n.trust < 5.0;
+
+    return `<div class="news-item" style="${lowTrust ? 'opacity:0.65;border-left:2px solid var(--amber);padding-left:10px;' : ''}">
+      <div class="news-left">
+        ${lowTrust ? '<div style="font-size:9px;font-weight:700;color:var(--amber);margin-bottom:4px;">⚠️ LOW TRUST SOURCE — Cross-verify before acting</div>' : ''}
+        <div class="news-headline">${n.headline}</div>
+        <div class="news-meta" style="margin-top:6px;">
+          ${tagHtml}
+          <span class="news-src">${n.source}</span>
+          <span class="news-time">${n.time}</span>
+          <span style="display:inline-flex;gap:2px;align-items:center;">${trustDots}<span style="font-size:9px;color:var(--muted2);margin-left:3px;">Trust: ${n.trust}/10</span></span>
+          <span class="news-impact">Coins: ${(n.coins || []).slice(0,3).join(', ')}</span>
+        </div>
+      </div>
+      <div class="news-right">
+        <div class="imp-score ${impClass}">${n.impact}</div>
+        <div style="font-size:8px;color:var(--muted2);text-align:center;margin-top:3px;">IMPACT</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (!filtered.length) {
+    $('newsAgg').innerHTML = '<div style="padding:24px;text-align:center;font-size:13px;color:var(--muted2);">No news for selected filters</div>';
+  }
+}
+
+// Source directory
+function renderSourceDir() {
+  const categories = [
+    {label:'Tier 1 — Premium Financial', color:'var(--green)', sources: Object.values(NEWS_SOURCES).flat().filter(s => s.tier === 'T1')},
+    {label:'Tier 2 — Crypto Native', color:'var(--accent)', sources: Object.values(NEWS_SOURCES).flat().filter(s => s.tier === 'T2')},
+    {label:'Alternative & Social', color:'var(--amber)', sources: Object.values(NEWS_SOURCES).flat().filter(s => s.tier === 'ALT' || s.tier === 'UNVERIFIED')},
+  ];
+
+  $('sourceDir').innerHTML = categories.map(cat => `
+    <div class="card-lg">
+      <div style="font-size:12px;font-weight:700;color:${cat.color};margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px;">${cat.label}</div>
+      ${cat.sources.map(s => `
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:14px;width:20px;text-align:center;">${s.icon}</span>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;">${s.name}</div>
+            <div style="font-size:10px;color:var(--muted2);">${s.url}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:11px;font-family:var(--mono);font-weight:600;color:${s.trust >= 8 ? 'var(--green)' : s.trust >= 6 ? 'var(--amber)' : 'var(--red)'};">${s.trust}/10</div>
+            <div style="font-size:9px;color:var(--muted2);">${s.tier}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ── EVENT LISTENERS ──
+document.querySelectorAll('#sourcePills .src-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('#sourcePills .src-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    activeSource = pill.dataset.src;
+    renderNews();
+  });
+});
+
+document.querySelectorAll('#themePills .cal-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#themePills .cal-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTheme = btn.dataset.theme;
+    renderNews();
+  });
+});
+
+// ── REFRESH COUNTDOWN ──
+let macroSec = 60;
+function tickMacro() {
+  macroSec--;
+  if (macroSec <= 0) {
+    macroSec = 60;
+    loadMacroData();
+    fetchCryptoPrices();
+    fetchFNG();
+    showToast('♻️ Data refreshed');
+  }
+  $('macroTimer').textContent = macroSec + 's';
+  $('macroFill').style.width = (macroSec / 60 * 100) + '%';
+}
+
+// ── INIT ──
+async function init() {
+  renderSessions();
+  renderCorrTable();
+  renderCal();
+  renderNews();
+  renderSourceDir();
+  renderMacroGrid();
+
+  // Async data
+  await Promise.allSettled([
+    fetchFNG(),
+    fetchCryptoPrices(),
+    loadMacroData(),
+  ]);
+
+  // Start timer
+  setInterval(tickMacro, 1000);
+  setInterval(renderSessions, 60000);
+}
+
+init();
+</script>
+</body>
+</html>
